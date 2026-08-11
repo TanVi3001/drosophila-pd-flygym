@@ -25,6 +25,12 @@ from drosophila_pd.metrics.locomotion import (
     check_locomotion_pass_criteria,
     compute_locomotion_metrics,
 )
+from drosophila_pd.perturbations import (
+    ActionPerturbationContext,
+    ControllerPerturbationContext,
+    Perturbation,
+    summarize_action_transformation,
+)
 
 
 DEFAULT_HEALTHY_BASELINE_CONFIG: dict[str, Any] = {
@@ -188,10 +194,19 @@ def load_healthy_baseline_config(path: str | Path) -> HealthyBaselineConfig:
     return HealthyBaselineConfig.from_mapping(loaded)
 
 
-def run_healthy_baseline(
-    config: HealthyBaselineConfig, *, repo_root: str | Path | None = None
+def run_locomotion(
+    config: HealthyBaselineConfig,
+    *,
+    repo_root: str | Path | None = None,
+    perturbation: Perturbation | None = None,
+    condition_id: str = "unperturbed",
+    include_condition_metadata: bool = False,
+    apply_config_perturbation: bool = True,
 ) -> dict[str, Any]:
-    """Execute the unperturbed FlyGym locomotion baseline and return a report."""
+    """Execute the FlyGym locomotion pipeline and return a compact report."""
+
+    if perturbation is not None and apply_config_perturbation:
+        config = perturbation.apply_to_config(config)
 
     np.random.seed(config.random_seed)
 
@@ -234,6 +249,16 @@ def run_healthy_baseline(
         output_dof_order=dof_order,
         config=config.controller,
     )
+    if perturbation is not None:
+        controller = perturbation.apply_to_controller(
+            controller,
+            ControllerPerturbationContext(
+                condition_id=condition_id,
+                timestep_s=float(sim.timestep),
+                random_seed=config.random_seed,
+                expected_joint_angle_count=len(dof_order),
+            ),
+        )
 
     initial_action = LocomotionAction(
         joint_angles=preprogrammed_steps.default_pose_by_dof_order(dof_order),
@@ -249,7 +274,15 @@ def run_healthy_baseline(
     step_count = config.expected_step_count()
     thorax_positions = np.full((step_count + 1, 3), np.nan, dtype=float)
     thorax_quaternions = np.full((step_count + 1, 4), np.nan, dtype=float)
+    controller_joint_angle_actions = np.full(
+        (step_count, len(dof_order)), np.nan, dtype=float
+    )
     joint_angle_actions = np.full((step_count, len(dof_order)), np.nan, dtype=float)
+    controller_adhesion_onoff = (
+        np.zeros((step_count, 6), dtype=bool)
+        if bool(config.fly["add_adhesion"])
+        else None
+    )
     adhesion_onoff = (
         np.zeros((step_count, 6), dtype=bool)
         if bool(config.fly["add_adhesion"])
@@ -268,10 +301,22 @@ def run_healthy_baseline(
     cpg_phases[0] = controller.cpg_network.curr_phases % (2 * np.pi)
 
     for step_index in range(step_count):
-        action = controller.step()
+        controller_action = controller.step()
+        action = _apply_action_perturbation(
+            controller_action,
+            perturbation=perturbation,
+            condition_id=condition_id,
+            step_index=step_index,
+            timestep_s=float(sim.timestep),
+            random_seed=config.random_seed,
+            expected_joint_angle_count=len(dof_order),
+        )
         apply_locomotion_action(sim, fly.name, action)
         sim.step()
 
+        controller_joint_angle_actions[step_index] = controller_action.joint_angles
+        if controller_adhesion_onoff is not None:
+            controller_adhesion_onoff[step_index] = controller_action.adhesion_onoff
         joint_angle_actions[step_index] = action.joint_angles
         if adhesion_onoff is not None:
             adhesion_onoff[step_index] = action.adhesion_onoff
@@ -300,6 +345,16 @@ def run_healthy_baseline(
     )
     skeleton_summary = _skeleton_summary(fly)
     actuator_summary = _actuator_summary(fly, sim)
+    action_transformation_summary = summarize_action_transformation(
+        controller_joint_angle_actions=controller_joint_angle_actions,
+        applied_joint_angle_actions=joint_angle_actions,
+        controller_adhesion_onoff=controller_adhesion_onoff,
+        applied_adhesion_onoff=adhesion_onoff,
+        expected_joint_angle_count=len(dof_order),
+        perturbation_metadata=(
+            perturbation.metadata() if perturbation is not None else None
+        ),
+    )
     checks = check_locomotion_pass_criteria(
         metrics=metrics,
         expected_step_count=step_count,
@@ -353,14 +408,34 @@ def run_healthy_baseline(
         "derived_locomotion_metrics": metrics,
         "checks": checks,
         "overall_pass": all(check["pass"] for check in checks.values()),
-        "scientific_scope": (
-            "Milestone C validates an unperturbed deterministic FlyGym locomotion "
-            "simulation baseline for future software comparisons. It is not a "
-            "Parkinson's disease model and is not biological validation."
-        ),
+        "scientific_scope": _locomotion_scientific_scope(perturbation),
     }
+    if include_condition_metadata:
+        report.update(
+            {
+                "condition_id": condition_id,
+                "perturbation": (
+                    perturbation.metadata() if perturbation is not None else None
+                ),
+                "action_transformation_summary": action_transformation_summary,
+            }
+        )
     sim.close()
     return report
+
+
+def run_healthy_baseline(
+    config: HealthyBaselineConfig, *, repo_root: str | Path | None = None
+) -> dict[str, Any]:
+    """Execute the canonical unperturbed baseline and return a report."""
+
+    return run_locomotion(
+        config,
+        repo_root=repo_root,
+        perturbation=None,
+        condition_id="unperturbed",
+        include_condition_metadata=False,
+    )
 
 
 def build_healthy_baseline_unavailable_report(
@@ -423,6 +498,45 @@ def _deep_merge(defaults: dict[str, Any], overrides: dict[str, Any]) -> dict[str
         else:
             result[key] = value
     return result
+
+
+def _locomotion_scientific_scope(perturbation: Perturbation | None) -> str:
+    if perturbation is None:
+        return (
+            "Milestone C validates an unperturbed deterministic FlyGym locomotion "
+            "simulation baseline for future software comparisons. It is not a "
+            "Parkinson's disease model and is not biological validation."
+        )
+    return (
+        "This condition report records a controlled simulation perturbation "
+        "condition for software comparison. It is not a Parkinson's disease model "
+        "and is not biological validation."
+    )
+
+
+def _apply_action_perturbation(
+    action: Any,
+    *,
+    perturbation: Perturbation | None,
+    condition_id: str,
+    step_index: int,
+    timestep_s: float,
+    random_seed: int,
+    expected_joint_angle_count: int,
+) -> Any:
+    if perturbation is None:
+        return action
+    return perturbation.apply_to_action(
+        action,
+        ActionPerturbationContext(
+            condition_id=condition_id,
+            step_index=step_index,
+            time_s=step_index * timestep_s,
+            timestep_s=timestep_s,
+            random_seed=random_seed,
+            expected_joint_angle_count=expected_joint_angle_count,
+        ),
+    )
 
 
 def _json_float_list(values: np.ndarray) -> list[float | None]:
@@ -494,5 +608,6 @@ __all__ = [
     "build_healthy_baseline_unavailable_report",
     "load_healthy_baseline_config",
     "run_healthy_baseline",
+    "run_locomotion",
     "write_json_report",
 ]

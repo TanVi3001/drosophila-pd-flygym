@@ -181,7 +181,13 @@ remain empty by design for Milestone 8B.
 Milestone C is the authorized unperturbed locomotion baseline. It creates the
 official FlyGym locomotion fly, position actuators, adhesion actuators,
 `FlatGroundWorld`, and `Simulation` through the canonical baseline pipeline.
-Milestone D controlled perturbations are not implemented yet.
+
+Milestone D is the controlled perturbation framework. Its repository
+implementation runs paired baseline-vs-perturbed simulations from fresh
+FlyGym/MuJoCo state while holding random seed, duration, timestep, world,
+spawn, baseline controller, skeleton, actuator architecture, and metric
+definitions constant. Milestone D must pass fresh Google Colab validation
+before it is frozen.
 
 ## Workflow
 
@@ -229,7 +235,7 @@ The planned high-level stages are:
 
 1. Unperturbed baseline (Milestone C, frozen)
 2. Controller interface
-3. Controlled perturbations (Milestone D, not implemented)
+3. Controlled perturbations (Milestone D, repository implementation pending validation)
 4. Gait metrics
 5. PD-like perturbation
 6. Healthy vs PD-like comparison

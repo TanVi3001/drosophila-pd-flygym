@@ -146,6 +146,27 @@ FlyGym 2.1.0, and MuJoCo 3.9.0. The generated
 This milestone validates an unperturbed simulation baseline for future software
 comparisons only. It does not establish biological realism or disease relevance.
 
+## Running Milestone D
+
+Milestone D runs paired controlled perturbation experiments:
+
+```bash
+python scripts/run_perturbation_experiment.py \
+  --baseline-config configs/experiments/healthy_baseline.yaml \
+  --perturbation-config configs/experiments/perturbations/identity.yaml \
+  --output results/perturbations/identity.json
+```
+
+```bash
+python scripts/run_perturbation_experiment.py \
+  --baseline-config configs/experiments/healthy_baseline.yaml \
+  --perturbation-config configs/experiments/perturbations/action_scale_080.yaml \
+  --output results/perturbations/action_scale_080.json
+```
+
+These are controlled simulation perturbation experiments. They are not
+Parkinson's disease models and are not biological validation.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline
