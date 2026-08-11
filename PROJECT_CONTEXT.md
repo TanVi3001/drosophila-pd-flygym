@@ -39,6 +39,13 @@ Milestone E3 is the latest frozen computational robustness checkpoint. It
 validates the frozen E2 leading computational candidate across five seeds and
 records software/simulation robustness only.
 
+Milestone E4 is the current literature-grounded concordance layer. It evaluates
+the frozen E3 computational phenotype against selected adult Drosophila dopamine
+and alpha-synuclein walking literature using qualitative endpoint mapping only.
+E4 does not tune the frozen candidate, does not run a new parameter search, does
+not implement rescue experiments, and does not validate a Parkinson's disease
+model.
+
 Milestone 8B is complete and frozen. The project crossed the joint
 materialization boundary exactly once through a canonical, explicitly named
 software gate before moving on to the unperturbed locomotion baseline.
@@ -485,6 +492,58 @@ Milestone E3 does not introduce new disease mechanisms, does not implement
 rescue experiments, and does not establish a mechanistic or biologically
 validated Parkinson's disease model.
 
+## Milestone E4 Concordance Status
+
+Milestone E4 is LITERATURE-GROUNDED PHENOTYPE CONCORDANCE.
+
+E4 uses the frozen E3 evidence only:
+
+```bash
+python scripts/run_phenotype_concordance.py --output results/validation/milestone_e4_concordance.json
+```
+
+The curated evidence matrix is
+`docs/scientific/e4_evidence_matrix.yaml`. The generated report is
+`results/validation/milestone_e4_concordance.json`.
+
+E4 records adult walking evidence separately from larval or non-adult evidence.
+The current E4 matrix contains primary adult evidence only:
+
+- Riemensperger et al. 2011, DOI `10.1073/pnas.1010930108`, PMID
+  `21187381`: neural dopamine-deficient adult flies showed reduced walking
+  speed and covered distance relative to control contexts.
+- Chen et al. 2014, DOI `10.1111/gbb.12172`, PMID `25113870`: old adult A30P
+  alpha-synuclein flies showed reduced total moving distance, distance per
+  movement, walking velocity, and angular velocity, with age dependence.
+
+Endpoint concordance is qualitative and directional only. E4 records:
+
+- Walking speed / velocity -> `mean_planar_speed_mm_s`: CONCORDANT.
+- Covered distance / total moving distance -> `planar_path_length_mm`, with
+  `planar_displacement_mm` as a supplemental metric: CONCORDANT.
+- Distance per movement: NOT_COMPARABLE because E3 does not segment movement
+  bouts.
+- Angular velocity: NOT_COMPARABLE because E3 yaw change is not angular
+  velocity.
+- Centrophobism, climbing, pause/freezing: NOT_COMPARABLE or NOT AVAILABLE with
+  the current flat-ground walking report.
+- Thorax/body height: INSUFFICIENT_EVIDENCE for Parkinson interpretation in the
+  selected literature set.
+
+The generated E4 report returns `overall_pass = true` for schema and scientific
+boundary checks and proposes `PARTIAL_PHENOTYPE_CONCORDANCE`. This means only
+that the frozen E3 candidate's reduced locomotor output is directionally
+consistent with selected adult walking endpoints while unsupported endpoints are
+preserved. It does not mean biological validation, statistical significance,
+dopamine depletion, disease severity, or mechanistic equivalence.
+
+The frozen candidate remains unchanged:
+
+- `motor_scale = 0.8`
+- `coupling_scale = 0.75`
+
+No E4 parameter tuning or direct numeric calibration is permitted.
+
 ## Workflow
 
 GitHub is the source of truth. Google Colab is an execution environment.
@@ -534,10 +593,11 @@ The planned high-level stages are:
 3. Controlled perturbations (Milestone D, frozen)
 4. Parameter-response characterization (Milestones E1 and E2, frozen)
 5. Multi-seed robustness validation (Milestone E3, frozen)
-6. Gait metrics
-7. PD-like perturbation
-8. Healthy vs PD-like comparison
-9. Potential rescue experiments
+6. Literature-grounded phenotype concordance (Milestone E4)
+7. Gait metrics
+8. PD-like perturbation
+9. Healthy vs PD-like comparison
+10. Potential rescue experiments
 
 No disease-specific modeling should be introduced until the locomotor simulation
 infrastructure is stable and the project owner authorizes that stage.

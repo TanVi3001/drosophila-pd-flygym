@@ -24,6 +24,10 @@ from .candidate_robustness import (
     load_candidate_robustness_config,
     run_candidate_robustness_validation,
 )
+from .phenotype_concordance import (
+    build_milestone_e4_concordance_report,
+    load_e4_evidence_matrix,
+)
 from .perturbation_experiment import (
     build_controlled_variables,
     build_paired_perturbation_report,
@@ -56,6 +60,7 @@ __all__ = [
     "build_combined_phenotype_report",
     "build_combined_phenotype_unavailable_report",
     "build_healthy_baseline_unavailable_report",
+    "build_milestone_e4_concordance_report",
     "build_parameter_sweep_report",
     "build_parameter_sweep_unavailable_report",
     "build_paired_perturbation_report",
@@ -63,6 +68,7 @@ __all__ = [
     "load_healthy_baseline_config",
     "load_candidate_robustness_config",
     "load_combined_phenotype_sweep_config",
+    "load_e4_evidence_matrix",
     "load_parameter_sweep_config",
     "run_candidate_robustness_validation",
     "run_combined_phenotype_sweep",

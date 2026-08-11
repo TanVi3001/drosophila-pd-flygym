@@ -16,19 +16,22 @@ claim biological validation of any Parkinson's disease model.
 ## Current Checkpoint
 
 Milestone E3 is the latest frozen computational robustness checkpoint.
-The canonical repository implementation now reproduces the pre-materialization
-anatomy audit, executes the authorized joint materialization gate once,
-validates the post-materialization anatomy state, runs an unperturbed
-deterministic FlyGym locomotion baseline, and characterizes combined
-motor-vigor and coordination proxy perturbations plus the frozen E2 candidate's
-multi-seed robustness.
+Milestone E4 adds a literature-grounded concordance layer over the frozen E3
+evidence. The canonical repository implementation now reproduces the
+pre-materialization anatomy audit, executes the authorized joint materialization
+gate once, validates the post-materialization anatomy state, runs an
+unperturbed deterministic FlyGym locomotion baseline, characterizes combined
+motor-vigor and coordination proxy perturbations, validates the frozen E2
+candidate's multi-seed robustness, and records qualitative concordance against
+selected adult Drosophila walking literature.
 
 Milestone C is an unperturbed simulation baseline. It is not biological
 validation, not a Parkinson's disease model, and not evidence from real
 Drosophila.
 
-Milestones E2 and E3 are also not biological validation and do not select a
-validated Parkinson's-disease-like condition.
+Milestones E2, E3, and E4 are also not biological validation and do not select a
+validated Parkinson's-disease-like condition. E4 does not tune the frozen
+candidate or calibrate simulation values to biological measurements.
 
 Historical Session 02 Blocks 8.14-8.19 are superseded by canonical Milestone 8B
 code and JSON evidence. The notebooks remain historical research records.
@@ -313,6 +316,29 @@ Key E3 aggregate observations:
 It does not mean biological robustness, statistical significance, disease
 validation, disease severity, dopamine depletion, or mechanistic validation.
 
+## Running Milestone E4
+
+Milestone E4 is LITERATURE-GROUNDED PHENOTYPE CONCORDANCE. It reads the curated
+evidence matrix and frozen E3 evidence without running another FlyGym
+simulation:
+
+```bash
+python scripts/run_phenotype_concordance.py \
+  --output results/validation/milestone_e4_concordance.json
+```
+
+The evidence matrix is `docs/scientific/e4_evidence_matrix.yaml`. The generated
+report classifies adult walking speed/velocity and covered-distance directions
+as `CONCORDANT`, while preserving unsupported endpoints such as angular
+velocity, distance per movement, centrophobism, climbing, pause/freezing, and
+body-height interpretation as `NOT_COMPARABLE`, `NOT_AVAILABLE`, or
+`INSUFFICIENT_EVIDENCE`.
+
+The proposed E4 status is `PARTIAL_PHENOTYPE_CONCORDANCE`: reduced locomotor
+output in the frozen E3 candidate is directionally consistent with selected
+adult walking literature, but this is not biological validation, not a weighted
+PD score, not dopamine depletion, and not mechanistic equivalence.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline
@@ -320,7 +346,8 @@ validation, disease severity, dopamine depletion, or mechanistic validation.
 3. Controlled perturbations
 4. Parameter-response characterization
 5. Multi-seed robustness validation
-6. Gait metrics
-7. PD-like perturbation
-8. Healthy vs PD-like comparison
-9. Potential rescue experiments
+6. Literature-grounded phenotype concordance
+7. Gait metrics
+8. PD-like perturbation
+9. Healthy vs PD-like comparison
+10. Potential rescue experiments
