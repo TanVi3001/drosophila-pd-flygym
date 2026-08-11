@@ -41,7 +41,7 @@ Block 8.12 is complete. The verified pre-materialization anatomy audit found:
 - `src/drosophila_pd/experiments/` - future experiment orchestration code
 - `src/drosophila_pd/metrics/` - future gait and locomotion metrics
 - `configs/experiments/` - version-controlled experiment configuration
-- `notebooks/experiments/` - Colab-targeted notebooks
+- `notebooks/session_*/` - session-based Colab research notebooks
 - `scripts/` - command-line utilities
 - `tests/` - automated checks
 - `results/` - local/generated experiment outputs, kept lightweight by default
