@@ -22,8 +22,9 @@ pre-materialization anatomy audit, executes the authorized joint materialization
 gate once, validates the post-materialization anatomy state, runs an
 unperturbed deterministic FlyGym locomotion baseline, characterizes combined
 motor-vigor and coordination proxy perturbations, validates the frozen E2
-candidate's multi-seed robustness, and records qualitative concordance against
-selected adult Drosophila walking literature.
+candidate's multi-seed robustness, records qualitative concordance against
+selected adult Drosophila walking literature, and implements the preregistered
+Milestone E5 computational reversibility experiment awaiting Colab validation.
 
 Milestone C is an unperturbed simulation baseline. It is not biological
 validation, not a Parkinson's disease model, and not evidence from real
@@ -32,6 +33,9 @@ Drosophila.
 Milestones E2, E3, and E4 are also not biological validation and do not select a
 validated Parkinson's-disease-like condition. E4 does not tune the frozen
 candidate or calibrate simulation values to biological measurements.
+E5 does not tune the frozen candidate, does not run a rescue parameter sweep,
+and does not claim pharmacological, dopaminergic, mechanistic, biological, or
+Parkinson's disease rescue.
 
 Historical Session 02 Blocks 8.14-8.19 are superseded by canonical Milestone 8B
 code and JSON evidence. The notebooks remain historical research records.
@@ -339,6 +343,37 @@ output in the frozen E3 candidate is directionally consistent with selected
 adult walking literature, but this is not biological validation, not a weighted
 PD score, not dopamine depletion, and not mechanistic equivalence.
 
+## Running Milestone E5
+
+Milestone E5 is IMPLEMENTED / AWAITING COLAB VALIDATION. It runs a fixed,
+preregistered computational reversibility experiment over the frozen E3/E4
+candidate:
+
+```bash
+python scripts/run_computational_rescue.py \
+  --baseline-config configs/experiments/healthy_baseline.yaml \
+  --validation-config configs/experiments/validation/milestone_e5.yaml \
+  --output results/validation/milestone_e5_computational_rescue.json
+```
+
+The fixed conditions are `control` (`1.0 / 1.0`), `impaired_candidate`
+(`0.8 / 0.75`), `motor_partial_rescue` (`0.9 / 0.75`),
+`coordination_partial_rescue` (`0.8 / 0.875`),
+`combined_partial_rescue` (`0.9 / 0.875`), and
+`full_computational_restoration_reference` (`1.0 / 1.0`). The midpoint values
+come from `(0.8 + 1.0) / 2 = 0.9` and `(0.75 + 1.0) / 2 = 0.875`.
+
+Primary endpoints are `mean_planar_speed_mm_s` and `planar_path_length_mm`.
+E5 reports computational recovery fractions using
+`(rescue - impaired) / (control - impaired)` and handles near-zero denominators
+explicitly. These are simulation quantities only, not biological recovery
+percentages.
+
+The `full_computational_restoration_reference` condition is a software/control
+equivalence check. It is not full rescue, cure, L-DOPA response, dopamine
+restoration, or Parkinson's disease rescue. No E5 evidence is frozen until a
+fresh Colab run completes and the real JSON report is reviewed.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline
@@ -347,7 +382,9 @@ PD score, not dopamine depletion, and not mechanistic equivalence.
 4. Parameter-response characterization
 5. Multi-seed robustness validation
 6. Literature-grounded phenotype concordance
-7. Gait metrics
-8. PD-like perturbation
-9. Healthy vs PD-like comparison
-10. Potential rescue experiments
+7. Preregistered computational reversibility
+8. Gait metrics
+9. PD-like perturbation
+10. Healthy vs PD-like comparison
+11. Potential biological-rescue interpretation, only after external evidence
+   and explicit authorization

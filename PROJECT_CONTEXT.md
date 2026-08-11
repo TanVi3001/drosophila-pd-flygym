@@ -46,6 +46,12 @@ E4 does not tune the frozen candidate, does not run a new parameter search, does
 not implement rescue experiments, and does not validate a Parkinson's disease
 model.
 
+Milestone E5 is implemented and awaiting Google Colab validation. It is a
+preregistered computational reversibility experiment over the frozen E3/E4
+candidate only. E5 does not tune the candidate, does not run a rescue parameter
+sweep, does not implement pharmacology, and does not claim dopaminergic,
+mechanistic, biological, or Parkinson's disease rescue.
+
 Milestone 8B is complete and frozen. The project crossed the joint
 materialization boundary exactly once through a canonical, explicitly named
 software gate before moving on to the unperturbed locomotion baseline.
@@ -544,6 +550,77 @@ The frozen candidate remains unchanged:
 
 No E4 parameter tuning or direct numeric calibration is permitted.
 
+## Milestone E5 Implementation Status
+
+Milestone E5 is IMPLEMENTED / AWAITING COLAB VALIDATION.
+
+E5 asks a narrow computational question: if the two phenomenological impairment
+parameters defining the frozen E3/E4 candidate are partially moved back toward
+their unperturbed values, do supported locomotor-output endpoints move back
+toward the unperturbed baseline?
+
+The preregistered E5 configuration is
+`configs/experiments/validation/milestone_e5.yaml`. The canonical command is:
+
+```bash
+python scripts/run_computational_rescue.py \
+  --baseline-config configs/experiments/healthy_baseline.yaml \
+  --validation-config configs/experiments/validation/milestone_e5.yaml \
+  --output results/validation/milestone_e5_computational_rescue.json
+```
+
+The fixed condition matrix is:
+
+- `control`: `motor_scale = 1.0`, `coupling_scale = 1.0`
+- `impaired_candidate`: `motor_scale = 0.8`, `coupling_scale = 0.75`
+- `motor_partial_rescue`: `motor_scale = 0.9`, `coupling_scale = 0.75`
+- `coordination_partial_rescue`: `motor_scale = 0.8`,
+  `coupling_scale = 0.875`
+- `combined_partial_rescue`: `motor_scale = 0.9`,
+  `coupling_scale = 0.875`
+- `full_computational_restoration_reference`: `motor_scale = 1.0`,
+  `coupling_scale = 1.0`
+
+The midpoint values are preregistered from the frozen impaired and control
+states:
+
+- `(0.8 + 1.0) / 2 = 0.9`
+- `(0.75 + 1.0) / 2 = 0.875`
+
+E5 uses seeds `[0, 1, 2, 3, 4]`, duration `1.0 s`, and the same canonical
+locomotion pipeline as the frozen baseline/candidate work. Each condition uses
+a fresh fly/world/simulation. The partial-return conditions are implemented
+through the generic perturbation interfaces and `CompositePerturbation`.
+
+Primary endpoints are `mean_planar_speed_mm_s` and `planar_path_length_mm`.
+Secondary/exploratory endpoints include planar displacement, trajectory
+efficiency, absolute yaw change, body-height summaries, joint-action magnitude,
+and adhesion summaries.
+
+For metrics expected to decrease in the impaired candidate, E5 reports the
+computational recovery fraction:
+
+```text
+(rescue - impaired) / (control - impaired)
+```
+
+Near-zero denominators are reported explicitly. Recovery fractions are
+computational quantities only and must not be described as biological recovery
+percentages.
+
+Partial-return conditions are classified conservatively as one of
+`DIRECTIONALLY_RESCUED`, `MIXED`, `NO_RESCUE`, or `UNSTABLE`. The classification
+uses the preregistered primary endpoints and records computational direction
+only. It is not a pharmacological, dopaminergic, mechanistic, or biological
+rescue label.
+
+The `full_computational_restoration_reference` condition is a software/control
+equivalence check for `1.0 / 1.0`, not full rescue, cure, L-DOPA response,
+dopamine restoration, or Parkinson's disease rescue.
+
+No E5 evidence is frozen until a fresh Colab run completes and the real JSON
+report is reviewed.
+
 ## Workflow
 
 GitHub is the source of truth. Google Colab is an execution environment.
@@ -594,10 +671,13 @@ The planned high-level stages are:
 4. Parameter-response characterization (Milestones E1 and E2, frozen)
 5. Multi-seed robustness validation (Milestone E3, frozen)
 6. Literature-grounded phenotype concordance (Milestone E4)
-7. Gait metrics
-8. PD-like perturbation
-9. Healthy vs PD-like comparison
-10. Potential rescue experiments
+7. Preregistered computational reversibility (Milestone E5, awaiting Colab
+   validation)
+8. Gait metrics
+9. PD-like perturbation
+10. Healthy vs PD-like comparison
+11. Potential biological-rescue interpretation, only after external evidence
+   and explicit authorization
 
 No disease-specific modeling should be introduced until the locomotor simulation
 infrastructure is stable and the project owner authorizes that stage.
