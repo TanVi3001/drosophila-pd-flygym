@@ -1,0 +1,54 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments and local environment files
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Coverage and test output
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Packaging/build artifacts
+dist/
+build/
+*.egg-info/
+
+# Logs
+logs/*
+!logs/.gitkeep
+*.log
+
+# Large or raw experiment artifacts
+*.mp4
+*.avi
+*.mov
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.npz
+
+# Local generated result artifacts. Keep directory anchors.
+results/**/*
+!results/**/
+!results/**/.gitkeep
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
