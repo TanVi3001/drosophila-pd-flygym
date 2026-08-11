@@ -61,6 +61,7 @@ logs/*
 results/**/*
 !results/**/
 !results/**/.gitkeep
+!results/baseline/block_8_12_audit.json
 
 # OS and editor noise
 .DS_Store

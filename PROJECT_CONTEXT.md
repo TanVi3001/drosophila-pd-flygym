@@ -59,6 +59,25 @@ Verified Block 8.12 invariants:
 The empty JointDOF, neutral-angle, and actuator mappings are expected before
 joint materialization. They must not be interpreted as errors.
 
+## Block 8.12 Reproduction Status
+
+On August 11, 2026, Block 8.12 was independently reproduced from a fresh
+Google Colab runtime using repository code:
+
+```bash
+python scripts/audit_block_8_12.py --output results/baseline/block_8_12_audit.json
+```
+
+Observed clean-runtime versions were Python 3.12.13, FlyGym 2.1.0, and
+MuJoCo 3.9.0. The generated JSON report returned `overall_pass = true`,
+`skeleton_before_is_none = true`, `skeleton_after_is_none = true`, MJCF body
+mapping total 69, missing parent MJCF bodies 0, and missing child MJCF bodies 0.
+The other documented Block 8.12 invariants also passed.
+
+This reproduction validates the repository's non-mutating software/anatomy audit
+only. It does not validate a Parkinson's disease model, locomotor biology, or
+evidence from real flies.
+
 ## Pre-Materialization Boundary
 
 The current phase audits FlyGym and NeuroMechFly anatomy and mapping behavior

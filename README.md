@@ -67,6 +67,12 @@ The audit checks anatomy and mapping invariants only. It must leave
 `fly.skeleton is None` and does not validate a Parkinson's disease model,
 locomotor biology, or evidence from real flies.
 
+Fresh Google Colab reproduction has passed using Python 3.12.13,
+FlyGym 2.1.0, and MuJoCo 3.9.0. The generated
+`results/baseline/block_8_12_audit.json` report returned
+`overall_pass = true` with `fly.skeleton` remaining `None` before and after the
+audit.
+
 ## Planned Research Stages
 
 1. Healthy baseline
