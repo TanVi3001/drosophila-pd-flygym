@@ -53,13 +53,12 @@ toward the unperturbed baseline. E5 does not tune the candidate, does not run a
 rescue parameter sweep, does not implement pharmacology, and does not claim
 dopaminergic, mechanistic, biological, or Parkinson's disease rescue.
 
-Milestone E6 is IMPLEMENTED - AWAITING REVIEW. It is an evidence-only analysis
-layer that reads the frozen C, D, E1, E2, E3, E4, and E5 JSON reports, validates
-their schemas, provenance, pass states, and frozen candidate identity, and
-generates reproducible CSV summaries and matplotlib figures. E6 does not run
-FlyGym or MuJoCo, change simulation behavior, tune parameters, or establish
-biological validation. It must not be marked frozen until the generated output
-has been reviewed.
+Milestone E6 is FROZEN - REPRODUCIBLE EVIDENCE SYNTHESIS. It is an evidence-only
+analysis layer that reads the frozen C, D, E1, E2, E3, E4, and E5 JSON reports,
+validates their schemas, provenance, pass states, and frozen candidate identity,
+and generates reproducible CSV summaries and matplotlib figures. E6 does not
+run FlyGym or MuJoCo, change simulation behavior, tune parameters, or establish
+biological validation.
 
 Milestone 8B is complete and frozen. The project crossed the joint
 materialization boundary exactly once through a canonical, explicitly named
@@ -673,10 +672,23 @@ as biological recovery percentages. E5 is not biological rescue, Parkinson's
 disease rescue, L-DOPA simulation, dopamine restoration, neuron restoration,
 pharmacological treatment, cure, or mechanistic validation.
 
-## Milestone E6 Implementation Status
+## Milestone E6 Reproduction Status
 
-Milestone E6 is IMPLEMENTED - AWAITING REVIEW. It consumes the frozen C, D,
-E1, E2, E3, E4, and E5 reports without modifying them or rerunning simulations.
+Milestone E6 is FROZEN - REPRODUCIBLE EVIDENCE SYNTHESIS. The implementation
+commit is `53e41d17365f56509ca708ba3352ddf724b0e89a`.
+
+It consumes exactly eight frozen reports without modifying them or rerunning
+simulations:
+
+- `results/baseline/healthy_baseline.json`
+- `results/perturbations/identity.json`
+- `results/perturbations/action_scale_080.json`
+- `results/sweeps/milestone_e1.json`
+- `results/sweeps/milestone_e2_combined.json`
+- `results/validation/milestone_e3_candidate_robustness.json`
+- `results/validation/milestone_e4_concordance.json`
+- `results/validation/milestone_e5_computational_rescue.json`
+
 The canonical CPU-only command is:
 
 ```bash
@@ -685,13 +697,23 @@ python scripts/run_evidence_synthesis.py \
   --output results/analysis/milestone_e6_synthesis.json
 ```
 
-The local run generated `results/analysis/milestone_e6_synthesis.json`, four
-figures under `results/analysis/figures/`, and five CSV tables under
-`results/analysis/tables/`, with `overall_pass = true`. The report records input
-SHA-256 hashes and upstream git commits. E6 PASS means only that the required
-computational evidence was internally consistent and the synthesis artifacts
-were generated successfully; it is not Parkinson's disease validation,
-biological rescue, mechanistic validation, or statistical significance.
+The frozen report `results/analysis/milestone_e6_synthesis.json` records
+`synthesis_git_commit = 53e41d17365f56509ca708ba3352ddf724b0e89a`, exactly 56
+passing checks, input SHA-256 hashes, and upstream git commits. It generated
+four figures under `results/analysis/figures/` and five CSV tables under
+`results/analysis/tables/`.
+
+The report records `synthesis_worktree_dirty = true`. At synthesis time this
+was caused solely by the pre-existing out-of-scope
+`notebooks/session_02_healthy_baseline/Session_02_Healthy_Baseline.ipynb` file;
+the notebook was not modified, staged, reverted, cleaned, or used as an E6
+input. This provenance flag was preserved rather than falsified.
+
+E6 PASS means only that the required computational evidence was internally
+consistent and the synthesis artifacts were generated successfully. E4 remains
+`PARTIAL_PHENOTYPE_CONCORDANCE`, and E5 remains computational reversibility
+only. E6 is not Parkinson's disease validation, biological rescue, mechanistic
+validation, disease-severity calibration, or statistical significance.
 
 ## Workflow
 
@@ -744,7 +766,7 @@ The planned high-level stages are:
 5. Multi-seed robustness validation (Milestone E3, frozen)
 6. Literature-grounded phenotype concordance (Milestone E4)
 7. Preregistered computational reversibility (Milestone E5, frozen)
-8. Reproducible evidence synthesis (Milestone E6, implemented and awaiting review)
+8. Reproducible evidence synthesis (Milestone E6, frozen)
 9. Gait metrics
 10. PD-like perturbation
 11. Healthy vs PD-like comparison

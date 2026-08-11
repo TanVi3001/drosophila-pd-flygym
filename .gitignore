@@ -71,6 +71,16 @@ results/**/*
 !results/validation/milestone_e3_candidate_robustness.json
 !results/validation/milestone_e4_concordance.json
 !results/validation/milestone_e5_computational_rescue.json
+!results/analysis/milestone_e6_synthesis.json
+!results/analysis/tables/evidence_manifest.csv
+!results/analysis/tables/e1_parameter_response.csv
+!results/analysis/tables/e2_condition_summary.csv
+!results/analysis/tables/e3_seed_summary.csv
+!results/analysis/tables/e5_reversibility_summary.csv
+!results/analysis/figures/e1_parameter_response.png
+!results/analysis/figures/e2_condition_comparison.png
+!results/analysis/figures/e3_paired_seed_robustness.png
+!results/analysis/figures/e5_computational_reversibility.png
 
 # OS and editor noise
 .DS_Store
