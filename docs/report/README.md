@@ -7,6 +7,8 @@ workflow is a validated Parkinson's disease model.
 
 ## Contents
 
+- [final_report.md](final_report.md): assembled, submission-ready scientific
+  manuscript.
 - [methods.md](methods.md): computational design, controls, perturbation
   proxies, and analysis procedures.
 - [results.md](results.md): frozen baseline, response-surface, robustness,
