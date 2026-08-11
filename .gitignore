@@ -32,6 +32,11 @@ coverage.xml
 
 # Packaging/build artifacts
 dist/
+!dist/
+dist/*
+!dist/Drosophila_PD_FlyGym_Final_Report.docx
+!dist/Drosophila_PD_FlyGym_Final_Report.pdf
+!dist/final_report_manifest.json
 build/
 *.egg-info/
 

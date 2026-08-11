@@ -15,9 +15,9 @@ claim biological validation of any Parkinson's disease model.
 
 ## Current Checkpoint
 
-Milestone E5 remains the latest frozen computational simulation checkpoint.
-Milestone E6 is FROZEN - REPRODUCIBLE EVIDENCE SYNTHESIS as an evidence-only
-analysis layer. The canonical
+Milestone F is the latest frozen submission-packaging checkpoint. Milestone E6
+is FROZEN - REPRODUCIBLE EVIDENCE SYNTHESIS as an evidence-only analysis layer.
+The canonical
 repository implementation now reproduces the
 pre-materialization anatomy audit, executes the authorized joint materialization
 gate once, validates the post-materialization anatomy state, runs an
@@ -422,6 +422,31 @@ significance.
 The report's `synthesis_worktree_dirty = true` records only the known
 pre-existing dirty Session 02 notebook; that notebook was not modified or
 staged.
+
+## Milestone F Final Submission Package
+
+Milestone F is FROZEN - FINAL SUBMISSION PACKAGE. The canonical manuscript is
+`docs/report/final_report.md` at source commit
+`004488cf7fd5e980137a209d360b977716865e1a`. Build the publication artifacts
+with:
+
+```bash
+python scripts/build_final_report.py
+```
+
+The version-controlled final artifacts are:
+
+- `dist/Drosophila_PD_FlyGym_Final_Report.docx`
+- `dist/Drosophila_PD_FlyGym_Final_Report.pdf`
+- `dist/final_report_manifest.json`
+
+The manifest records artifact hashes, sizes, page count, build provenance, and
+validation results. This package changes document formatting only; it does not
+rerun simulations or expand the scientific scope. The report remains a
+computational/phenomenological model with qualitative
+`PARTIAL_PHENOTYPE_CONCORDANCE`, not Parkinson's disease validation, biological
+rescue, dopamine equivalence, disease-severity mapping, mechanistic equivalence,
+or a statistical-significance claim.
 
 ## Planned Research Stages
 

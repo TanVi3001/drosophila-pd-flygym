@@ -715,6 +715,37 @@ consistent and the synthesis artifacts were generated successfully. E4 remains
 only. E6 is not Parkinson's disease validation, biological rescue, mechanistic
 validation, disease-severity calibration, or statistical significance.
 
+## Milestone F Final Submission Package
+
+Milestone F is FROZEN - FINAL SUBMISSION PACKAGE. The canonical manuscript
+source is `docs/report/final_report.md` at commit
+`004488cf7fd5e980137a209d360b977716865e1a`. The committed build implementation
+is at commit `82746cf1276d3edf7e8ce3206d83f49b3470e1dd`.
+
+The canonical build command is:
+
+```bash
+python scripts/build_final_report.py
+```
+
+The final submission artifacts are:
+
+- `dist/Drosophila_PD_FlyGym_Final_Report.docx`
+- `dist/Drosophila_PD_FlyGym_Final_Report.pdf`
+- `dist/final_report_manifest.json`
+
+The manifest records the manuscript source and build commits, artifact sizes,
+SHA-256 hashes, PDF page count, build timestamp, validation/test results, and
+scientific scope. The package contains the four frozen E6 figures, manuscript
+tables, references, appendices, captions, and reproducibility/provenance
+statements without rerunning simulations or changing frozen evidence.
+
+Milestone F is a document-packaging checkpoint only. The scientific boundary
+remains a computational/phenomenological model; `PARTIAL_PHENOTYPE_CONCORDANCE`
+is qualitative. The package does not claim Parkinson's disease validation,
+biological rescue, dopamine equivalence, disease-severity mapping, mechanistic
+equivalence, or statistical significance.
+
 ## Workflow
 
 GitHub is the source of truth. Google Colab is an execution environment.
