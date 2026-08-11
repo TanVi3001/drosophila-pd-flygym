@@ -15,14 +15,19 @@ claim biological validation of any Parkinson's disease model.
 
 ## Current Checkpoint
 
-Milestone C is complete and frozen. The canonical repository implementation now
-reproduces the pre-materialization anatomy audit, executes the authorized joint
-materialization gate once, validates the post-materialization anatomy state, and
-runs an unperturbed deterministic FlyGym locomotion baseline.
+Milestone E2 is the latest frozen computational characterization checkpoint.
+The canonical repository implementation now reproduces the pre-materialization
+anatomy audit, executes the authorized joint materialization gate once,
+validates the post-materialization anatomy state, runs an unperturbed
+deterministic FlyGym locomotion baseline, and characterizes combined
+motor-vigor and coordination proxy perturbations.
 
 Milestone C is an unperturbed simulation baseline. It is not biological
 validation, not a Parkinson's disease model, and not evidence from real
 Drosophila.
+
+Milestone E2 is also not biological validation and does not select a validated
+Parkinson's-disease-like condition.
 
 Historical Session 02 Blocks 8.14-8.19 are superseded by canonical Milestone 8B
 code and JSON evidence. The notebooks remain historical research records.
@@ -227,7 +232,9 @@ depletion, neuron-loss percentage, disease stage, or biological severity.
 
 ## Running Milestone E2
 
-Milestone E2 characterizes a compact explicit set of combined motor-vigor and
+Milestone E2 is FROZEN — COMBINED PHENOTYPE CHARACTERIZATION.
+
+It characterizes a compact explicit set of combined motor-vigor and
 coordination proxy conditions:
 
 ```bash
@@ -237,10 +244,26 @@ python scripts/run_combined_phenotype_sweep.py \
   --output results/sweeps/milestone_e2_combined.json
 ```
 
+Fresh Google Colab reproduction has passed using Python 3.12.13,
+FlyGym 2.1.0, and MuJoCo 3.9.0. The generated evidence file is
+`results/sweeps/milestone_e2_combined.json`, produced from git commit
+`433269ed11e0475eb973b62d31f469d66843872f`.
+
+The report returned `overall_pass = true`: all 9 conditions completed, all
+completed conditions passed, the control-equivalent condition passed, controlled
+variables were preserved, and fresh simulation state per condition was declared.
+
 This run composes CPG coupling-weight scaling with joint-angle action scaling,
 records both transformations separately, and reports baseline deltas plus
 interaction residuals. It is a phenomenological simulation characterization
 only; it does not choose or validate a Parkinson's-disease-like condition.
+
+Key E2 observations:
+
+- Speed and displacement interaction effects were mostly close to additive.
+- Directional/yaw effects were more nonlinear across combined conditions.
+- Motor scale 0.8 with coupling scale 0.75 is a leading computational candidate
+  for further validation, not a final or validated disease model.
 
 ## Planned Research Stages
 

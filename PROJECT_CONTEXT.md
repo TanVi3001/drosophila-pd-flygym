@@ -35,6 +35,10 @@ Milestone C is an unperturbed simulation baseline only. It is not biological
 validation, not a Parkinson's disease model, and not evidence from real
 Drosophila.
 
+Milestone E2 is the latest frozen computational characterization checkpoint. It
+combines motor-vigor and coordination proxy perturbations and records simulation
+response and interaction summaries only.
+
 Milestone 8B is complete and frozen. The project crossed the joint
 materialization boundary exactly once through a canonical, explicitly named
 software gate before moving on to the unperturbed locomotion baseline.
@@ -325,18 +329,30 @@ These are simulation response surfaces only. No E1 parameter value is currently
 designated as Parkinson's disease, dopamine depletion, neuron-loss percentage,
 disease stage, or biological severity.
 
-## Milestone E2 Implementation Status
+## Milestone E2 Reproduction Status
 
-Milestone E2 is implemented for fresh-runtime validation, but it is not yet
-frozen. It characterizes a compact explicit set of combined phenomenological
-simulation perturbations using the same unperturbed baseline pipeline and fresh
-FlyGym/MuJoCo state per condition.
+Milestone E2 is FROZEN — COMBINED PHENOTYPE CHARACTERIZATION.
 
-The canonical Milestone E2 command is:
+On August 11, 2026, Milestone E2 was independently reproduced from a fresh
+Google Colab runtime using repository code:
 
 ```bash
 python scripts/run_combined_phenotype_sweep.py --baseline-config configs/experiments/healthy_baseline.yaml --sweep-config configs/experiments/sweeps/milestone_e2.yaml --output results/sweeps/milestone_e2_combined.json
 ```
+
+Observed clean-runtime versions were Python 3.12.13, FlyGym 2.1.0, and
+MuJoCo 3.9.0. The evidence file reports git commit
+`433269ed11e0475eb973b62d31f469d66843872f` and `overall_pass = true`.
+
+Verified Milestone E2 sweep summary:
+
+- Evidence path: `results/sweeps/milestone_e2_combined.json`
+- Conditions completed: 9 / 9
+- Completed conditions passed: true
+- Control-equivalent condition passed: true
+- Controlled variables preserved for every completed condition: true
+- Fresh simulation state per condition declared: true
+- Raw observations and derived metrics finite for every condition: true
 
 Milestone E2 composes two generic computational proxies:
 
@@ -347,6 +363,43 @@ The E2 implementation records controller-stage and action-stage transformations
 separately, preserves controlled variables except for the declared proxy values,
 adds trajectory efficiency when derivable from thorax-position samples, and
 reports interaction residuals for combined conditions.
+
+Observed Milestone E2 condition summary:
+
+| condition | motor | coupling | displacement mm | speed mm/s | yaw rad | height mean mm | action abs mean |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| control_motor_100_coupling_100 | 1.0 | 1.0 | 6.284186050286936 | 12.568372100573873 | 0.2342730946151257 | 0.946592192150494 | 1.0243701362137825 |
+| motor_080_coupling_100 | 0.8 | 1.0 | 5.612736582836174 | 11.225473165672348 | 0.26488362532130916 | 1.4787535043295645 | 0.8194961089710263 |
+| motor_070_coupling_100 | 0.7 | 1.0 | 5.268050612232854 | 10.536101224465709 | 0.11859624957082766 | 1.7640121538755738 | 0.7170590953496476 |
+| motor_060_coupling_100 | 0.6 | 1.0 | 4.665347652380944 | 9.330695304761887 | 0.12149833837745547 | 2.0254362305602083 | 0.6146220817282696 |
+| motor_100_coupling_075 | 1.0 | 0.75 | 6.21723627703009 | 12.43447255406018 | 0.29121506035623623 | 0.94667094441612 | 1.0243119639852822 |
+| motor_100_coupling_050 | 1.0 | 0.5 | 6.105537853973774 | 12.211075707947549 | 0.33130987292379543 | 0.9564334845117194 | 1.0244046906374453 |
+| combined_motor_080_coupling_075 | 0.8 | 0.75 | 5.513499489822533 | 11.026998979645066 | 0.30259921850584254 | 1.478905964396374 | 0.8194495711882258 |
+| combined_motor_070_coupling_075 | 0.7 | 0.75 | 5.136531853151933 | 10.273063706303866 | 0.15663928641475375 | 1.7535528444304547 | 0.7170183747896974 |
+| combined_motor_070_coupling_050 | 0.7 | 0.5 | 5.029479715627041 | 10.058959431254083 | 0.2533262746314835 | 1.742194548438357 | 0.7170832834462115 |
+
+Observed combined-condition results:
+
+- Motor 0.8 / coupling 0.75: displacement 5.513499489822533 mm, mean speed
+  11.026998979645066 mm/s, yaw 0.30259921850584254 rad, height mean
+  1.478905964396374 mm, action absolute mean 0.8194495711882258.
+- Motor 0.7 / coupling 0.75: displacement 5.136531853151933 mm, mean speed
+  10.273063706303866 mm/s, yaw 0.15663928641475375 rad, height mean
+  1.7535528444304547 mm, action absolute mean 0.7170183747896974.
+- Motor 0.7 / coupling 0.5: displacement 5.029479715627041 mm, mean speed
+  10.058959431254083 mm/s, yaw 0.2533262746314835 rad, height mean
+  1.742194548438357 mm, action absolute mean 0.7170832834462115.
+
+Observed interaction findings:
+
+- Speed and displacement interaction effects were mostly close to additive for
+  the three combined conditions.
+- Directional/yaw effects were more nonlinear: motor 0.8 / coupling 0.75 was
+  sub-additive, motor 0.7 / coupling 0.75 was super-additive, and motor 0.7 /
+  coupling 0.5 showed direction reversal relative to the additive expectation.
+- Motor 0.8 / coupling 0.75 is a leading computational candidate for further
+  validation because it combines reduced locomotor output with continued stable
+  simulation behavior and moderate directional change.
 
 Milestone E2 does not choose a final Parkinson's-disease-like condition, does
 not implement rescue experiments, and does not map any parameter value to
@@ -400,7 +453,7 @@ The planned high-level stages are:
 1. Unperturbed baseline (Milestone C, frozen)
 2. Controller interface
 3. Controlled perturbations (Milestone D, frozen)
-4. Parameter-response characterization (Milestone E1, frozen)
+4. Parameter-response characterization (Milestones E1 and E2, frozen)
 5. Gait metrics
 6. PD-like perturbation
 7. Healthy vs PD-like comparison
