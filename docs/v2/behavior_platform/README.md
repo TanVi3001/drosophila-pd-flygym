@@ -18,6 +18,14 @@ artifacts, perturbation logic, or simulation code.
   and comparison rendering entry points.
 - `drosophila_pd.behavior_platform.comparison`: Healthy/Candidate/Rescue
   comparison summaries and synchronized playback plans.
+- `drosophila_pd.behavior_platform.gait`: Session05 gait, contact, and
+  coordination analysis.
+- `drosophila_pd.behavior_platform.gait_export`: Session05 CSV, JSON, NPZ, PNG,
+  and SVG gait package exporters.
+- `drosophila_pd.behavior_platform.gait_visualization`: Session06 footfall,
+  raster, timeline, coordination, phase, stride, joint, and foot plots.
+- `drosophila_pd.behavior_platform.gait_animation`: Session06 PNG sequence,
+  GIF, and MP4 gait animation export.
 
 ## Scientific Boundary
 
