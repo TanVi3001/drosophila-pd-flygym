@@ -281,6 +281,50 @@ The canonical Milestone E0/E1 sweep command is:
 python scripts/run_parameter_sweep.py --baseline-config configs/experiments/healthy_baseline.yaml --sweep-config configs/experiments/sweeps/milestone_e1.yaml --output results/sweeps/milestone_e1.json
 ```
 
+## Milestone E1 Reproduction Status
+
+Milestone E1 is complete and frozen as parameter-response characterization.
+
+On August 11, 2026, Milestone E1 was independently reproduced from a fresh
+Google Colab runtime using repository code:
+
+```bash
+python scripts/run_parameter_sweep.py --baseline-config configs/experiments/healthy_baseline.yaml --sweep-config configs/experiments/sweeps/milestone_e1.yaml --output results/sweeps/milestone_e1.json
+```
+
+Observed clean-runtime versions were Python 3.12.13, FlyGym 2.1.0, and
+MuJoCo 3.9.0. The evidence file reports git commit
+`7cb2ed580b8eabb6a363b27f481564751eeb9e48` and `overall_pass = true`.
+
+Verified Milestone E1 sweep summary:
+
+- Evidence path: `results/sweeps/milestone_e1.json`
+- Conditions completed: 10 / 10
+- Completed conditions passed: true
+- Baseline-equivalent conditions passed: true
+- Motor-vigor proxy scales: 1.00, 0.90, 0.80, 0.70, 0.60
+- Coordination proxy coupling scales: 1.00, 0.75, 0.50, 0.25, 0.00
+- Controlled variables preserved for every condition: true
+- Raw observations and derived metrics finite for every condition: true
+
+Observed Milestone E1 response-surface findings:
+
+- Motor-vigor scaling produced a graded reduction in planar displacement and
+  mean planar speed across the configured scale series.
+- Joint-action absolute mean followed commanded motor-vigor scaling exactly:
+  0%, -10%, -20%, -30%, and -40% relative to the unperturbed baseline.
+- Body-height response was nonlinear: height mean increased as motor-vigor
+  scale decreased, while height range was non-monotonic.
+- CPG coupling reduction had modest displacement/speed effects at intermediate
+  values 0.75, 0.50, and 0.25.
+- Near-zero CPG coupling produced a large locomotion loss and large yaw
+  deviation: displacement delta -45.809430686563735% and yaw-change relative
+  delta 850.3387842988586% versus baseline.
+
+These are simulation response surfaces only. No E1 parameter value is currently
+designated as Parkinson's disease, dopamine depletion, neuron-loss percentage,
+disease stage, or biological severity.
+
 ## Workflow
 
 GitHub is the source of truth. Google Colab is an execution environment.
@@ -328,7 +372,7 @@ The planned high-level stages are:
 1. Unperturbed baseline (Milestone C, frozen)
 2. Controller interface
 3. Controlled perturbations (Milestone D, frozen)
-4. Parameter-response characterization (Milestone E0/E1, pending validation)
+4. Parameter-response characterization (Milestone E1, frozen)
 5. Gait metrics
 6. PD-like perturbation
 7. Healthy vs PD-like comparison

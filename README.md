@@ -206,6 +206,25 @@ The configured families are `motor_vigor_proxy` and `coordination_proxy`.
 These are phenomenological computational proxies, not direct simulations of
 dopamine concentration, dopaminergic neuron loss, or biological validation.
 
+Fresh Google Colab reproduction has passed using Python 3.12.13,
+FlyGym 2.1.0, and MuJoCo 3.9.0. The generated evidence file is
+`results/sweeps/milestone_e1.json`, produced from git commit
+`7cb2ed580b8eabb6a363b27f481564751eeb9e48`.
+
+The report returned `overall_pass = true`: all 10 conditions completed, all
+completed conditions passed, and both baseline-equivalent conditions passed.
+
+Key simulation response-surface findings:
+
+- Motor-vigor scaling produced a graded reduction in displacement and speed.
+- Joint-action magnitude followed the commanded scaling exactly.
+- Body-height response was nonlinear.
+- CPG coupling reduction had modest effects at intermediate values.
+- Near-zero CPG coupling produced large locomotion loss and large yaw deviation.
+
+No E1 parameter value is currently designated as Parkinson's disease, dopamine
+depletion, neuron-loss percentage, disease stage, or biological severity.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline
