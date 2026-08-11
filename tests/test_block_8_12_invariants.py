@@ -79,25 +79,75 @@ def test_pre_materialization_safety_assertion_rejects_initialized_skeleton():
 
 def test_python_sources_do_not_call_materializing_methods_or_assign_skeleton():
     forbidden_calls = {
-        "add_joints",
         "add_actuators",
         "add_joint_sites",
         "add_leg_adhesion",
     }
+    allowed_add_joints_call = (
+        REPO_ROOT / "src" / "drosophila_pd" / "anatomy" / "materialization.py",
+        "materialize_joints_explicit_gate",
+    )
     violations = []
 
     for path in sorted((REPO_ROOT / "src").rglob("*.py")) + sorted(
         (REPO_ROOT / "scripts").rglob("*.py")
     ):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-                if node.func.attr in forbidden_calls:
-                    violations.append(f"{path}:{node.lineno} calls {node.func.attr}")
-            if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
-                targets = list(getattr(node, "targets", [])) or [node.target]
-                for target in targets:
-                    if isinstance(target, ast.Attribute) and target.attr == "skeleton":
-                        violations.append(f"{path}:{node.lineno} assigns skeleton")
+        visitor = MaterializationGuardVisitor(path)
+        visitor.visit(tree)
+        for call in visitor.calls:
+            if call["name"] == "add_joints":
+                if (path, call["function"]) != allowed_add_joints_call:
+                    violations.append(
+                        f"{path}:{call['line']} calls add_joints outside gate"
+                    )
+            elif call["name"] in forbidden_calls:
+                violations.append(f"{path}:{call['line']} calls {call['name']}")
+        violations.extend(visitor.skeleton_assignments)
 
     assert violations == []
+
+
+class MaterializationGuardVisitor(ast.NodeVisitor):
+    def __init__(self, path: Path):
+        self.path = path
+        self.function_stack = []
+        self.calls = []
+        self.skeleton_assignments = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        self.function_stack.append(node.name)
+        self.generic_visit(node)
+        self.function_stack.pop()
+
+    def visit_Call(self, node: ast.Call):
+        if isinstance(node.func, ast.Attribute):
+            self.calls.append(
+                {
+                    "line": node.lineno,
+                    "function": self.function_stack[-1]
+                    if self.function_stack
+                    else None,
+                    "name": node.func.attr,
+                }
+            )
+        self.generic_visit(node)
+
+    def visit_Assign(self, node: ast.Assign):
+        self._check_targets(node.targets, node.lineno)
+        self.generic_visit(node)
+
+    def visit_AnnAssign(self, node: ast.AnnAssign):
+        self._check_targets([node.target], node.lineno)
+        self.generic_visit(node)
+
+    def visit_AugAssign(self, node: ast.AugAssign):
+        self._check_targets([node.target], node.lineno)
+        self.generic_visit(node)
+
+    def _check_targets(self, targets, lineno):
+        for target in targets:
+            if isinstance(target, ast.Attribute) and target.attr == "skeleton":
+                self.skeleton_assignments.append(
+                    f"{self.path}:{lineno} assigns skeleton"
+                )
