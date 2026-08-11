@@ -40,6 +40,15 @@ def compute_locomotion_metrics(
     final_position = positions[-1]
     planar_vector = final_position[:2] - initial_position[:2]
     planar_displacement_mm = float(np.linalg.norm(planar_vector))
+    planar_step_vectors = np.diff(positions[:, :2], axis=0)
+    planar_path_length_mm = float(
+        np.sum(np.linalg.norm(planar_step_vectors, axis=1))
+    )
+    trajectory_efficiency = (
+        planar_displacement_mm / planar_path_length_mm
+        if math.isfinite(planar_path_length_mm) and planar_path_length_mm > 1e-12
+        else None
+    )
     mean_planar_speed_mm_s = (
         planar_displacement_mm / executed_duration_s
         if executed_duration_s > 0
@@ -78,6 +87,8 @@ def compute_locomotion_metrics(
         "final_thorax_position_mm": _json_float_list(final_position),
         "planar_displacement_vector_mm": _json_float_list(planar_vector),
         "planar_displacement_mm": _json_float(planar_displacement_mm),
+        "planar_path_length_mm": _json_float(planar_path_length_mm),
+        "trajectory_efficiency": _json_float(trajectory_efficiency),
         "mean_planar_speed_mm_s": _json_float(mean_planar_speed_mm_s),
         "body_height_mm": height_summary,
         "heading_yaw_change_rad": _json_float(yaw_change_rad),

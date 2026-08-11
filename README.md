@@ -225,6 +225,23 @@ Key simulation response-surface findings:
 No E1 parameter value is currently designated as Parkinson's disease, dopamine
 depletion, neuron-loss percentage, disease stage, or biological severity.
 
+## Running Milestone E2
+
+Milestone E2 characterizes a compact explicit set of combined motor-vigor and
+coordination proxy conditions:
+
+```bash
+python scripts/run_combined_phenotype_sweep.py \
+  --baseline-config configs/experiments/healthy_baseline.yaml \
+  --sweep-config configs/experiments/sweeps/milestone_e2.yaml \
+  --output results/sweeps/milestone_e2_combined.json
+```
+
+This run composes CPG coupling-weight scaling with joint-angle action scaling,
+records both transformations separately, and reports baseline deltas plus
+interaction residuals. It is a phenomenological simulation characterization
+only; it does not choose or validate a Parkinson's-disease-like condition.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline

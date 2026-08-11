@@ -325,6 +325,34 @@ These are simulation response surfaces only. No E1 parameter value is currently
 designated as Parkinson's disease, dopamine depletion, neuron-loss percentage,
 disease stage, or biological severity.
 
+## Milestone E2 Implementation Status
+
+Milestone E2 is implemented for fresh-runtime validation, but it is not yet
+frozen. It characterizes a compact explicit set of combined phenomenological
+simulation perturbations using the same unperturbed baseline pipeline and fresh
+FlyGym/MuJoCo state per condition.
+
+The canonical Milestone E2 command is:
+
+```bash
+python scripts/run_combined_phenotype_sweep.py --baseline-config configs/experiments/healthy_baseline.yaml --sweep-config configs/experiments/sweeps/milestone_e2.yaml --output results/sweeps/milestone_e2_combined.json
+```
+
+Milestone E2 composes two generic computational proxies:
+
+- `coordination_proxy`: CPG coupling-weight scale.
+- `motor_vigor_proxy`: global joint-angle action scale.
+
+The E2 implementation records controller-stage and action-stage transformations
+separately, preserves controlled variables except for the declared proxy values,
+adds trajectory efficiency when derivable from thorax-position samples, and
+reports interaction residuals for combined conditions.
+
+Milestone E2 does not choose a final Parkinson's-disease-like condition, does
+not implement rescue experiments, and does not map any parameter value to
+dopamine concentration, dopaminergic neuron loss, disease stage, or biological
+severity.
+
 ## Workflow
 
 GitHub is the source of truth. Google Colab is an execution environment.

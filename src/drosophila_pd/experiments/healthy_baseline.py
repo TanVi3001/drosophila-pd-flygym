@@ -30,6 +30,7 @@ from drosophila_pd.perturbations import (
     ControllerPerturbationContext,
     Perturbation,
     summarize_action_transformation,
+    summarize_controller_transformation,
 )
 
 
@@ -249,6 +250,7 @@ def run_locomotion(
         output_dof_order=dof_order,
         config=config.controller,
     )
+    pre_perturbation_controller_state = _controller_transformation_snapshot(controller)
     if perturbation is not None:
         controller = perturbation.apply_to_controller(
             controller,
@@ -259,6 +261,7 @@ def run_locomotion(
                 expected_joint_angle_count=len(dof_order),
             ),
         )
+    post_perturbation_controller_state = _controller_transformation_snapshot(controller)
 
     initial_action = LocomotionAction(
         joint_angles=preprogrammed_steps.default_pose_by_dof_order(dof_order),
@@ -355,6 +358,13 @@ def run_locomotion(
             perturbation.metadata() if perturbation is not None else None
         ),
     )
+    controller_transformation_summary = summarize_controller_transformation(
+        pre_controller_state=pre_perturbation_controller_state,
+        post_controller_state=post_perturbation_controller_state,
+        perturbation_metadata=(
+            perturbation.metadata() if perturbation is not None else None
+        ),
+    )
     checks = check_locomotion_pass_criteria(
         metrics=metrics,
         expected_step_count=step_count,
@@ -417,6 +427,7 @@ def run_locomotion(
                 "perturbation": (
                     perturbation.metadata() if perturbation is not None else None
                 ),
+                "controller_transformation_summary": controller_transformation_summary,
                 "action_transformation_summary": action_transformation_summary,
             }
         )
@@ -537,6 +548,16 @@ def _apply_action_perturbation(
             expected_joint_angle_count=expected_joint_angle_count,
         ),
     )
+
+
+def _controller_transformation_snapshot(controller: Any) -> dict[str, Any]:
+    cpg_network = getattr(controller, "cpg_network", None)
+    coupling_weights = getattr(cpg_network, "coupling_weights", None)
+    if coupling_weights is None:
+        coupling_weights = np.empty((0, 0), dtype=float)
+    return {
+        "cpg_coupling_weights": np.asarray(coupling_weights, dtype=float).copy(),
+    }
 
 
 def _json_float_list(values: np.ndarray) -> list[float | None]:

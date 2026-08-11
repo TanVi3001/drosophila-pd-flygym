@@ -205,6 +205,78 @@ class CPGCouplingScalePerturbation:
         }
 
 
+@dataclass(frozen=True)
+class CompositePerturbation:
+    """Apply multiple perturbations in a declared, ordered sequence."""
+
+    components: tuple[Perturbation, ...]
+    name: str = "composite"
+    config_id: str | None = None
+
+    def __post_init__(self) -> None:
+        components = tuple(self.components)
+        if not components:
+            raise ValueError("CompositePerturbation requires at least one component.")
+        object.__setattr__(self, "components", components)
+
+    @property
+    def perturbation_type(self) -> str:
+        return "composite"
+
+    def apply_to_config(self, config: Any) -> Any:
+        transformed = config
+        for component in self.components:
+            transformed = component.apply_to_config(transformed)
+        return transformed
+
+    def apply_to_controller(
+        self, controller: Any, context: ControllerPerturbationContext
+    ) -> Any:
+        transformed = controller
+        for component in self.components:
+            transformed = component.apply_to_controller(transformed, context)
+        return transformed
+
+    def apply_to_action(self, action: Any, context: ActionPerturbationContext) -> Any:
+        transformed = action
+        for component in self.components:
+            transformed = component.apply_to_action(transformed, context)
+        return transformed
+
+    def metadata(self) -> dict[str, Any]:
+        component_metadata = [component.metadata() for component in self.components]
+        return {
+            "type": self.perturbation_type,
+            "name": self.name,
+            "config_id": self.config_id,
+            "parameters": {
+                "component_count": len(component_metadata),
+                "order": [
+                    {
+                        "index": index,
+                        "type": metadata["type"],
+                        "name": metadata["name"],
+                        "intervention_stage": metadata["intervention_stage"],
+                        "intervention_target": metadata["intervention_target"],
+                    }
+                    for index, metadata in enumerate(component_metadata)
+                ],
+            },
+            "components": component_metadata,
+            "intervention_target": "ordered_composite",
+            "intervention_stage": "ordered_config_controller_action_pipeline",
+            "deterministic": all(
+                metadata.get("deterministic") is True
+                for metadata in component_metadata
+            ),
+            "description": (
+                "Ordered composition of deterministic perturbations. Component "
+                "metadata is preserved separately so controller-stage and "
+                "action-stage transformations remain independently auditable."
+            ),
+        }
+
+
 def load_perturbation_config(path: str | Path) -> Perturbation:
     """Load a perturbation from a YAML config file."""
 
@@ -244,6 +316,22 @@ def perturbation_from_mapping(data: dict[str, Any]) -> Perturbation:
             name=name,
             config_id=config_id,
         )
+    if perturbation_type == "composite":
+        raw_components = values.get("components")
+        if not isinstance(raw_components, list) or not raw_components:
+            raise ValueError("composite perturbation requires non-empty components.")
+        components = tuple(
+            perturbation_from_mapping(component)
+            for component in raw_components
+            if isinstance(component, dict)
+        )
+        if len(components) != len(raw_components):
+            raise ValueError("composite perturbation components must be mappings.")
+        return CompositePerturbation(
+            components=components,
+            name=name,
+            config_id=config_id,
+        )
     raise ValueError(f"Unsupported perturbation type: {perturbation_type}")
 
 
@@ -260,7 +348,7 @@ def perturbation_metadata_complete(metadata: dict[str, Any]) -> bool:
     )
     if any(key not in metadata for key in required):
         return False
-    return (
+    base_complete = (
         isinstance(metadata["type"], str)
         and bool(metadata["type"].strip())
         and isinstance(metadata["name"], str)
@@ -271,6 +359,19 @@ def perturbation_metadata_complete(metadata: dict[str, Any]) -> bool:
         and isinstance(metadata["intervention_stage"], str)
         and bool(metadata["intervention_stage"].strip())
         and metadata["deterministic"] is True
+    )
+    if not base_complete:
+        return False
+    if metadata["type"] != "composite":
+        return True
+    components = metadata.get("components")
+    return (
+        isinstance(components, list)
+        and bool(components)
+        and all(
+            isinstance(component, dict) and perturbation_metadata_complete(component)
+            for component in components
+        )
     )
 
 
@@ -331,6 +432,7 @@ def _copy_action(
 __all__ = [
     "ActionPerturbationContext",
     "CPGCouplingScalePerturbation",
+    "CompositePerturbation",
     "ControllerPerturbationContext",
     "GlobalActionScalePerturbation",
     "IdentityPerturbation",

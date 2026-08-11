@@ -3,6 +3,7 @@
 from .base import (
     ActionPerturbationContext,
     CPGCouplingScalePerturbation,
+    CompositePerturbation,
     ControllerPerturbationContext,
     GlobalActionScalePerturbation,
     IdentityPerturbation,
@@ -12,11 +13,12 @@ from .base import (
     perturbation_from_mapping,
     perturbation_metadata_complete,
 )
-from .validation import summarize_action_transformation
+from .validation import summarize_action_transformation, summarize_controller_transformation
 
 __all__ = [
     "ActionPerturbationContext",
     "CPGCouplingScalePerturbation",
+    "CompositePerturbation",
     "ControllerPerturbationContext",
     "GlobalActionScalePerturbation",
     "IdentityPerturbation",
@@ -26,4 +28,5 @@ __all__ = [
     "perturbation_from_mapping",
     "perturbation_metadata_complete",
     "summarize_action_transformation",
+    "summarize_controller_transformation",
 ]

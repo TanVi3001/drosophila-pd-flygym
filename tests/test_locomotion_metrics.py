@@ -46,6 +46,8 @@ def test_compute_locomotion_metrics_reports_displacement_and_speed():
 
     assert metrics["step_count"] == 2
     assert metrics["planar_displacement_mm"] == 1.0
+    assert metrics["planar_path_length_mm"] == 1.0
+    assert metrics["trajectory_efficiency"] == 1.0
     assert metrics["mean_planar_speed_mm_s"] == 5.0
     assert metrics["body_height_mm"]["min"] == 1.0
     assert metrics["observations_are_finite"] is True

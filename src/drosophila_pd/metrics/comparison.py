@@ -19,53 +19,61 @@ def compare_locomotion_reports(
 
     baseline = baseline_report["derived_locomotion_metrics"]
     perturbed = perturbed_report["derived_locomotion_metrics"]
+    scalars = {
+        "planar_displacement_mm": _scalar_delta(
+            baseline["planar_displacement_mm"],
+            perturbed["planar_displacement_mm"],
+            relative_epsilon=relative_epsilon,
+        ),
+        "mean_planar_speed_mm_s": _scalar_delta(
+            baseline["mean_planar_speed_mm_s"],
+            perturbed["mean_planar_speed_mm_s"],
+            relative_epsilon=relative_epsilon,
+        ),
+        "heading_yaw_change_rad": _scalar_delta(
+            baseline["heading_yaw_change_rad"],
+            perturbed["heading_yaw_change_rad"],
+            relative_epsilon=relative_epsilon,
+        ),
+        "body_height_min_mm": _scalar_delta(
+            baseline["body_height_mm"]["min"],
+            perturbed["body_height_mm"]["min"],
+            relative_epsilon=relative_epsilon,
+        ),
+        "body_height_mean_mm": _scalar_delta(
+            baseline["body_height_mm"]["mean"],
+            perturbed["body_height_mm"]["mean"],
+            relative_epsilon=relative_epsilon,
+        ),
+        "body_height_range_mm": _scalar_delta(
+            _height_range(baseline),
+            _height_range(perturbed),
+            relative_epsilon=relative_epsilon,
+        ),
+        "joint_angle_action_mean": _scalar_delta(
+            baseline["controller_action_summary"]["joint_angle_action"]["mean"],
+            perturbed["controller_action_summary"]["joint_angle_action"]["mean"],
+            relative_epsilon=relative_epsilon,
+        ),
+        "joint_angle_action_abs_mean": _scalar_delta(
+            baseline["controller_action_summary"]["joint_angle_action_abs"][
+                "mean"
+            ],
+            perturbed["controller_action_summary"]["joint_angle_action_abs"][
+                "mean"
+            ],
+            relative_epsilon=relative_epsilon,
+        ),
+    }
+    for optional_metric in ("planar_path_length_mm", "trajectory_efficiency"):
+        if optional_metric in baseline and optional_metric in perturbed:
+            scalars[optional_metric] = _scalar_delta(
+                baseline[optional_metric],
+                perturbed[optional_metric],
+                relative_epsilon=relative_epsilon,
+            )
     return {
-        "scalars": {
-            "planar_displacement_mm": _scalar_delta(
-                baseline["planar_displacement_mm"],
-                perturbed["planar_displacement_mm"],
-                relative_epsilon=relative_epsilon,
-            ),
-            "mean_planar_speed_mm_s": _scalar_delta(
-                baseline["mean_planar_speed_mm_s"],
-                perturbed["mean_planar_speed_mm_s"],
-                relative_epsilon=relative_epsilon,
-            ),
-            "heading_yaw_change_rad": _scalar_delta(
-                baseline["heading_yaw_change_rad"],
-                perturbed["heading_yaw_change_rad"],
-                relative_epsilon=relative_epsilon,
-            ),
-            "body_height_min_mm": _scalar_delta(
-                baseline["body_height_mm"]["min"],
-                perturbed["body_height_mm"]["min"],
-                relative_epsilon=relative_epsilon,
-            ),
-            "body_height_mean_mm": _scalar_delta(
-                baseline["body_height_mm"]["mean"],
-                perturbed["body_height_mm"]["mean"],
-                relative_epsilon=relative_epsilon,
-            ),
-            "body_height_range_mm": _scalar_delta(
-                _height_range(baseline),
-                _height_range(perturbed),
-                relative_epsilon=relative_epsilon,
-            ),
-            "joint_angle_action_mean": _scalar_delta(
-                baseline["controller_action_summary"]["joint_angle_action"]["mean"],
-                perturbed["controller_action_summary"]["joint_angle_action"]["mean"],
-                relative_epsilon=relative_epsilon,
-            ),
-            "joint_angle_action_abs_mean": _scalar_delta(
-                baseline["controller_action_summary"]["joint_angle_action_abs"][
-                    "mean"
-                ],
-                perturbed["controller_action_summary"]["joint_angle_action_abs"][
-                    "mean"
-                ],
-                relative_epsilon=relative_epsilon,
-            ),
-        },
+        "scalars": scalars,
         "adhesion": _adhesion_delta(
             baseline["controller_action_summary"]["adhesion"],
             perturbed["controller_action_summary"]["adhesion"],
