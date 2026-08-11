@@ -15,7 +15,8 @@ claim biological validation of any Parkinson's disease model.
 
 ## Current Checkpoint
 
-Milestone E5 is the latest frozen computational checkpoint. The canonical
+Milestone E5 is the latest frozen computational checkpoint. Milestone E6 is
+implemented and awaiting review as an evidence-only analysis layer. The canonical
 repository implementation now reproduces the
 pre-materialization anatomy audit, executes the authorized joint materialization
 gate once, validates the post-materialization anatomy state, runs an
@@ -90,7 +91,9 @@ The verified Milestone C unperturbed baseline found:
 - `src/drosophila_pd/perturbations/` - controlled perturbation interfaces
 - `src/drosophila_pd/experiments/` - experiment orchestration code
 - `src/drosophila_pd/metrics/` - gait and locomotion metrics
+- `src/drosophila_pd/analysis/` - evidence-only synthesis of frozen reports
 - `configs/experiments/` - version-controlled experiment configuration
+- `configs/analysis/` - evidence-synthesis configuration
 - `notebooks/session_*/` - session-based Colab research notebooks
 - `scripts/` - command-line utilities
 - `tests/` - automated checks
@@ -390,6 +393,25 @@ Combined partial restoration is therefore not universally superior.
 The `full_computational_restoration_reference` condition is a software/control
 equivalence check. It is not full rescue, cure, L-DOPA response, dopamine
 restoration, or Parkinson's disease rescue.
+
+## Running Milestone E6
+
+Milestone E6 is an evidence-only synthesis over the frozen reports. It does not
+run FlyGym or MuJoCo and does not modify any upstream evidence JSON:
+
+```bash
+python scripts/run_evidence_synthesis.py \
+  --config configs/analysis/milestone_e6.yaml \
+  --output results/analysis/milestone_e6_synthesis.json
+```
+
+The pipeline validates upstream pass states, provenance, and the frozen
+`motor_scale = 0.8` / `coupling_scale = 0.75` candidate, then writes one JSON
+report, four deterministic figures, and five CSV tables under `results/analysis/`.
+E6 PASS means only that the computational evidence was internally consistent and
+the analysis artifacts were generated. It is not biological validation,
+Parkinson's disease validation, mechanistic equivalence, or statistical
+significance. E6 remains implemented and awaiting review, not frozen.
 
 ## Planned Research Stages
 

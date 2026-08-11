@@ -35,9 +35,9 @@ Milestone C is an unperturbed simulation baseline only. It is not biological
 validation, not a Parkinson's disease model, and not evidence from real
 Drosophila.
 
-Milestone E3 is the latest frozen computational robustness checkpoint. It
-validates the frozen E2 leading computational candidate across five seeds and
-records software/simulation robustness only.
+Milestone E5 is the latest frozen computational checkpoint. It validates
+preregistered computational reversibility of the frozen E3/E4 candidate and
+records software/simulation behavior only.
 
 Milestone E4 is the current literature-grounded concordance layer. It evaluates
 the frozen E3 computational phenotype against selected adult Drosophila dopamine
@@ -52,6 +52,14 @@ candidate's two proxy parameters move supported locomotor-output endpoints back
 toward the unperturbed baseline. E5 does not tune the candidate, does not run a
 rescue parameter sweep, does not implement pharmacology, and does not claim
 dopaminergic, mechanistic, biological, or Parkinson's disease rescue.
+
+Milestone E6 is IMPLEMENTED - AWAITING REVIEW. It is an evidence-only analysis
+layer that reads the frozen C, D, E1, E2, E3, E4, and E5 JSON reports, validates
+their schemas, provenance, pass states, and frozen candidate identity, and
+generates reproducible CSV summaries and matplotlib figures. E6 does not run
+FlyGym or MuJoCo, change simulation behavior, tune parameters, or establish
+biological validation. It must not be marked frozen until the generated output
+has been reviewed.
 
 Milestone 8B is complete and frozen. The project crossed the joint
 materialization boundary exactly once through a canonical, explicitly named
@@ -665,6 +673,26 @@ as biological recovery percentages. E5 is not biological rescue, Parkinson's
 disease rescue, L-DOPA simulation, dopamine restoration, neuron restoration,
 pharmacological treatment, cure, or mechanistic validation.
 
+## Milestone E6 Implementation Status
+
+Milestone E6 is IMPLEMENTED - AWAITING REVIEW. It consumes the frozen C, D,
+E1, E2, E3, E4, and E5 reports without modifying them or rerunning simulations.
+The canonical CPU-only command is:
+
+```bash
+python scripts/run_evidence_synthesis.py \
+  --config configs/analysis/milestone_e6.yaml \
+  --output results/analysis/milestone_e6_synthesis.json
+```
+
+The local run generated `results/analysis/milestone_e6_synthesis.json`, four
+figures under `results/analysis/figures/`, and five CSV tables under
+`results/analysis/tables/`, with `overall_pass = true`. The report records input
+SHA-256 hashes and upstream git commits. E6 PASS means only that the required
+computational evidence was internally consistent and the synthesis artifacts
+were generated successfully; it is not Parkinson's disease validation,
+biological rescue, mechanistic validation, or statistical significance.
+
 ## Workflow
 
 GitHub is the source of truth. Google Colab is an execution environment.
@@ -716,10 +744,11 @@ The planned high-level stages are:
 5. Multi-seed robustness validation (Milestone E3, frozen)
 6. Literature-grounded phenotype concordance (Milestone E4)
 7. Preregistered computational reversibility (Milestone E5, frozen)
-8. Gait metrics
-9. PD-like perturbation
-10. Healthy vs PD-like comparison
-11. Potential biological-rescue interpretation, only after external evidence
+8. Reproducible evidence synthesis (Milestone E6, implemented and awaiting review)
+9. Gait metrics
+10. PD-like perturbation
+11. Healthy vs PD-like comparison
+12. Potential biological-rescue interpretation, only after external evidence
    and explicit authorization
 
 No disease-specific modeling should be introduced until the locomotor simulation
