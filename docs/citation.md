@@ -6,7 +6,7 @@ declared by this repository.
 
 ## Repository
 
-`drosophila-pd-flygym`  
+`drosophila-pd-flygym`
 GitHub: <https://github.com/TanVi3001/drosophila-pd-flygym>
 
 ## Release
