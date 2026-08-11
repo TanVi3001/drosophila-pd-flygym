@@ -46,6 +46,8 @@ biological assumptions, and experimentally observed results separate.
 - RH leg JointDOFs: 24
 - Non-leg JointDOFs: 60
 - MJCF body mapping: 69/69
+- Missing parent MJCF bodies for JointDOFs: 0
+- Missing child MJCF bodies for JointDOFs: 0
 - JointDOF to MJCF joint mapping: 0, expected before materialization
 - JointDOF to neutral angle mapping: 0, expected before materialization
 - Actuator mappings: 0, expected before materialization

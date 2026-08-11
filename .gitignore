@@ -5,6 +5,13 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.tox/
+.nox/
+.hypothesis/
+.eggs/
+__pypackages__/
+*.pyd
+*.so
 
 # Virtual environments and local environment files
 .venv/
@@ -15,6 +22,7 @@ env/
 
 # Notebooks
 .ipynb_checkpoints/
+*.nbconvert.ipynb
 
 # Coverage and test output
 .coverage
@@ -41,6 +49,13 @@ logs/*
 *.pkl
 *.pickle
 *.npz
+*.npy
+*.mjb
+*.zarr/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
 
 # Local generated result artifacts. Keep directory anchors.
 results/**/*

@@ -55,6 +55,18 @@ Block 8.12 is complete. The verified pre-materialization anatomy audit found:
 4. Save reproducibility metadata, metrics, logs, and selected small artifacts.
 5. Keep large raw artifacts outside Git unless explicitly curated.
 
+## Reproducing Block 8.12
+
+Block 8.12 can be reproduced with the non-mutating audit CLI:
+
+```bash
+python scripts/audit_block_8_12.py --output results/baseline/block_8_12_audit.json
+```
+
+The audit checks anatomy and mapping invariants only. It must leave
+`fly.skeleton is None` and does not validate a Parkinson's disease model,
+locomotor biology, or evidence from real flies.
+
 ## Planned Research Stages
 
 1. Healthy baseline
