@@ -406,6 +406,43 @@ not implement rescue experiments, and does not map any parameter value to
 dopamine concentration, dopaminergic neuron loss, disease stage, or biological
 severity.
 
+## Milestone E3 Implementation Status
+
+Milestone E3 is implemented for fresh-runtime validation, but it is not yet
+frozen. It validates robustness of the frozen E2 leading computational
+candidate across five simulation seeds and a 1.0 s duration.
+
+The canonical Milestone E3 command is:
+
+```bash
+python scripts/run_candidate_robustness.py --baseline-config configs/experiments/healthy_baseline.yaml --validation-config configs/experiments/validation/milestone_e3.yaml --output results/validation/milestone_e3_candidate_robustness.json
+```
+
+Milestone E3 uses paired baseline-vs-candidate simulations for seeds 0, 1, 2,
+3, and 4. Within each pair, baseline and candidate use the same seed, duration,
+timestep, world, spawn, baseline controller parameters, actuator architecture,
+and metric definitions. The candidate condition differs only by the frozen E2
+proxy values:
+
+- `motor_scale = 0.8`
+- `coupling_scale = 0.75`
+
+These parameters were selected before E3 execution from Milestone E2
+characterization. No post-hoc tuning is permitted inside E3.
+
+E3 PASS semantics are software/simulation only: all paired simulations complete,
+required observations and metrics are finite, controlled variables are
+preserved, candidate transformations are validated, and aggregate reporting is
+produced. PASS does not require a desired biological phenotype.
+
+E3 reports descriptive aggregate statistics, sign consistency, and a
+computational robustness classification of `ROBUST`, `MIXED`, or `UNSTABLE`.
+These classes are not disease severity labels.
+
+Milestone E3 does not introduce new disease mechanisms, does not implement
+rescue experiments, and does not establish a mechanistic or biologically
+validated Parkinson's disease model.
+
 ## Workflow
 
 GitHub is the source of truth. Google Colab is an execution environment.

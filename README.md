@@ -265,6 +265,24 @@ Key E2 observations:
 - Motor scale 0.8 with coupling scale 0.75 is a leading computational candidate
   for further validation, not a final or validated disease model.
 
+## Running Milestone E3
+
+Milestone E3 is implemented for multi-seed robustness validation, but it is not
+yet frozen. It runs paired baseline-vs-candidate simulations for seeds 0 through
+4 at 1.0 s duration:
+
+```bash
+python scripts/run_candidate_robustness.py \
+  --baseline-config configs/experiments/healthy_baseline.yaml \
+  --validation-config configs/experiments/validation/milestone_e3.yaml \
+  --output results/validation/milestone_e3_candidate_robustness.json
+```
+
+The frozen candidate remains `motor_scale = 0.8` and
+`coupling_scale = 0.75`, selected before E3 execution from Milestone E2. E3
+does not tune those parameters, implement rescue experiments, or validate a
+Parkinson's disease model.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline

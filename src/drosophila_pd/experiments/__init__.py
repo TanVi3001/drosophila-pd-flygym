@@ -16,6 +16,14 @@ from .combined_phenotype import (
     load_combined_phenotype_sweep_config,
     run_combined_phenotype_sweep,
 )
+from .candidate_robustness import (
+    CandidateRobustnessConfig,
+    E3CandidateDefinition,
+    build_candidate_robustness_report,
+    build_candidate_robustness_unavailable_report,
+    load_candidate_robustness_config,
+    run_candidate_robustness_validation,
+)
 from .perturbation_experiment import (
     build_controlled_variables,
     build_paired_perturbation_report,
@@ -34,13 +42,17 @@ from .parameter_sweep import (
 
 __all__ = [
     "DEFAULT_HEALTHY_BASELINE_CONFIG",
+    "CandidateRobustnessConfig",
     "CombinedPhenotypeConditionSpec",
     "CombinedPhenotypeSweepConfig",
+    "E3CandidateDefinition",
     "HealthyBaselineConfig",
     "ParameterSweepConfig",
     "SweepConditionSpec",
     "SweepFamilyConfig",
     "build_controlled_variables",
+    "build_candidate_robustness_report",
+    "build_candidate_robustness_unavailable_report",
     "build_combined_phenotype_report",
     "build_combined_phenotype_unavailable_report",
     "build_healthy_baseline_unavailable_report",
@@ -49,8 +61,10 @@ __all__ = [
     "build_paired_perturbation_report",
     "build_perturbation_unavailable_report",
     "load_healthy_baseline_config",
+    "load_candidate_robustness_config",
     "load_combined_phenotype_sweep_config",
     "load_parameter_sweep_config",
+    "run_candidate_robustness_validation",
     "run_combined_phenotype_sweep",
     "run_healthy_baseline",
     "run_locomotion",
