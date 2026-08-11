@@ -4,10 +4,10 @@ Research software scaffold for an in-silico Drosophila melanogaster
 locomotion simulation using FlyGym, NeuroMechFly, and MuJoCo.
 
 The project goal is to build a reproducible simulation workflow that can compare
-healthy and Parkinson's-disease-like locomotor phenotypes after the locomotion
-infrastructure is stable. This repository is the source of truth for code,
-configuration, tests, and documentation. Google Colab is used as an execution
-environment, not as the canonical project state.
+an unperturbed locomotion baseline against future controlled perturbations after
+the locomotion infrastructure is stable. This repository is the source of truth
+for code, configuration, tests, and documentation. Google Colab is used as an
+execution environment, not as the canonical project state.
 
 This is a computational model. Simulation outputs must not be presented as
 direct evidence from real Drosophila, and this repository does not currently
@@ -15,10 +15,14 @@ claim biological validation of any Parkinson's disease model.
 
 ## Current Checkpoint
 
-Milestone 8B is complete and frozen. The canonical repository implementation
-now reproduces the pre-materialization anatomy audit, executes the authorized
-joint materialization gate once, and validates the post-materialization anatomy
-state.
+Milestone C is complete and frozen. The canonical repository implementation now
+reproduces the pre-materialization anatomy audit, executes the authorized joint
+materialization gate once, validates the post-materialization anatomy state, and
+runs an unperturbed deterministic FlyGym locomotion baseline.
+
+Milestone C is an unperturbed simulation baseline. It is not biological
+validation, not a Parkinson's disease model, and not evidence from real
+Drosophila.
 
 Historical Session 02 Blocks 8.14-8.19 are superseded by canonical Milestone 8B
 code and JSON evidence. The notebooks remain historical research records.
@@ -53,13 +57,27 @@ The verified Milestone 8B materialization checkpoint found:
 - actuator mappings: 0
 - second materialization attempt rejected
 
+The verified Milestone C unperturbed baseline found:
+
+- Python 3.12.13, FlyGym 2.1.0, and MuJoCo 3.9.0
+- duration: 0.5 s
+- timestep: 0.0001 s
+- steps: 5000
+- position actuators: 42
+- adhesion actuators: 6
+- compiled MuJoCo `nu`: 48
+- planar displacement: 6.284186050286936 mm
+- mean planar speed: 12.568372100573873 mm/s
+- yaw change: 0.2342730946151257 rad
+- finite observations and derived metrics
+
 ## Repository Layout
 
 - `src/drosophila_pd/anatomy/` - anatomy and FlyGym mapping audit helpers
-- `src/drosophila_pd/controllers/` - future controller interfaces
+- `src/drosophila_pd/controllers/` - controller interfaces
 - `src/drosophila_pd/perturbations/` - future controlled perturbation interfaces
-- `src/drosophila_pd/experiments/` - future experiment orchestration code
-- `src/drosophila_pd/metrics/` - future gait and locomotion metrics
+- `src/drosophila_pd/experiments/` - experiment orchestration code
+- `src/drosophila_pd/metrics/` - gait and locomotion metrics
 - `configs/experiments/` - version-controlled experiment configuration
 - `notebooks/session_*/` - session-based Colab research notebooks
 - `scripts/` - command-line utilities
@@ -110,9 +128,27 @@ This milestone validates FlyGym/NeuroMechFly joint materialization and
 post-materialization anatomy mappings only. It does not create actuators, run
 locomotion, implement controllers, or validate a Parkinson's disease model.
 
+## Reproducing Milestone C
+
+Milestone C can be reproduced with the unperturbed baseline CLI:
+
+```bash
+python scripts/run_healthy_baseline.py \
+  --config configs/experiments/healthy_baseline.yaml \
+  --output results/baseline/healthy_baseline.json
+```
+
+Fresh Google Colab reproduction has passed using Python 3.12.13,
+FlyGym 2.1.0, and MuJoCo 3.9.0. The generated
+`results/baseline/healthy_baseline.json` report returned
+`overall_pass = true`.
+
+This milestone validates an unperturbed simulation baseline for future software
+comparisons only. It does not establish biological realism or disease relevance.
+
 ## Planned Research Stages
 
-1. Healthy baseline
+1. Unperturbed baseline
 2. Controller interface
 3. Controlled perturbations
 4. Gait metrics

@@ -118,7 +118,7 @@ def check_locomotion_pass_criteria(
             True, metrics["observations_are_finite"]
         ),
         "derived_metrics_finite": _check(True, metrics["derived_metrics_are_finite"]),
-        "body_height_above_numerical_floor": _check(
+        "body_height_below_numerical_floor": _check(
             False, metrics["body_height_below_floor"]
         ),
         "expected_actuated_dofs": _check(

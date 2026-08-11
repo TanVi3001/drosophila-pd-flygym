@@ -4,10 +4,10 @@
 
 This repository supports an in-silico research prototype for simulating
 Drosophila melanogaster locomotion phenotypes with FlyGym, NeuroMechFly, and
-MuJoCo. The long-term research direction is to build a reproducible healthy
-baseline, introduce controlled motor or controller perturbations, quantify gait
-phenotypes, and only then explore Parkinson's-disease-like perturbation
-scenarios.
+MuJoCo. The long-term research direction is to build a reproducible
+unperturbed baseline, introduce controlled motor or controller perturbations,
+quantify gait phenotypes, and only then explore Parkinson's-disease-like
+perturbation scenarios.
 
 This is a computational simulation project. Simulation output must not be
 presented as direct evidence from real Drosophila. Biological validation can be
@@ -25,9 +25,19 @@ claimed only when supported by external experimental evidence.
 
 ## Current Scientific Checkpoint
 
-Milestone 8B is complete and frozen. The project has crossed the joint
+Milestone C is complete and frozen. The project now has a reproducible
+unperturbed simulation baseline that creates the official FlyGym locomotion fly,
+adds position and adhesion actuators through the canonical baseline pipeline,
+runs a deterministic flat-ground simulation, and records derived locomotion
+metrics.
+
+Milestone C is an unperturbed simulation baseline only. It is not biological
+validation, not a Parkinson's disease model, and not evidence from real
+Drosophila.
+
+Milestone 8B is complete and frozen. The project crossed the joint
 materialization boundary exactly once through a canonical, explicitly named
-software gate and is now paused before healthy locomotion baseline work.
+software gate before moving on to the unperturbed locomotion baseline.
 
 Milestone 8B supersedes the historical Session 02 Blocks 8.14-8.19 notebook
 sequence. Those historical cells remain important research records, but their
@@ -116,6 +126,37 @@ This reproduction validates FlyGym/NeuroMechFly joint materialization and
 post-materialization anatomy mappings only. It does not create actuators, run
 locomotion, implement controllers, or validate a Parkinson's disease model.
 
+## Milestone C Reproduction Status
+
+On August 11, 2026, Milestone C was independently reproduced from a fresh
+Google Colab runtime using repository code:
+
+```bash
+python scripts/run_healthy_baseline.py --config configs/experiments/healthy_baseline.yaml --output results/baseline/healthy_baseline.json
+```
+
+Observed clean-runtime versions were Python 3.12.13, FlyGym 2.1.0, and
+MuJoCo 3.9.0. The generated JSON report returned `overall_pass = true`.
+
+Verified Milestone C unperturbed baseline summary:
+
+- Requested duration: 0.5 s
+- Timestep: 0.0001 s
+- Simulation steps: 5000
+- Position actuators: 42
+- Adhesion actuators: 6
+- Compiled MuJoCo control dimension (`nu`): 48
+- Planar displacement: 6.284186050286936 mm
+- Mean planar speed: 12.568372100573873 mm/s
+- Heading yaw change: 0.2342730946151257 rad
+- Thorax height min/mean/final: 0.7660532202481788 /
+  0.946592192150494 / 1.0115140447050612 mm
+- Raw observations and derived metrics finite: true
+
+This reproduction validates only the deterministic unperturbed FlyGym
+simulation pipeline and derived software metrics. It does not establish
+biological realism or disease relevance.
+
 ## Materialization Boundary And Current Stop Point
 
 Milestone 8B is the authorized materialization boundary:
@@ -123,9 +164,8 @@ Milestone 8B is the authorized materialization boundary:
 - `fly.add_joints(...)` may be called only inside
   `materialize_joints_explicit_gate`.
 - Do not assign `fly.skeleton` manually.
-- Do not call `add_joints()` from any other repository code path.
-- Do not create actuators, run locomotion, or implement Milestone C until the
-  project owner authorizes that stage.
+- Repository anatomy/materialization audit code must not call `add_joints()`
+  from any other code path.
 
 Before the Milestone 8B gate:
 
@@ -136,7 +176,12 @@ Before the Milestone 8B gate:
 
 After the Milestone 8B gate, `fly.skeleton`, MJCF joints, joint mappings, and
 neutral-angle mappings are materialized. Actuator mappings and MJCF actuators
-remain empty by design.
+remain empty by design for Milestone 8B.
+
+Milestone C is the authorized unperturbed locomotion baseline. It creates the
+official FlyGym locomotion fly, position actuators, adhesion actuators,
+`FlatGroundWorld`, and `Simulation` through the canonical baseline pipeline.
+Milestone D controlled perturbations are not implemented yet.
 
 ## Workflow
 
@@ -182,9 +227,9 @@ should stay out of Git unless explicitly curated.
 
 The planned high-level stages are:
 
-1. Healthy baseline
+1. Unperturbed baseline (Milestone C, frozen)
 2. Controller interface
-3. Controlled perturbations
+3. Controlled perturbations (Milestone D, not implemented)
 4. Gait metrics
 5. PD-like perturbation
 6. Healthy vs PD-like comparison

@@ -88,6 +88,44 @@ def test_nonfinite_observations_fail_finite_observation_check():
     assert checks["required_observations_finite"]["pass"] is False
 
 
+def test_body_height_check_records_below_floor_semantics():
+    positions = np.array(
+        [
+            [0.0, 0.0, 1.0],
+            [0.1, 0.0, 1.1],
+        ]
+    )
+    quaternions = np.tile(np.array([[1.0, 0.0, 0.0, 0.0]]), (2, 1))
+    actions = np.zeros((1, 42))
+
+    metrics = compute_locomotion_metrics(
+        thorax_positions=positions,
+        thorax_quaternions=quaternions,
+        joint_angle_actions=actions,
+        adhesion_onoff=None,
+        timestep_s=0.1,
+        requested_duration_s=0.1,
+        instability_height_floor_mm=-1.0,
+    )
+    checks = check_locomotion_pass_criteria(
+        metrics=metrics,
+        expected_step_count=1,
+        expected_actuated_dofs=42,
+        observed_actuated_dofs=42,
+        expected_adhesion_actuators=0,
+        observed_adhesion_actuators=0,
+        deterministic_seed_recorded=True,
+    )
+
+    assert metrics["body_height_below_floor"] is False
+    assert checks["body_height_below_numerical_floor"] == {
+        "expected": False,
+        "observed": False,
+        "pass": True,
+    }
+    assert "body_height_above_numerical_floor" not in checks
+
+
 def test_metric_shape_validation_rejects_missing_initial_sample():
     positions = np.zeros((2, 3))
     quaternions = np.zeros((2, 4))
