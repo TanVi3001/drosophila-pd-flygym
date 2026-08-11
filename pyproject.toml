@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drosophila-pd-flygym"
+version = "0.1.0"
+description = "In-silico Drosophila Parkinson's disease locomotion simulation scaffold using FlyGym, NeuroMechFly and MuJoCo."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24"
+]
+
+[project.optional-dependencies]
+sim = [
+  "flygym",
+  "mujoco"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
