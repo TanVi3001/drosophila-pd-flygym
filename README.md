@@ -1,5 +1,10 @@
 # drosophila-pd-flygym
 
+[![Release](https://img.shields.io/github/v/release/TanVi3001/drosophila-pd-flygym?display_name=tag&sort=semver)](https://github.com/TanVi3001/drosophila-pd-flygym/releases)
+![Python](https://img.shields.io/badge/python-3.12-blue)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Tests](https://img.shields.io/badge/tests-pytest-blue)
+
 Research software scaffold for an in-silico Drosophila melanogaster
 locomotion simulation using FlyGym, NeuroMechFly, and MuJoCo.
 
@@ -108,6 +113,22 @@ The verified Milestone C unperturbed baseline found:
 3. Pull the repository into Google Colab for FlyGym/MuJoCo execution.
 4. Save reproducibility metadata, metrics, logs, and selected small artifacts.
 5. Keep large raw artifacts outside Git unless explicitly curated.
+
+## GitHub Discussions
+
+GitHub Discussions are recommended for research planning, assay design,
+literature-mapping questions, reproducibility notes, and non-urgent roadmap
+coordination. Use issues for actionable bugs or scoped implementation requests,
+and pull requests for reviewed repository changes.
+
+Community and maintenance files:
+
+- `CONTRIBUTING.md` - contribution workflow and scientific-boundary guidance
+- `CODE_OF_CONDUCT.md` - participation expectations
+- `SECURITY.md` - vulnerability reporting guidance
+- `SUPPORT.md` - support and discussion guidance
+- `docs/citation.md` - citation guidance for the repository, Release v1.0.0,
+  and final report
 
 ## Reproducing Block 8.12
 
