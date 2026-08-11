@@ -15,19 +15,20 @@ claim biological validation of any Parkinson's disease model.
 
 ## Current Checkpoint
 
-Milestone E2 is the latest frozen computational characterization checkpoint.
+Milestone E3 is the latest frozen computational robustness checkpoint.
 The canonical repository implementation now reproduces the pre-materialization
 anatomy audit, executes the authorized joint materialization gate once,
 validates the post-materialization anatomy state, runs an unperturbed
 deterministic FlyGym locomotion baseline, and characterizes combined
-motor-vigor and coordination proxy perturbations.
+motor-vigor and coordination proxy perturbations plus the frozen E2 candidate's
+multi-seed robustness.
 
 Milestone C is an unperturbed simulation baseline. It is not biological
 validation, not a Parkinson's disease model, and not evidence from real
 Drosophila.
 
-Milestone E2 is also not biological validation and does not select a validated
-Parkinson's-disease-like condition.
+Milestones E2 and E3 are also not biological validation and do not select a
+validated Parkinson's-disease-like condition.
 
 Historical Session 02 Blocks 8.14-8.19 are superseded by canonical Milestone 8B
 code and JSON evidence. The notebooks remain historical research records.
@@ -267,9 +268,8 @@ Key E2 observations:
 
 ## Running Milestone E3
 
-Milestone E3 is implemented for multi-seed robustness validation, but it is not
-yet frozen. It runs paired baseline-vs-candidate simulations for seeds 0 through
-4 at 1.0 s duration:
+Milestone E3 is FROZEN - MULTI-SEED ROBUSTNESS VALIDATION. It runs paired
+baseline-vs-candidate simulations for seeds 0 through 4 at 1.0 s duration:
 
 ```bash
 python scripts/run_candidate_robustness.py \
@@ -283,13 +283,44 @@ The frozen candidate remains `motor_scale = 0.8` and
 does not tune those parameters, implement rescue experiments, or validate a
 Parkinson's disease model.
 
+Fresh Google Colab reproduction has passed using Python 3.12.13,
+FlyGym 2.1.0, and MuJoCo 3.9.0. The generated evidence file is
+`results/validation/milestone_e3_candidate_robustness.json`, produced from git
+commit `730ab3acd8e5535b93f320a62c19080feca0448f`.
+
+The report returned `overall_pass = true` and robustness classification
+`ROBUST`: all 5 paired seeds completed, controlled variables were preserved,
+candidate transformations were validated, required observations and metrics were
+finite, and displacement/speed deltas were negative for all 5 seeds.
+
+Key E3 aggregate observations:
+
+- Displacement and speed means changed from 13.751281674590993 to
+  12.302040063313584, about -10.54%.
+- Planar path length mean changed from 19.31485503067457 to
+  17.308442670909542, about -10.39%.
+- Trajectory efficiency mean changed from 0.7119806020699851 to
+  0.7107636180753024, about -0.16%, with mixed seed-wise deltas.
+- Joint action absolute mean changed from 1.0256368082597096 to
+  0.820559121832831, about -20.00%.
+- Body height mean increased from 0.9465522152698778 mm to
+  1.4910686043526398 mm and remains an important confound.
+- Absolute yaw-change mean increased from 0.10385794490113649 rad to
+  0.21120580249246884 rad; the yaw absolute-change delta was positive in 4 / 5
+  seeds.
+
+`ROBUST` means computational/software robustness under these tested seeds only.
+It does not mean biological robustness, statistical significance, disease
+validation, disease severity, dopamine depletion, or mechanistic validation.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline
 2. Controller interface
 3. Controlled perturbations
 4. Parameter-response characterization
-5. Gait metrics
-6. PD-like perturbation
-7. Healthy vs PD-like comparison
-8. Potential rescue experiments
+5. Multi-seed robustness validation
+6. Gait metrics
+7. PD-like perturbation
+8. Healthy vs PD-like comparison
+9. Potential rescue experiments

@@ -35,9 +35,9 @@ Milestone C is an unperturbed simulation baseline only. It is not biological
 validation, not a Parkinson's disease model, and not evidence from real
 Drosophila.
 
-Milestone E2 is the latest frozen computational characterization checkpoint. It
-combines motor-vigor and coordination proxy perturbations and records simulation
-response and interaction summaries only.
+Milestone E3 is the latest frozen computational robustness checkpoint. It
+validates the frozen E2 leading computational candidate across five seeds and
+records software/simulation robustness only.
 
 Milestone 8B is complete and frozen. The project crossed the joint
 materialization boundary exactly once through a canonical, explicitly named
@@ -406,23 +406,38 @@ not implement rescue experiments, and does not map any parameter value to
 dopamine concentration, dopaminergic neuron loss, disease stage, or biological
 severity.
 
-## Milestone E3 Implementation Status
+## Milestone E3 Reproduction Status
 
-Milestone E3 is implemented for fresh-runtime validation, but it is not yet
-frozen. It validates robustness of the frozen E2 leading computational
-candidate across five simulation seeds and a 1.0 s duration.
+Milestone E3 is FROZEN - MULTI-SEED ROBUSTNESS VALIDATION.
 
-The canonical Milestone E3 command is:
+On August 11, 2026, Milestone E3 was independently reproduced from a fresh
+Google Colab runtime using repository code:
 
 ```bash
 python scripts/run_candidate_robustness.py --baseline-config configs/experiments/healthy_baseline.yaml --validation-config configs/experiments/validation/milestone_e3.yaml --output results/validation/milestone_e3_candidate_robustness.json
 ```
 
-Milestone E3 uses paired baseline-vs-candidate simulations for seeds 0, 1, 2,
-3, and 4. Within each pair, baseline and candidate use the same seed, duration,
-timestep, world, spawn, baseline controller parameters, actuator architecture,
-and metric definitions. The candidate condition differs only by the frozen E2
-proxy values:
+Observed clean-runtime versions were Python 3.12.13, FlyGym 2.1.0, and
+MuJoCo 3.9.0. The evidence file reports git commit
+`730ab3acd8e5535b93f320a62c19080feca0448f`, `overall_pass = true`, and
+robustness classification `ROBUST`.
+
+Verified Milestone E3 summary:
+
+- Evidence path: `results/validation/milestone_e3_candidate_robustness.json`
+- Paired seeds completed: 5 / 5
+- Seeds: 0, 1, 2, 3, and 4
+- Duration: 1.0 s
+- Fresh fly/world/simulation per condition declared: true
+- Same seed within every baseline/candidate pair: true
+- Required observations and metrics finite: true
+- Controlled variables preserved: true
+- Candidate transformation validated: true
+- Displacement delta negative for all 5 seeds: true
+- Speed delta negative for all 5 seeds: true
+
+The frozen candidate differs from the paired baseline only by the E2 proxy
+values:
 
 - `motor_scale = 0.8`
 - `coupling_scale = 0.75`
@@ -430,14 +445,41 @@ proxy values:
 These parameters were selected before E3 execution from Milestone E2
 characterization. No post-hoc tuning is permitted inside E3.
 
-E3 PASS semantics are software/simulation only: all paired simulations complete,
-required observations and metrics are finite, controlled variables are
-preserved, candidate transformations are validated, and aggregate reporting is
+Observed aggregate Milestone E3 findings:
+
+- Planar displacement mean: baseline 13.751281674590993 mm, candidate
+  12.302040063313584 mm, mean relative delta -10.53649998704906%.
+- Mean planar speed: baseline 13.751281674590993 mm/s, candidate
+  12.302040063313584 mm/s, mean relative delta -10.53649998704906%.
+- Planar path length mean: baseline 19.31485503067457 mm, candidate
+  17.308442670909542 mm, mean relative delta -10.386359062038664%.
+- Trajectory efficiency mean: baseline 0.7119806020699851, candidate
+  0.7107636180753024, mean relative delta -0.16292589177790413%.
+- Joint action absolute mean: baseline 1.0256368082597096, candidate
+  0.820559121832831, mean relative delta -19.995156821323032%.
+- Body height mean: baseline 0.9465522152698778 mm, candidate
+  1.4910686043526398 mm.
+- Absolute yaw-change mean: baseline 0.10385794490113649 rad, candidate
+  0.21120580249246884 rad.
+
+Observed variability and confounds:
+
+- Displacement and speed reduction were directionally consistent across all 5
+  seeds.
+- Trajectory-efficiency delta was mixed across seeds: 3 negative and 2
+  positive.
+- Absolute-yaw-change delta was positive in 4 / 5 seeds.
+- Body-height response remains an important confound and phenotype component.
+
+E3 PASS semantics are software/simulation only: all paired simulations completed,
+required observations and metrics were finite, controlled variables were
+preserved, candidate transformations were validated, and aggregate reporting was
 produced. PASS does not require a desired biological phenotype.
 
-E3 reports descriptive aggregate statistics, sign consistency, and a
-computational robustness classification of `ROBUST`, `MIXED`, or `UNSTABLE`.
-These classes are not disease severity labels.
+The `ROBUST` classification means computational/software robustness under the
+tested seeds only. It does not mean biological robustness, statistical
+significance, Parkinson's disease validation, disease severity, dopamine
+depletion, or mechanistic validation.
 
 Milestone E3 does not introduce new disease mechanisms, does not implement
 rescue experiments, and does not establish a mechanistic or biologically
@@ -491,10 +533,11 @@ The planned high-level stages are:
 2. Controller interface
 3. Controlled perturbations (Milestone D, frozen)
 4. Parameter-response characterization (Milestones E1 and E2, frozen)
-5. Gait metrics
-6. PD-like perturbation
-7. Healthy vs PD-like comparison
-8. Potential rescue experiments
+5. Multi-seed robustness validation (Milestone E3, frozen)
+6. Gait metrics
+7. PD-like perturbation
+8. Healthy vs PD-like comparison
+9. Potential rescue experiments
 
 No disease-specific modeling should be introduced until the locomotor simulation
 infrastructure is stable and the project owner authorizes that stage.
