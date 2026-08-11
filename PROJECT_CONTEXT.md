@@ -25,8 +25,14 @@ claimed only when supported by external experimental evidence.
 
 ## Current Scientific Checkpoint
 
-Block 8.12 is complete. The project is intentionally paused at a
-pre-materialization anatomy audit checkpoint.
+Milestone 8B is complete and frozen. The project has crossed the joint
+materialization boundary exactly once through a canonical, explicitly named
+software gate and is now paused before healthy locomotion baseline work.
+
+Milestone 8B supersedes the historical Session 02 Blocks 8.14-8.19 notebook
+sequence. Those historical cells remain important research records, but their
+scientifically relevant anatomy/materialization observations are now represented
+by repository code and the frozen JSON evidence report.
 
 Verified Block 8.12 invariants:
 
@@ -57,7 +63,8 @@ Verified Block 8.12 invariants:
 - JointDOF name round-trip failures: 0
 
 The empty JointDOF, neutral-angle, and actuator mappings are expected before
-joint materialization. They must not be interpreted as errors.
+joint materialization. They must not be interpreted as errors. These Block 8.12
+invariants define the frozen pre-materialization state used by Milestone 8B.
 
 ## Block 8.12 Reproduction Status
 
@@ -78,18 +85,58 @@ This reproduction validates the repository's non-mutating software/anatomy audit
 only. It does not validate a Parkinson's disease model, locomotor biology, or
 evidence from real flies.
 
-## Pre-Materialization Boundary
+## Milestone 8B Reproduction Status
 
-The current phase audits FlyGym and NeuroMechFly anatomy and mapping behavior
-without mutating the live fly model. During this phase:
+On August 11, 2026, Milestone 8B was independently reproduced from a fresh
+Google Colab runtime using repository code:
+
+```bash
+python scripts/run_joint_materialization_milestone.py --output results/baseline/milestone_8b_materialization.json
+```
+
+Observed clean-runtime versions were Python 3.12.13, FlyGym 2.1.0, and
+MuJoCo 3.9.0. The generated JSON report returned `overall_pass = true` and all
+48 documented checks passed.
+
+Verified Milestone 8B transition:
+
+- Pre-state `fly.skeleton is None`: true
+- Pre-state MJCF root joints: 0
+- Materialization gate used: true
+- `add_joints()` executed only through `materialize_joints_explicit_gate`
+- Post-state skeleton is materialized as `flygym.anatomy.Skeleton`
+- Post-state MJCF root joints: 204
+- JointDOF to MJCF joint mapping: 204
+- JointDOF to neutral-angle mapping: 204
+- Actuator mappings: 0
+- MJCF root actuators: 0
+- Second materialization attempt rejected: true
+
+This reproduction validates FlyGym/NeuroMechFly joint materialization and
+post-materialization anatomy mappings only. It does not create actuators, run
+locomotion, implement controllers, or validate a Parkinson's disease model.
+
+## Materialization Boundary And Current Stop Point
+
+Milestone 8B is the authorized materialization boundary:
+
+- `fly.add_joints(...)` may be called only inside
+  `materialize_joints_explicit_gate`.
+- Do not assign `fly.skeleton` manually.
+- Do not call `add_joints()` from any other repository code path.
+- Do not create actuators, run locomotion, or implement Milestone C until the
+  project owner authorizes that stage.
+
+Before the Milestone 8B gate:
 
 - Do not call `fly.add_joints(...)`.
 - Do not assign `fly.skeleton`.
 - Do not intentionally mutate the MJCF model.
 - Do not create actuators, sites, or sensors on the live model.
 
-The transition into materialization requires explicit authorization from the
-project owner.
+After the Milestone 8B gate, `fly.skeleton`, MJCF joints, joint mappings, and
+neutral-angle mappings are materialized. Actuator mappings and MJCF actuators
+remain empty by design.
 
 ## Workflow
 

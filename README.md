@@ -15,7 +15,15 @@ claim biological validation of any Parkinson's disease model.
 
 ## Current Checkpoint
 
-Block 8.12 is complete. The verified pre-materialization anatomy audit found:
+Milestone 8B is complete and frozen. The canonical repository implementation
+now reproduces the pre-materialization anatomy audit, executes the authorized
+joint materialization gate once, and validates the post-materialization anatomy
+state.
+
+Historical Session 02 Blocks 8.14-8.19 are superseded by canonical Milestone 8B
+code and JSON evidence. The notebooks remain historical research records.
+
+The verified Block 8.12 pre-materialization anatomy audit found:
 
 - Python target: 3.12
 - FlyGym target: 2.1.0
@@ -32,6 +40,18 @@ Block 8.12 is complete. The verified pre-materialization anatomy audit found:
 - Actuator mappings: 0, expected before materialization
 - `fly.skeleton is None`
 - `add_joints()` has not been called
+
+The verified Milestone 8B materialization checkpoint found:
+
+- pre-state `fly.skeleton is None`
+- pre-state MJCF joints: 0
+- materialization gate used
+- post-state skeleton is materialized
+- post-state MJCF joints: 204
+- JointDOF to MJCF joint mapping: 204
+- JointDOF to neutral-angle mapping: 204
+- actuator mappings: 0
+- second materialization attempt rejected
 
 ## Repository Layout
 
@@ -72,6 +92,23 @@ FlyGym 2.1.0, and MuJoCo 3.9.0. The generated
 `results/baseline/block_8_12_audit.json` report returned
 `overall_pass = true` with `fly.skeleton` remaining `None` before and after the
 audit.
+
+## Reproducing Milestone 8B
+
+Milestone 8B can be reproduced with the joint materialization milestone CLI:
+
+```bash
+python scripts/run_joint_materialization_milestone.py --output results/baseline/milestone_8b_materialization.json
+```
+
+Fresh Google Colab reproduction has passed using Python 3.12.13,
+FlyGym 2.1.0, and MuJoCo 3.9.0. The generated
+`results/baseline/milestone_8b_materialization.json` report returned
+`overall_pass = true`.
+
+This milestone validates FlyGym/NeuroMechFly joint materialization and
+post-materialization anatomy mappings only. It does not create actuators, run
+locomotion, implement controllers, or validate a Parkinson's disease model.
 
 ## Planned Research Stages
 

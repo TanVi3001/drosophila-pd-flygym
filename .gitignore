@@ -62,6 +62,7 @@ results/**/*
 !results/**/
 !results/**/.gitkeep
 !results/baseline/block_8_12_audit.json
+!results/baseline/milestone_8b_materialization.json
 
 # OS and editor noise
 .DS_Store
