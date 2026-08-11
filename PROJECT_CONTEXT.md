@@ -247,6 +247,40 @@ Observed action-scale simulation response relative to the paired baseline:
 The action-scale experiment is a generic software/simulation perturbation. It
 is not a Parkinson's disease model and is not biological validation.
 
+## Milestone E0/E1 Working Hypothesis
+
+Milestone E0/E1 begins parameter-response characterization before choosing any
+PD-like computational phenotype. The current working hypothesis is that
+Drosophila locomotor dysfunction relevant to later Parkinson-related modeling
+may be explored phenomenologically through impairments in:
+
+- locomotor motor vigor or output
+- locomotor coordination
+
+These are computational hypotheses, not direct mechanistic dopamine mappings.
+The repository must continue to distinguish biological evidence, computational
+hypothesis, simulation intervention, and observed simulation response.
+
+Milestone E0/E1 uses two generic perturbation families:
+
+- `motor_vigor_proxy`: global scaling of the 42 joint-angle controller commands
+  with scale values 1.00, 0.90, 0.80, 0.70, and 0.60.
+- `coordination_proxy`: scaling of FlyGym CPG inter-leg coupling weights with
+  scale values 1.00, 0.75, 0.50, 0.25, and 0.00.
+
+For both families, scale 1.00 is the exact baseline-equivalent control value.
+These parameter sweeps are not disease-severity series.
+
+Motor-vigor and coordination perturbations are phenomenological computational
+proxies. They are not direct simulations of dopamine concentration or
+dopaminergic neuron loss, and they do not validate a Parkinson's disease model.
+
+The canonical Milestone E0/E1 sweep command is:
+
+```bash
+python scripts/run_parameter_sweep.py --baseline-config configs/experiments/healthy_baseline.yaml --sweep-config configs/experiments/sweeps/milestone_e1.yaml --output results/sweeps/milestone_e1.json
+```
+
 ## Workflow
 
 GitHub is the source of truth. Google Colab is an execution environment.
@@ -294,10 +328,11 @@ The planned high-level stages are:
 1. Unperturbed baseline (Milestone C, frozen)
 2. Controller interface
 3. Controlled perturbations (Milestone D, frozen)
-4. Gait metrics
-5. PD-like perturbation
-6. Healthy vs PD-like comparison
-7. Potential rescue experiments
+4. Parameter-response characterization (Milestone E0/E1, pending validation)
+5. Gait metrics
+6. PD-like perturbation
+7. Healthy vs PD-like comparison
+8. Potential rescue experiments
 
 No disease-specific modeling should be introduced until the locomotor simulation
 infrastructure is stable and the project owner authorizes that stage.

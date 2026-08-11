@@ -148,6 +148,63 @@ class GlobalActionScalePerturbation:
         }
 
 
+@dataclass(frozen=True)
+class CPGCouplingScalePerturbation:
+    """Scale CPG inter-leg coupling weights before rollout."""
+
+    scale: float = 1.0
+    name: str = "cpg_coupling_scale_100"
+    config_id: str | None = None
+
+    def __post_init__(self) -> None:
+        scale = float(self.scale)
+        if not np.isfinite(scale) or scale < 0:
+            raise ValueError("cpg_coupling_scale.scale must be finite and non-negative.")
+        object.__setattr__(self, "scale", scale)
+
+    @property
+    def perturbation_type(self) -> str:
+        return "cpg_coupling_scale"
+
+    def apply_to_config(self, config: Any) -> Any:
+        return config
+
+    def apply_to_controller(
+        self, controller: Any, context: ControllerPerturbationContext
+    ) -> Any:
+        cpg_network = getattr(controller, "cpg_network", None)
+        if cpg_network is None or not hasattr(cpg_network, "coupling_weights"):
+            raise ValueError("Controller does not expose cpg_network.coupling_weights.")
+        coupling_weights = np.asarray(cpg_network.coupling_weights, dtype=float)
+        if coupling_weights.ndim != 2 or coupling_weights.shape[0] != coupling_weights.shape[1]:
+            raise ValueError("CPG coupling_weights must be a square matrix.")
+        cpg_network.coupling_weights = coupling_weights.copy() * self.scale
+        return controller
+
+    def apply_to_action(self, action: Any, context: ActionPerturbationContext) -> Any:
+        _validate_joint_angles(action.joint_angles, context.expected_joint_angle_count)
+        return _copy_action(action)
+
+    def metadata(self) -> dict[str, Any]:
+        return {
+            "type": self.perturbation_type,
+            "name": self.name,
+            "config_id": self.config_id,
+            "parameters": {
+                "scale": self.scale,
+                "baseline_equivalent_scale": 1.0,
+            },
+            "intervention_target": "cpg_network.coupling_weights",
+            "intervention_stage": "post_controller_construction_pre_rollout",
+            "deterministic": True,
+            "description": (
+                "Generic coordination proxy that scales FlyGym CPG inter-leg "
+                "coupling weights. It does not change intrinsic frequency, "
+                "intrinsic amplitude, action scaling, actuator gains, or adhesion."
+            ),
+        }
+
+
 def load_perturbation_config(path: str | Path) -> Perturbation:
     """Load a perturbation from a YAML config file."""
 
@@ -175,6 +232,14 @@ def perturbation_from_mapping(data: dict[str, Any]) -> Perturbation:
         if "scale" not in values:
             raise ValueError("global_action_scale perturbation requires scale.")
         return GlobalActionScalePerturbation(
+            scale=float(values["scale"]),
+            name=name,
+            config_id=config_id,
+        )
+    if perturbation_type == "cpg_coupling_scale":
+        if "scale" not in values:
+            raise ValueError("cpg_coupling_scale perturbation requires scale.")
+        return CPGCouplingScalePerturbation(
             scale=float(values["scale"]),
             name=name,
             config_id=config_id,
@@ -265,6 +330,7 @@ def _copy_action(
 
 __all__ = [
     "ActionPerturbationContext",
+    "CPGCouplingScalePerturbation",
     "ControllerPerturbationContext",
     "GlobalActionScalePerturbation",
     "IdentityPerturbation",

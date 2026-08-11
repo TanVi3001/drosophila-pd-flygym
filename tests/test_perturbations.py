@@ -15,6 +15,8 @@ if str(SRC_DIR) not in sys.path:
 
 from drosophila_pd.perturbations import (  # noqa: E402
     ActionPerturbationContext,
+    CPGCouplingScalePerturbation,
+    ControllerPerturbationContext,
     GlobalActionScalePerturbation,
     IdentityPerturbation,
     load_perturbation_config,
@@ -27,6 +29,16 @@ from drosophila_pd.perturbations import (  # noqa: E402
 class FakeAction:
     joint_angles: np.ndarray
     adhesion_onoff: np.ndarray | None = None
+
+
+@dataclass
+class FakeCPGNetwork:
+    coupling_weights: np.ndarray
+
+
+@dataclass
+class FakeController:
+    cpg_network: FakeCPGNetwork
 
 
 def test_identity_config_parses_and_records_complete_metadata():
@@ -53,6 +65,30 @@ def test_action_scale_config_parses_scale():
     assert perturbation.metadata()["intervention_target"] == (
         "controller_joint_angle_commands"
     )
+
+
+def test_cpg_coupling_scale_transforms_controller_weights_only():
+    controller = FakeController(
+        cpg_network=FakeCPGNetwork(coupling_weights=np.array([[0.0, 10.0], [10.0, 0.0]]))
+    )
+
+    transformed = CPGCouplingScalePerturbation(scale=0.5).apply_to_controller(
+        controller, _controller_context()
+    )
+
+    assert transformed is controller
+    assert np.array_equal(
+        transformed.cpg_network.coupling_weights,
+        np.array([[0.0, 5.0], [5.0, 0.0]]),
+    )
+
+
+def test_cpg_coupling_scale_metadata_marks_coordination_target():
+    perturbation = CPGCouplingScalePerturbation(scale=1.0)
+
+    assert perturbation.metadata()["parameters"]["baseline_equivalent_scale"] == 1.0
+    assert perturbation.metadata()["intervention_target"] == "cpg_network.coupling_weights"
+    assert perturbation_metadata_complete(perturbation.metadata())
 
 
 def test_identity_action_transformation_preserves_values():
@@ -102,6 +138,8 @@ def test_invalid_scale_values_are_rejected():
         GlobalActionScalePerturbation(scale=-0.1)
     with pytest.raises(ValueError, match="finite and non-negative"):
         GlobalActionScalePerturbation(scale=float("nan"))
+    with pytest.raises(ValueError, match="finite and non-negative"):
+        CPGCouplingScalePerturbation(scale=-0.1)
 
 
 def test_action_dimension_mismatch_is_rejected():
@@ -135,4 +173,13 @@ def _context(expected_joint_angle_count: int = 42) -> ActionPerturbationContext:
         timestep_s=0.0001,
         random_seed=0,
         expected_joint_angle_count=expected_joint_angle_count,
+    )
+
+
+def _controller_context() -> ControllerPerturbationContext:
+    return ControllerPerturbationContext(
+        condition_id="test",
+        timestep_s=0.0001,
+        random_seed=0,
+        expected_joint_angle_count=42,
     )

@@ -75,7 +75,7 @@ The verified Milestone C unperturbed baseline found:
 
 - `src/drosophila_pd/anatomy/` - anatomy and FlyGym mapping audit helpers
 - `src/drosophila_pd/controllers/` - controller interfaces
-- `src/drosophila_pd/perturbations/` - future controlled perturbation interfaces
+- `src/drosophila_pd/perturbations/` - controlled perturbation interfaces
 - `src/drosophila_pd/experiments/` - experiment orchestration code
 - `src/drosophila_pd/metrics/` - gait and locomotion metrics
 - `configs/experiments/` - version-controlled experiment configuration
@@ -190,12 +190,29 @@ speed delta -1.342898934901525 mm/s, yaw-change delta
 adhesion duty-factor or transition-count deltas. These are simulation results,
 not biological interpretation.
 
+## Running Milestone E0/E1
+
+Milestone E0/E1 runs generic parameter-response sweeps before selecting any
+disease-like computational phenotype:
+
+```bash
+python scripts/run_parameter_sweep.py \
+  --baseline-config configs/experiments/healthy_baseline.yaml \
+  --sweep-config configs/experiments/sweeps/milestone_e1.yaml \
+  --output results/sweeps/milestone_e1.json
+```
+
+The configured families are `motor_vigor_proxy` and `coordination_proxy`.
+These are phenomenological computational proxies, not direct simulations of
+dopamine concentration, dopaminergic neuron loss, or biological validation.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline
 2. Controller interface
 3. Controlled perturbations
-4. Gait metrics
-5. PD-like perturbation
-6. Healthy vs PD-like comparison
-7. Potential rescue experiments
+4. Parameter-response characterization
+5. Gait metrics
+6. PD-like perturbation
+7. Healthy vs PD-like comparison
+8. Potential rescue experiments
