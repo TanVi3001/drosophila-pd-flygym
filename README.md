@@ -15,16 +15,15 @@ claim biological validation of any Parkinson's disease model.
 
 ## Current Checkpoint
 
-Milestone E3 is the latest frozen computational robustness checkpoint.
-Milestone E4 adds a literature-grounded concordance layer over the frozen E3
-evidence. The canonical repository implementation now reproduces the
+Milestone E5 is the latest frozen computational checkpoint. The canonical
+repository implementation now reproduces the
 pre-materialization anatomy audit, executes the authorized joint materialization
 gate once, validates the post-materialization anatomy state, runs an
 unperturbed deterministic FlyGym locomotion baseline, characterizes combined
 motor-vigor and coordination proxy perturbations, validates the frozen E2
 candidate's multi-seed robustness, records qualitative concordance against
-selected adult Drosophila walking literature, and implements the preregistered
-Milestone E5 computational reversibility experiment awaiting Colab validation.
+selected adult Drosophila walking literature, and freezes the preregistered
+Milestone E5 computational reversibility evidence.
 
 Milestone C is an unperturbed simulation baseline. It is not biological
 validation, not a Parkinson's disease model, and not evidence from real
@@ -345,9 +344,9 @@ PD score, not dopamine depletion, and not mechanistic equivalence.
 
 ## Running Milestone E5
 
-Milestone E5 is IMPLEMENTED / AWAITING COLAB VALIDATION. It runs a fixed,
-preregistered computational reversibility experiment over the frozen E3/E4
-candidate:
+Milestone E5 is FROZEN - PREREGISTERED COMPUTATIONAL REVERSIBILITY. It runs a
+fixed, preregistered computational reversibility experiment over the frozen
+E3/E4 candidate:
 
 ```bash
 python scripts/run_computational_rescue.py \
@@ -369,10 +368,28 @@ E5 reports computational recovery fractions using
 explicitly. These are simulation quantities only, not biological recovery
 percentages.
 
+The frozen Colab evidence is
+`results/validation/milestone_e5_computational_rescue.json`. It reports Python
+3.12.13, FlyGym 2.1.0, MuJoCo 3.9.0, git commit
+`7cffac001488589d089bc49266aa103e7458f476`, 30 / 30 completed condition runs,
+and `overall_pass = true`.
+
+Observed primary endpoint classifications:
+
+- `motor_partial_rescue`: `DIRECTIONALLY_RESCUED`
+- `coordination_partial_rescue`: `MIXED`
+- `combined_partial_rescue`: `DIRECTIONALLY_RESCUED`
+- `full_computational_restoration_reference`: reference only
+
+Motor-axis restoration accounts for most of the primary locomotor recovery
+observed in E5. Adding partial coordination restoration produced modest and
+endpoint-dependent additional effects: combined partial restoration was slightly
+higher than motor-only for mean speed but slightly lower for path length.
+Combined partial restoration is therefore not universally superior.
+
 The `full_computational_restoration_reference` condition is a software/control
 equivalence check. It is not full rescue, cure, L-DOPA response, dopamine
-restoration, or Parkinson's disease rescue. No E5 evidence is frozen until a
-fresh Colab run completes and the real JSON report is reviewed.
+restoration, or Parkinson's disease rescue.
 
 ## Planned Research Stages
 

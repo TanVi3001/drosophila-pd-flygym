@@ -46,11 +46,12 @@ E4 does not tune the frozen candidate, does not run a new parameter search, does
 not implement rescue experiments, and does not validate a Parkinson's disease
 model.
 
-Milestone E5 is implemented and awaiting Google Colab validation. It is a
-preregistered computational reversibility experiment over the frozen E3/E4
-candidate only. E5 does not tune the candidate, does not run a rescue parameter
-sweep, does not implement pharmacology, and does not claim dopaminergic,
-mechanistic, biological, or Parkinson's disease rescue.
+Milestone E5 is FROZEN - PREREGISTERED COMPUTATIONAL REVERSIBILITY. It tests
+whether fixed, preregistered partial returns of the frozen E3/E4 computational
+candidate's two proxy parameters move supported locomotor-output endpoints back
+toward the unperturbed baseline. E5 does not tune the candidate, does not run a
+rescue parameter sweep, does not implement pharmacology, and does not claim
+dopaminergic, mechanistic, biological, or Parkinson's disease rescue.
 
 Milestone 8B is complete and frozen. The project crossed the joint
 materialization boundary exactly once through a canonical, explicitly named
@@ -550,17 +551,12 @@ The frozen candidate remains unchanged:
 
 No E4 parameter tuning or direct numeric calibration is permitted.
 
-## Milestone E5 Implementation Status
+## Milestone E5 Reproduction Status
 
-Milestone E5 is IMPLEMENTED / AWAITING COLAB VALIDATION.
+Milestone E5 is FROZEN - PREREGISTERED COMPUTATIONAL REVERSIBILITY.
 
-E5 asks a narrow computational question: if the two phenomenological impairment
-parameters defining the frozen E3/E4 candidate are partially moved back toward
-their unperturbed values, do supported locomotor-output endpoints move back
-toward the unperturbed baseline?
-
-The preregistered E5 configuration is
-`configs/experiments/validation/milestone_e5.yaml`. The canonical command is:
+On August 11, 2026, Milestone E5 was independently reproduced from a fresh
+Google Colab runtime using repository code:
 
 ```bash
 python scripts/run_computational_rescue.py \
@@ -569,7 +565,29 @@ python scripts/run_computational_rescue.py \
   --output results/validation/milestone_e5_computational_rescue.json
 ```
 
-The fixed condition matrix is:
+Observed clean-runtime versions were Python 3.12.13, FlyGym 2.1.0, and
+MuJoCo 3.9.0. The evidence file reports git commit
+`7cffac001488589d089bc49266aa103e7458f476`, timestamp
+`2026-08-11T13:32:09.675748+00:00`, and `overall_pass = true`.
+
+Verified Milestone E5 design:
+
+- Evidence path: `results/validation/milestone_e5_computational_rescue.json`
+- Seeds: `[0, 1, 2, 3, 4]`
+- Duration: 1.0 s
+- Conditions per seed: 6
+- Total condition runs: 30
+- Completed condition runs: 30 / 30
+- Completed conditions passed: true
+- Controlled variables preserved: true
+- Required observations and derived metrics finite: true
+- Fresh fly/world/simulation per condition declared: true
+- No arbitrary recovery threshold introduced: true
+- Post-hoc tuning forbidden: true
+- Biological rescue claim forbidden: true
+- Full computational restoration reference equivalent to control: true
+
+The fixed preregistered condition matrix is:
 
 - `control`: `motor_scale = 1.0`, `coupling_scale = 1.0`
 - `impaired_candidate`: `motor_scale = 0.8`, `coupling_scale = 0.75`
@@ -581,22 +599,12 @@ The fixed condition matrix is:
 - `full_computational_restoration_reference`: `motor_scale = 1.0`,
   `coupling_scale = 1.0`
 
-The midpoint values are preregistered from the frozen impaired and control
-states:
+The midpoint values were preregistered before execution:
 
 - `(0.8 + 1.0) / 2 = 0.9`
 - `(0.75 + 1.0) / 2 = 0.875`
 
-E5 uses seeds `[0, 1, 2, 3, 4]`, duration `1.0 s`, and the same canonical
-locomotion pipeline as the frozen baseline/candidate work. Each condition uses
-a fresh fly/world/simulation. The partial-return conditions are implemented
-through the generic perturbation interfaces and `CompositePerturbation`.
-
 Primary endpoints are `mean_planar_speed_mm_s` and `planar_path_length_mm`.
-Secondary/exploratory endpoints include planar displacement, trajectory
-efficiency, absolute yaw change, body-height summaries, joint-action magnitude,
-and adhesion summaries.
-
 For metrics expected to decrease in the impaired candidate, E5 reports the
 computational recovery fraction:
 
@@ -604,22 +612,58 @@ computational recovery fraction:
 (rescue - impaired) / (control - impaired)
 ```
 
-Near-zero denominators are reported explicitly. Recovery fractions are
-computational quantities only and must not be described as biological recovery
-percentages.
+Primary endpoint aggregate findings:
 
-Partial-return conditions are classified conservatively as one of
-`DIRECTIONALLY_RESCUED`, `MIXED`, `NO_RESCUE`, or `UNSTABLE`. The classification
-uses the preregistered primary endpoints and records computational direction
-only. It is not a pharmacological, dopaminergic, mechanistic, or biological
-rescue label.
+| condition | endpoint | control mean | impaired mean | condition mean | recovery fraction | direction count | no-farther count | classification |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `motor_partial_rescue` | speed | 13.751281674590993 | 12.302040063313584 | 12.798554263221726 | 0.34260277654496735 | 5 / 5 | 5 / 5 | `DIRECTIONALLY_RESCUED` |
+| `motor_partial_rescue` | path length | 19.31485503067457 | 17.308442670909542 | 18.06483724383281 | 0.3769885932181204 | 5 / 5 | 5 / 5 | `DIRECTIONALLY_RESCUED` |
+| `coordination_partial_rescue` | speed | 13.751281674590993 | 12.302040063313584 | 12.38638348376136 | 0.05819831544405736 | 4 / 5 | 4 / 5 | `MIXED` |
+| `coordination_partial_rescue` | path length | 19.31485503067457 | 17.308442670909542 | 17.32301662767562 | 0.007263689687290947 | 3 / 5 | 3 / 5 | `MIXED` |
+| `combined_partial_rescue` | speed | 13.751281674590993 | 12.302040063313584 | 12.823982404294824 | 0.36014860249643493 | 5 / 5 | 5 / 5 | `DIRECTIONALLY_RESCUED` |
+| `combined_partial_rescue` | path length | 19.31485503067457 | 17.308442670909542 | 18.018699776028235 | 0.35399358544714715 | 5 / 5 | 5 / 5 | `DIRECTIONALLY_RESCUED` |
 
-The `full_computational_restoration_reference` condition is a software/control
-equivalence check for `1.0 / 1.0`, not full rescue, cure, L-DOPA response,
-dopamine restoration, or Parkinson's disease rescue.
+The `full_computational_restoration_reference` condition is classified as a
+reference, not a rescue condition. It reproduced the unperturbed control within
+the declared deterministic tolerances for every seed.
 
-No E5 evidence is frozen until a fresh Colab run completes and the real JSON
-report is reviewed.
+Motor-axis restoration accounts for most of the primary locomotor recovery
+observed in E5; adding partial coordination restoration produces modest and
+endpoint-dependent additional effects. This interpretation is supported by both
+primary endpoints. Compared with `motor_partial_rescue`,
+`combined_partial_rescue` increased mean speed by only
+0.025428141073097876 mm/s and recovery fraction by 0.017545825951467586, but
+decreased mean path length by 0.04613746780457362 mm and recovery fraction by
+0.02299500777097324. Combined partial restoration is therefore not universally
+superior to motor-axis partial restoration.
+
+Important secondary endpoint findings and confounds:
+
+- Planar displacement mirrored mean speed because duration was fixed at 1.0 s.
+- Trajectory-efficiency recovery fractions were denominator-sensitive because
+  control and impaired aggregate means differed by only about 0.001216984. The
+  per-seed directions were mixed, including recovery fractions below 0 and
+  above 1.
+- Absolute yaw-change responses were nonlinear. Coordination-only partial
+  restoration had aggregate yaw recovery above 1 because its mean absolute yaw
+  change was lower than control, but this must not be interpreted as biological
+  over-recovery.
+- Body-height mean and minimum moved back toward control for motor-only and
+  combined partial restoration, but not for coordination-only partial
+  restoration.
+- Body-height range recovery fractions were unstable and denominator-sensitive,
+  with mixed per-seed direction/no-farther counts.
+- Joint-angle action absolute mean followed the motor scaling as expected:
+  motor-only and combined partial restoration were near 0.9231, while
+  coordination-only remained near the impaired value.
+- Adhesion summaries were present for all conditions and seeds. Mean adhesion
+  duty was essentially unchanged across conditions, and transition counts
+  remained in the observed 23-25 range.
+
+Recovery fractions are computational quantities only and must not be described
+as biological recovery percentages. E5 is not biological rescue, Parkinson's
+disease rescue, L-DOPA simulation, dopamine restoration, neuron restoration,
+pharmacological treatment, cure, or mechanistic validation.
 
 ## Workflow
 
@@ -671,8 +715,7 @@ The planned high-level stages are:
 4. Parameter-response characterization (Milestones E1 and E2, frozen)
 5. Multi-seed robustness validation (Milestone E3, frozen)
 6. Literature-grounded phenotype concordance (Milestone E4)
-7. Preregistered computational reversibility (Milestone E5, awaiting Colab
-   validation)
+7. Preregistered computational reversibility (Milestone E5, frozen)
 8. Gait metrics
 9. PD-like perturbation
 10. Healthy vs PD-like comparison

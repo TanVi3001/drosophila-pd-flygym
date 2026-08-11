@@ -70,6 +70,7 @@ results/**/*
 !results/sweeps/milestone_e2_combined.json
 !results/validation/milestone_e3_candidate_robustness.json
 !results/validation/milestone_e4_concordance.json
+!results/validation/milestone_e5_computational_rescue.json
 
 # OS and editor noise
 .DS_Store
