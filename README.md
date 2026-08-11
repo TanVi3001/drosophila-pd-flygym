@@ -167,6 +167,29 @@ python scripts/run_perturbation_experiment.py \
 These are controlled simulation perturbation experiments. They are not
 Parkinson's disease models and are not biological validation.
 
+Fresh Google Colab reproduction has passed for both Milestone D validation
+runs using Python 3.12.13, FlyGym 2.1.0, and MuJoCo 3.9.0. The generated
+evidence files are:
+
+- `results/perturbations/identity.json`
+- `results/perturbations/action_scale_080.json`
+
+Both reports were generated from git commit
+`f886c204d8ad3a95dcd953418a8f9df51927137f`.
+
+The identity run returned `overall_pass = true` and
+`identity_equivalence_pass = true`, with zero recorded comparison deltas. The
+`action_scale_080` run returned `overall_pass = true`, scaled the 42
+joint-angle controller commands by 0.8, preserved adhesion commands, and kept
+all controlled variables matched between conditions.
+
+For `action_scale_080`, the observed simulation response relative to the paired
+baseline included planar displacement delta -0.6714494674507625 mm, mean planar
+speed delta -1.342898934901525 mm/s, yaw-change delta
+0.03061053070618347 rad, body-height mean delta 0.5321613121790706 mm, and no
+adhesion duty-factor or transition-count deltas. These are simulation results,
+not biological interpretation.
+
 ## Planned Research Stages
 
 1. Unperturbed baseline

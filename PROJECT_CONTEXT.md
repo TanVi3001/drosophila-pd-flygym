@@ -182,12 +182,70 @@ Milestone C is the authorized unperturbed locomotion baseline. It creates the
 official FlyGym locomotion fly, position actuators, adhesion actuators,
 `FlatGroundWorld`, and `Simulation` through the canonical baseline pipeline.
 
-Milestone D is the controlled perturbation framework. Its repository
-implementation runs paired baseline-vs-perturbed simulations from fresh
-FlyGym/MuJoCo state while holding random seed, duration, timestep, world,
-spawn, baseline controller, skeleton, actuator architecture, and metric
-definitions constant. Milestone D must pass fresh Google Colab validation
-before it is frozen.
+Milestone D is complete and frozen. The controlled perturbation framework runs
+paired baseline-vs-perturbed simulations from fresh FlyGym/MuJoCo state while
+holding random seed, duration, timestep, world, spawn, baseline controller,
+skeleton, actuator architecture, and metric definitions constant.
+
+Milestone D is a controlled software/simulation perturbation framework only. It
+does not define a Parkinson's disease mechanism, validate disease biology, or
+map a controller parameter directly to dopamine or any other biological
+mechanism.
+
+## Milestone D Reproduction Status
+
+On August 11, 2026, Milestone D was independently reproduced from a fresh
+Google Colab runtime using repository code:
+
+```bash
+python scripts/run_perturbation_experiment.py --baseline-config configs/experiments/healthy_baseline.yaml --perturbation-config configs/experiments/perturbations/identity.yaml --output results/perturbations/identity.json
+
+python scripts/run_perturbation_experiment.py --baseline-config configs/experiments/healthy_baseline.yaml --perturbation-config configs/experiments/perturbations/action_scale_080.yaml --output results/perturbations/action_scale_080.json
+```
+
+Observed clean-runtime versions were Python 3.12.13, FlyGym 2.1.0, and
+MuJoCo 3.9.0. Both evidence files report git commit
+`f886c204d8ad3a95dcd953418a8f9df51927137f`.
+
+Verified Milestone D identity gate:
+
+- Evidence path: `results/perturbations/identity.json`
+- `overall_pass = true`
+- `identity_equivalence_pass = true`
+- Controlled variables match: true
+- Fresh fly/world/simulation per condition: true
+- Baseline and identity step counts: 5000 / 5000
+- Identity comparison deltas: zero across recorded scalar and adhesion metrics
+- Action transformation: identity with transform error 0.0
+
+Verified Milestone D action-scale perturbation:
+
+- Evidence path: `results/perturbations/action_scale_080.json`
+- `overall_pass = true`
+- Perturbation type: `global_action_scale`
+- Scale: 0.8
+- Intervention target: controller joint-angle commands
+- Action shape: 5000 x 42
+- Joint-angle transform error: 0.0
+- Adhesion commands preserved: true
+- Controlled variables match: true
+- Fresh fly/world/simulation per condition: true
+
+Observed action-scale simulation response relative to the paired baseline:
+
+- Planar displacement delta: -0.6714494674507625 mm
+- Mean planar speed delta: -1.342898934901525 mm/s
+- Heading yaw-change delta: 0.03061053070618347 rad
+- Body height minimum delta: 0.3917972226323848 mm
+- Body height mean delta: 0.5321613121790706 mm
+- Body height range delta: -0.0011024944162713046 mm
+- Joint action mean delta: -0.06393024147301052
+- Joint action absolute mean delta: -0.20487402724275616
+- Adhesion duty-factor deltas: 0.0 for all legs
+- Adhesion transition-count deltas: 0 for all legs
+
+The action-scale experiment is a generic software/simulation perturbation. It
+is not a Parkinson's disease model and is not biological validation.
 
 ## Workflow
 
@@ -235,7 +293,7 @@ The planned high-level stages are:
 
 1. Unperturbed baseline (Milestone C, frozen)
 2. Controller interface
-3. Controlled perturbations (Milestone D, repository implementation pending validation)
+3. Controlled perturbations (Milestone D, frozen)
 4. Gait metrics
 5. PD-like perturbation
 6. Healthy vs PD-like comparison

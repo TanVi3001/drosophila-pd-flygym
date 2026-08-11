@@ -64,6 +64,8 @@ results/**/*
 !results/baseline/block_8_12_audit.json
 !results/baseline/milestone_8b_materialization.json
 !results/baseline/healthy_baseline.json
+!results/perturbations/identity.json
+!results/perturbations/action_scale_080.json
 
 # OS and editor noise
 .DS_Store
