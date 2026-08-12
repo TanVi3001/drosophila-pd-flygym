@@ -1,0 +1,80 @@
+:root {
+    --bg-base: #1e1e1e;
+    --bg-surface: #252526;
+    --bg-panel: #333333;
+    --text-primary: #cccccc;
+    --text-secondary: #808080;
+    --accent: #007acc;
+    --border: #444444;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+#toolbar {
+    height: 40px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+#main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+#sidebar {
+    width: 300px;
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#viewer-container {
+    flex: 1;
+    position: relative;
+    background-color: #000;
+}
+
+#timeline-container {
+    height: 150px;
+    background-color: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    z-index: 1000;
+}
