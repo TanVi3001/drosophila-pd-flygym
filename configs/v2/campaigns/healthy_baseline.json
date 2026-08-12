@@ -1,0 +1,37 @@
+{
+  "campaign_library_entry_version": "v2.scientific_campaign_entry.1",
+  "campaign_name": "healthy_baseline",
+  "campaign_config": {
+    "campaign_id": "healthy_baseline",
+    "version": "v2.campaign.1",
+    "scientific_scope": "Version 2 computational campaign orchestration only; no biological validation, diagnosis, disease-severity mapping, or mechanistic claim.",
+    "roles": ["Healthy"],
+    "progression_stages": [],
+    "interventions": [],
+    "custom_scenarios": ["flat_ground_behavior"],
+    "parameter_grid": {
+      "coupling_scale": [1.0],
+      "motor_scale": [1.0]
+    },
+    "seeds": [0, 1, 2, 3, 4],
+    "replicates": 1,
+    "metadata": {
+      "description": "Unperturbed computational baseline production campaign.",
+      "scientific_evidence": false
+    }
+  },
+  "configuration_hash": "cd7848de4e21afd8e2b218c2762e1b5e09462779105ffc81ea5206d9fa908b34",
+  "provenance": {
+    "source": "v2 scientific production campaign library",
+    "execution_runtime": "FlyGym-enabled runtime required for simulations",
+    "scientific_evidence": false
+  },
+  "output_layout": {
+    "root": "outputs/v2/scientific_campaign/healthy_baseline",
+    "folders": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"]
+  },
+  "metadata": {
+    "planned_experiment_count": 5,
+    "scientific_scope": "Computational campaign specification only."
+  }
+}

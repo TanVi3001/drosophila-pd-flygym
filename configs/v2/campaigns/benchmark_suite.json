@@ -1,0 +1,37 @@
+{
+  "campaign_library_entry_version": "v2.scientific_campaign_entry.1",
+  "campaign_name": "benchmark_suite",
+  "campaign_config": {
+    "campaign_id": "benchmark_suite",
+    "version": "v2.campaign.1",
+    "scientific_scope": "Version 2 computational campaign orchestration only; no biological validation, diagnosis, disease-severity mapping, or mechanistic claim.",
+    "roles": ["Healthy", "Candidate", "Progression", "Intervention"],
+    "progression_stages": ["Stage0", "Stage1", "Stage2", "Stage3", "Stage4"],
+    "interventions": ["none", "full_computational_restoration_reference"],
+    "custom_scenarios": ["flat_ground_behavior", "open_field_behavior"],
+    "parameter_grid": {
+      "coupling_scale": [1.0, 0.75],
+      "motor_scale": [1.0, 0.8]
+    },
+    "seeds": [0, 1, 2, 3, 4],
+    "replicates": 1,
+    "metadata": {
+      "description": "V2 computational benchmark campaign suite.",
+      "scientific_evidence": false
+    }
+  },
+  "configuration_hash": "caf372a3f9413967baca2231d91e74e809ed18f0d30988e92b1c77462e025eae",
+  "provenance": {
+    "source": "v2 scientific production campaign library",
+    "execution_runtime": "FlyGym-enabled runtime required for simulations",
+    "scientific_evidence": false
+  },
+  "output_layout": {
+    "root": "outputs/v2/scientific_campaign/benchmark_suite",
+    "folders": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"]
+  },
+  "metadata": {
+    "planned_experiment_count": 1600,
+    "scientific_scope": "Computational campaign specification only."
+  }
+}

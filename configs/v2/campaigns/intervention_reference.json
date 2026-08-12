@@ -1,0 +1,37 @@
+{
+  "campaign_library_entry_version": "v2.scientific_campaign_entry.1",
+  "campaign_name": "intervention_reference",
+  "campaign_config": {
+    "campaign_id": "intervention_reference",
+    "version": "v2.campaign.1",
+    "scientific_scope": "Version 2 computational campaign orchestration only; no biological validation, diagnosis, disease-severity mapping, or mechanistic claim.",
+    "roles": ["Intervention"],
+    "progression_stages": [],
+    "interventions": ["full_computational_restoration_reference"],
+    "custom_scenarios": ["flat_ground_behavior"],
+    "parameter_grid": {
+      "coupling_scale": [1.0],
+      "motor_scale": [1.0]
+    },
+    "seeds": [0, 1, 2, 3, 4],
+    "replicates": 1,
+    "metadata": {
+      "description": "Computational intervention reference campaign; not biological rescue.",
+      "scientific_evidence": false
+    }
+  },
+  "configuration_hash": "66c0a80f454e5f73f8db26988a43c6cca77c4d65e1981f666727c688af035933",
+  "provenance": {
+    "source": "v2 scientific production campaign library",
+    "execution_runtime": "FlyGym-enabled runtime required for simulations",
+    "scientific_evidence": false
+  },
+  "output_layout": {
+    "root": "outputs/v2/scientific_campaign/intervention_reference",
+    "folders": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"]
+  },
+  "metadata": {
+    "planned_experiment_count": 5,
+    "scientific_scope": "Computational campaign specification only."
+  }
+}

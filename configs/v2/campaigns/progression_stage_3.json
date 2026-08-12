@@ -1,0 +1,37 @@
+{
+  "campaign_library_entry_version": "v2.scientific_campaign_entry.1",
+  "campaign_name": "progression_stage_3",
+  "campaign_config": {
+    "campaign_id": "progression_stage_3",
+    "version": "v2.campaign.1",
+    "scientific_scope": "Version 2 computational campaign orchestration only; no biological validation, diagnosis, disease-severity mapping, or mechanistic claim.",
+    "roles": ["Progression"],
+    "progression_stages": ["Stage3"],
+    "interventions": [],
+    "custom_scenarios": ["flat_ground_behavior"],
+    "parameter_grid": {
+      "coupling_scale": [0.8125],
+      "motor_scale": [0.85]
+    },
+    "seeds": [0, 1, 2, 3, 4],
+    "replicates": 1,
+    "metadata": {
+      "description": "Computational progression Stage3 campaign.",
+      "scientific_evidence": false
+    }
+  },
+  "configuration_hash": "9feb48d46a9169c301595631178391481197676d06acb574a38797aa1e942fc1",
+  "provenance": {
+    "source": "v2 scientific production campaign library",
+    "execution_runtime": "FlyGym-enabled runtime required for simulations",
+    "scientific_evidence": false
+  },
+  "output_layout": {
+    "root": "outputs/v2/scientific_campaign/progression_stage_3",
+    "folders": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"]
+  },
+  "metadata": {
+    "planned_experiment_count": 5,
+    "scientific_scope": "Computational campaign specification only."
+  }
+}

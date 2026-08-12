@@ -1,0 +1,37 @@
+{
+  "campaign_library_entry_version": "v2.scientific_campaign_entry.1",
+  "campaign_name": "pd_candidate",
+  "campaign_config": {
+    "campaign_id": "pd_candidate",
+    "version": "v2.campaign.1",
+    "scientific_scope": "Version 2 computational campaign orchestration only; no biological validation, diagnosis, disease-severity mapping, or mechanistic claim.",
+    "roles": ["Candidate"],
+    "progression_stages": [],
+    "interventions": [],
+    "custom_scenarios": ["flat_ground_behavior"],
+    "parameter_grid": {
+      "coupling_scale": [0.75],
+      "motor_scale": [0.8]
+    },
+    "seeds": [0, 1, 2, 3, 4],
+    "replicates": 1,
+    "metadata": {
+      "description": "Frozen computational candidate campaign; not biologically validated Parkinson's disease.",
+      "scientific_evidence": false
+    }
+  },
+  "configuration_hash": "943b0378c5a315b44ef7237b271aae860db09565f004a1e22e8305ada3960f7f",
+  "provenance": {
+    "source": "v2 scientific production campaign library",
+    "execution_runtime": "FlyGym-enabled runtime required for simulations",
+    "scientific_evidence": false
+  },
+  "output_layout": {
+    "root": "outputs/v2/scientific_campaign/pd_candidate",
+    "folders": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"]
+  },
+  "metadata": {
+    "planned_experiment_count": 5,
+    "scientific_scope": "Computational campaign specification only."
+  }
+}
