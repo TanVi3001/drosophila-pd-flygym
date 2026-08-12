@@ -29,3 +29,5 @@ jobs:
 
       - name: Run tests
         run: pytest -q -rs -p no:cacheprovider
+        env:
+          PYTHONPATH: src
