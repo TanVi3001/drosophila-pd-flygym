@@ -9,6 +9,10 @@ jobs:
     name: Python tests
     runs-on: ubuntu-latest
 
+    env:
+      PYTHONPATH: src
+      MPLBACKEND: Agg
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -18,14 +22,21 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install requirements
+      - name: Upgrade pip
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements-docs.txt ]; then pip install -r requirements-docs.txt; fi
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements-docs.txt ]; then
+            pip install -r requirements-docs.txt
+          fi
           pip install pytest numpy PyYAML matplotlib
 
       - name: Compile Python files
-        run: python -m compileall -q src scripts tests
+        run: |
+          python -m compileall -q src scripts tests
 
-      - name: Run tests
-        run: pytest -q -rs -p no:cacheprovider
+      - name: Run test suite
+        run: |
+          pytest -q -rs -p no:cacheprovider
