@@ -1,0 +1,11 @@
+{
+  "campaign_template_version": "v2.experiment_template.1",
+  "template_id": "benchmark_study",
+  "template_type": "benchmark_study",
+  "description": "Computational benchmark suite with deterministic scenarios, seeds, and outputs.",
+  "required_fields": ["benchmark_conditions", "metrics", "random_seeds", "expected_outputs"],
+  "deterministic": true,
+  "metadata": {
+    "scientific_scope": "Computational template only."
+  }
+}

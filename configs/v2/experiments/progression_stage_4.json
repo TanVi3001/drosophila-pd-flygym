@@ -1,0 +1,28 @@
+{
+  "experiment_definition_version": "v2.experiment.1",
+  "experiment_id": "progression_stage_4",
+  "display_name": "Progression Stage4",
+  "experiment_type": "progression_study",
+  "campaign_id": "progression_stage_4",
+  "metadata": {
+    "description": "Computational progression Stage4 experiment.",
+    "scientific_scope": "Version 2 computational experiment definition only; no biological validation, diagnosis, disease-severity mapping, dopamine equivalence, or mechanistic claim.",
+    "scientific_evidence": false,
+    "biological_claims": false
+  },
+  "parameters": {
+    "motor_scale": 0.8,
+    "coupling_scale": 0.75,
+    "progression_stage": "Stage4",
+    "scenario": "flat_ground_behavior",
+    "duration_s": 1.0
+  },
+  "random_seeds": [0, 1, 2, 3, 4],
+  "provenance": {
+    "source": "v2 canonical computational experiment library",
+    "frozen_v1_unchanged": true,
+    "requires_flygym_for_execution": true
+  },
+  "expected_outputs": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"],
+  "configuration_hash": "a5aee231ea349117a28f0fedf5b32d7e783c5da98a6cb8ac82b22ba830bb2898"
+}

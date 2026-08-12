@@ -1,0 +1,28 @@
+{
+  "experiment_definition_version": "v2.experiment.1",
+  "experiment_id": "computational_intervention_reference",
+  "display_name": "Computational intervention reference",
+  "experiment_type": "intervention_study",
+  "campaign_id": "intervention_reference",
+  "metadata": {
+    "description": "Computational intervention reference experiment; not biological rescue.",
+    "scientific_scope": "Version 2 computational experiment definition only; no biological validation, diagnosis, disease-severity mapping, dopamine equivalence, or mechanistic claim.",
+    "scientific_evidence": false,
+    "biological_claims": false
+  },
+  "parameters": {
+    "motor_scale": 1.0,
+    "coupling_scale": 1.0,
+    "intervention": "full_computational_restoration_reference",
+    "scenario": "flat_ground_behavior",
+    "duration_s": 1.0
+  },
+  "random_seeds": [0, 1, 2, 3, 4],
+  "provenance": {
+    "source": "v2 canonical computational experiment library",
+    "frozen_v1_unchanged": true,
+    "requires_flygym_for_execution": true
+  },
+  "expected_outputs": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"],
+  "configuration_hash": "29c7ce888090f3bd11b637f96bd9c08717e11e1640d17ed1ddae861b0e9482a6"
+}

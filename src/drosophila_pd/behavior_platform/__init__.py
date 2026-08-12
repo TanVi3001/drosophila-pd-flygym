@@ -117,6 +117,21 @@ from drosophila_pd.behavior_platform.comparison import (
     build_comparison_playback_plan,
     compare_rollouts,
 )
+from drosophila_pd.behavior_platform.computational_experiments import (
+    EXPERIMENT_REPORT_FORMATS,
+    EXPERIMENT_SCOPE,
+    EXPERIMENT_TEMPLATE_TYPES,
+    CampaignTemplate,
+    ExperimentDefinition,
+    build_campaign_dashboard,
+    load_campaign_templates,
+    load_experiment_definition,
+    load_experiment_library,
+    render_experiment_report,
+    validate_experiment_definition,
+    validate_experiment_library,
+    verify_generated_artifacts,
+)
 from drosophila_pd.behavior_platform.behavior_comparison import compare_behavior_conditions
 from drosophila_pd.behavior_platform.advanced_visualization import (
     VISUAL_EXPORT_FORMATS,
@@ -489,4 +504,17 @@ __all__ = [
     "run_scientific_analysis",
     "validate_scientific_campaign_package",
     "verify_dataset_integrity",
+    "EXPERIMENT_REPORT_FORMATS",
+    "EXPERIMENT_SCOPE",
+    "EXPERIMENT_TEMPLATE_TYPES",
+    "CampaignTemplate",
+    "ExperimentDefinition",
+    "build_campaign_dashboard",
+    "load_campaign_templates",
+    "load_experiment_definition",
+    "load_experiment_library",
+    "render_experiment_report",
+    "validate_experiment_definition",
+    "validate_experiment_library",
+    "verify_generated_artifacts",
 ]

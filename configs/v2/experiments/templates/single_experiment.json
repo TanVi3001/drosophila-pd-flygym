@@ -1,0 +1,11 @@
+{
+  "campaign_template_version": "v2.experiment_template.1",
+  "template_id": "single_experiment",
+  "template_type": "single_experiment",
+  "description": "One deterministic computational condition over declared seeds.",
+  "required_fields": ["experiment_id", "campaign_id", "parameters", "random_seeds"],
+  "deterministic": true,
+  "metadata": {
+    "scientific_scope": "Computational template only."
+  }
+}

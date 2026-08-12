@@ -1,0 +1,27 @@
+{
+  "experiment_definition_version": "v2.experiment.1",
+  "experiment_id": "robustness_benchmark",
+  "display_name": "Robustness benchmark",
+  "experiment_type": "robustness_study",
+  "campaign_id": "benchmark_suite",
+  "metadata": {
+    "description": "Computational multi-seed robustness benchmark.",
+    "scientific_scope": "Version 2 computational experiment definition only; no biological validation, diagnosis, disease-severity mapping, dopamine equivalence, or mechanistic claim.",
+    "scientific_evidence": false,
+    "biological_claims": false
+  },
+  "parameters": {
+    "motor_scale": [1.0, 0.8],
+    "coupling_scale": [1.0, 0.75],
+    "scenario": "flat_ground_behavior",
+    "duration_s": 1.0
+  },
+  "random_seeds": [0, 1, 2, 3, 4],
+  "provenance": {
+    "source": "v2 canonical computational experiment library",
+    "frozen_v1_unchanged": true,
+    "requires_flygym_for_execution": true
+  },
+  "expected_outputs": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"],
+  "configuration_hash": "198736cde6a600b5dc5466a6b125743b83465209103d7547e2b1650dc8e03087"
+}

@@ -1,0 +1,11 @@
+{
+  "campaign_template_version": "v2.experiment_template.1",
+  "template_id": "robustness_study",
+  "template_type": "robustness_study",
+  "description": "Paired or repeated computational conditions across deterministic seeds.",
+  "required_fields": ["conditions", "random_seeds", "paired_variables"],
+  "deterministic": true,
+  "metadata": {
+    "scientific_scope": "Computational template only."
+  }
+}

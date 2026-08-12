@@ -1,0 +1,27 @@
+{
+  "experiment_definition_version": "v2.experiment.1",
+  "experiment_id": "candidate_phenotype",
+  "display_name": "Candidate phenotype",
+  "experiment_type": "single_experiment",
+  "campaign_id": "pd_candidate",
+  "metadata": {
+    "description": "Frozen computational candidate phenotype experiment; not a biologically validated disease condition.",
+    "scientific_scope": "Version 2 computational experiment definition only; no biological validation, diagnosis, disease-severity mapping, dopamine equivalence, or mechanistic claim.",
+    "scientific_evidence": false,
+    "biological_claims": false
+  },
+  "parameters": {
+    "motor_scale": 0.8,
+    "coupling_scale": 0.75,
+    "scenario": "flat_ground_behavior",
+    "duration_s": 1.0
+  },
+  "random_seeds": [0, 1, 2, 3, 4],
+  "provenance": {
+    "source": "v2 canonical computational experiment library",
+    "frozen_v1_unchanged": true,
+    "requires_flygym_for_execution": true
+  },
+  "expected_outputs": ["rollouts", "measurements", "behavior", "gait", "open_field", "digital_twin", "reports", "figures", "videos", "metadata"],
+  "configuration_hash": "72bea8ce7d7f1ab0e47a10a07afd4a6534618c7d81bf5f79d1ed918ed1b86ffe"
+}
