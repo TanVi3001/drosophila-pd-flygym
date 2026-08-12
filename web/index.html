@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fly Studio Web Platform</title>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+    <div id="app-container">
+        <header id="toolbar"></header>
+        <div id="main-content">
+            <aside id="sidebar"></aside>
+            <main id="viewer-container">
+                <div id="viewer"></div>
+                <div id="overlay"></div>
+            </main>
+        </div>
+        <footer id="timeline-container">
+            <div id="playback-controls"></div>
+            <div id="timeline"></div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="settings-modal" class="modal hidden"></div>
+    <div id="project-loader-modal" class="modal hidden"></div>
+
+    <!-- Scripts -->
+    <script src="main.js" type="module"></script>
+</body>
+</html>
