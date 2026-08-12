@@ -1,9 +1,11 @@
-name: Deploy Fly Studio Web
+name: Deploy Fly Studio Web to GitHub Pages
 
 on:
   push:
     branches:
       - main
+
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,36 +17,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
 
-      - uses: actions/configure-pages@v5
+      - name: Check web directory
+        run: |
+          ls -la
+          ls -la web
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: web
+          path: ./web
 
   deploy:
+    needs: build
+
+    runs-on: ubuntu-latest
 
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
-    needs: build
-
-    runs-on: ubuntu-latest
 
     permissions:
       pages: write
       id-token: write
 
     steps:
-
-      - id: deployment
+      - name: Deploy
+        id: deployment
         uses: actions/deploy-pages@v4
