@@ -178,6 +178,17 @@ body {
     background-color: #000;
 }
 
+#viewer {
+    height: 100%;
+    width: 100%;
+}
+
+.viewport-canvas {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
 #timeline-container {
     height: 150px;
     background-color: var(--bg-surface);
