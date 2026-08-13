@@ -15,7 +15,10 @@ export class App {
         this.timeline = new Timeline();
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.inspector = new Inspector(this.workspace);
-        this.toolbar = new Toolbar({ onLoadJSON: (file) => this.loadSceneFile(file) });
+        this.toolbar = new Toolbar({
+            onLoadJSON: (file) => this.loadSceneFile(file),
+            onResetView: () => this.viewportRenderer.resetView(),
+        });
     }
 
     init() {
@@ -61,7 +64,12 @@ export class App {
 
     setupKeyboardShortcuts() {
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
+            if (e.code !== 'Space' || e.repeat) return;
+            e.preventDefault();
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.code !== 'Space') return;
+            if (!this.viewportRenderer.consumeSpacePan()) {
                 this.timeline.togglePlayback();
             }
         });

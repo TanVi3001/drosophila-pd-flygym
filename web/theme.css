@@ -187,6 +187,12 @@ body {
     display: block;
     height: 100%;
     width: 100%;
+    cursor: default;
+    touch-action: none;
+}
+
+.viewport-canvas:active {
+    cursor: grabbing;
 }
 
 #timeline-container {

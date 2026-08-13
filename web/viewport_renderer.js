@@ -15,6 +15,16 @@ export class ViewportRenderer {
         this.devicePixelRatio = 1;
         this.width = 0;
         this.height = 0;
+        this.cameraOffsetX = 0;
+        this.cameraOffsetY = 0;
+        this.zoom = 1;
+        this.isPanning = false;
+        this.spacePressed = false;
+        this.spaceUsedForPan = false;
+        this.lastPointerX = 0;
+        this.lastPointerY = 0;
+        this.keyDownHandler = (event) => this.handleKeyDown(event);
+        this.keyUpHandler = (event) => this.handleKeyUp(event);
     }
 
     init(container) {
@@ -24,6 +34,14 @@ export class ViewportRenderer {
         this.canvas.setAttribute('aria-label', 'Scene viewport');
         this.container.replaceChildren(this.canvas);
         this.context = this.canvas.getContext('2d');
+        this.canvas.addEventListener('wheel', (event) => this.handleWheel(event), { passive: false });
+        this.canvas.addEventListener('pointerdown', (event) => this.handlePointerDown(event));
+        this.canvas.addEventListener('pointermove', (event) => this.handlePointerMove(event));
+        this.canvas.addEventListener('pointerup', (event) => this.handlePointerUp(event));
+        this.canvas.addEventListener('pointercancel', (event) => this.handlePointerUp(event));
+        this.canvas.addEventListener('dblclick', () => this.focusSelectedNode());
+        window.addEventListener('keydown', this.keyDownHandler);
+        window.addEventListener('keyup', this.keyUpHandler);
 
         if (typeof ResizeObserver !== 'undefined') {
             this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -42,6 +60,35 @@ export class ViewportRenderer {
         this.context.fillStyle = BACKGROUND;
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.context.restore();
+    }
+
+    resetView() {
+        this.cameraOffsetX = 0;
+        this.cameraOffsetY = 0;
+        this.zoom = 1;
+        this.render();
+    }
+
+    focusSelectedNode() {
+        const selectedNode = this.workspace.selectedNode;
+        const nodes = Array.isArray(this.workspace.data?.nodes)
+            ? this.workspace.data.nodes
+            : [];
+        if (!selectedNode || nodes.length === 0) return;
+
+        const layout = layoutNodes(nodes, this.width, this.height);
+        const position = layout.positionByNode.get(selectedNode);
+        if (!position) return;
+
+        this.cameraOffsetX = -this.zoom * (position.x - this.width / 2);
+        this.cameraOffsetY = -this.zoom * (position.y - this.height / 2);
+        this.render();
+    }
+
+    consumeSpacePan() {
+        const usedForPan = this.spaceUsedForPan;
+        this.spaceUsedForPan = false;
+        return usedForPan;
     }
 
     resize() {
@@ -81,8 +128,77 @@ export class ViewportRenderer {
         }
 
         const layout = layoutNodes(nodes, this.width, this.height);
+        this.context.save();
+        this.applyCameraTransform();
         this.drawLinks(layout);
         this.drawNodes(layout, this.workspace.selectedNode);
+        this.context.restore();
+    }
+
+    applyCameraTransform() {
+        this.context.translate(
+            this.width / 2 + this.cameraOffsetX,
+            this.height / 2 + this.cameraOffsetY,
+        );
+        this.context.scale(this.zoom, this.zoom);
+        this.context.translate(-this.width / 2, -this.height / 2);
+    }
+
+    handleWheel(event) {
+        event.preventDefault();
+        const factor = Math.exp(-event.deltaY * 0.001);
+        this.zoomAt(factor, event.offsetX, event.offsetY);
+    }
+
+    zoomAt(factor, x, y) {
+        const nextZoom = clamp(this.zoom * factor, 0.25, 4);
+        const centerX = this.width / 2;
+        const centerY = this.height / 2;
+        const worldX = centerX + (x - centerX - this.cameraOffsetX) / this.zoom;
+        const worldY = centerY + (y - centerY - this.cameraOffsetY) / this.zoom;
+        this.zoom = nextZoom;
+        this.cameraOffsetX = x - centerX - this.zoom * (worldX - centerX);
+        this.cameraOffsetY = y - centerY - this.zoom * (worldY - centerY);
+        this.render();
+    }
+
+    handlePointerDown(event) {
+        const middleButton = event.button === 1;
+        const spaceDrag = event.button === 0 && this.spacePressed;
+        if (!middleButton && !spaceDrag) return;
+
+        event.preventDefault();
+        this.isPanning = true;
+        this.spaceUsedForPan = this.spaceUsedForPan || spaceDrag;
+        this.lastPointerX = event.clientX;
+        this.lastPointerY = event.clientY;
+        this.canvas.setPointerCapture(event.pointerId);
+    }
+
+    handlePointerMove(event) {
+        if (!this.isPanning) return;
+        event.preventDefault();
+        this.cameraOffsetX += event.clientX - this.lastPointerX;
+        this.cameraOffsetY += event.clientY - this.lastPointerY;
+        this.lastPointerX = event.clientX;
+        this.lastPointerY = event.clientY;
+        this.render();
+    }
+
+    handlePointerUp(event) {
+        if (!this.isPanning) return;
+        this.isPanning = false;
+        if (this.canvas.hasPointerCapture(event.pointerId)) {
+            this.canvas.releasePointerCapture(event.pointerId);
+        }
+    }
+
+    handleKeyDown(event) {
+        if (event.code === 'Space') this.spacePressed = true;
+    }
+
+    handleKeyUp(event) {
+        if (event.code === 'Space') this.spacePressed = false;
     }
 
     drawMessage(message) {
@@ -181,4 +297,8 @@ function layoutNodes(nodes, width, height) {
 
 function getNodeLabel(node) {
     return String(node.name ?? node.id ?? node.type ?? node.kind ?? 'Unnamed node');
+}
+
+function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
 }
