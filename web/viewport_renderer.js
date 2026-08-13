@@ -125,12 +125,14 @@ export class ViewportRenderer {
         const currentFrame = Number.isInteger(this.workspace.currentFrame)
             ? this.workspace.currentFrame
             : 0;
+        const animationFrame = this.workspace.animation?.frames?.[currentFrame] ?? null;
         if (nodes.length === 0) {
             this.drawMessage('No Scene Loaded');
             return;
         }
 
         const layout = layoutNodes(nodes, this.width, this.height);
+        applyAnimationFrame(layout, animationFrame, this.width, this.height);
         this.context.save();
         this.applyCameraTransform();
         this.drawLinks(layout);
@@ -302,6 +304,60 @@ function layoutNodes(nodes, width, height) {
 
 function getNodeLabel(node) {
     return String(node.name ?? node.id ?? node.type ?? node.kind ?? 'Unnamed node');
+}
+
+function applyAnimationFrame(layout, frame, width, height) {
+    if (!frame || typeof frame !== 'object') return;
+    const frameData = frame.data && typeof frame.data === 'object' ? frame.data : frame;
+    const frameNodes = Array.isArray(frameData.nodes) ? frameData.nodes : [];
+    const transforms = frameData.nodeTransforms ?? frameData.transforms ?? frameData.positions;
+
+    layout.forEach((entry) => {
+        const transform = findFrameTransform(entry.node, frameNodes, transforms, frameData);
+        const position = getFramePosition(transform, width, height);
+        if (!position) return;
+        entry.x = position.x;
+        entry.y = position.y;
+        layout.positionByNode.set(entry.node, position);
+    });
+}
+
+function findFrameTransform(node, frameNodes, transforms, frameData) {
+    const nodeId = node.id ?? node.name;
+    const frameNode = frameNodes.find((candidate) => (
+        candidate
+        && typeof candidate === 'object'
+        && (candidate.id ?? candidate.name) === nodeId
+    ));
+    if (frameNode) return frameNode;
+
+    if (transforms && typeof transforms === 'object' && nodeId !== undefined) {
+        return transforms[nodeId] ?? null;
+    }
+    if (!frameNodes.length && !transforms && nodeId !== undefined) {
+        return frameData[nodeId] ?? null;
+    }
+    return null;
+}
+
+function getFramePosition(transform, width, height) {
+    if (!transform || typeof transform !== 'object') return null;
+    const position = transform.position ?? transform.translation ?? transform;
+    if (Array.isArray(position) && position.length >= 2) {
+        return normalizePosition(Number(position[0]), Number(position[1]), width, height);
+    }
+    if (position && typeof position === 'object') {
+        return normalizePosition(Number(position.x), Number(position.y), width, height);
+    }
+    return null;
+}
+
+function normalizePosition(x, y, width, height) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    if (x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+        return { x: x * width, y: y * height };
+    }
+    return { x, y };
 }
 
 function clamp(value, minimum, maximum) {

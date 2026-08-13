@@ -4,6 +4,9 @@ export class Workspace {
         this.selectedNode = null;
         this.currentFrame = 0;
         this.totalFrames = 1;
+        this.animation = null;
+        this.frames = [];
+        this.duration = 0;
     }
 
     load(data = null) {
@@ -11,7 +14,14 @@ export class Workspace {
             this.data = data;
             this.selectedNode = null;
             this.currentFrame = 0;
-            this.totalFrames = getTotalFrames(data);
+            this.animation = getAnimation(data);
+            this.frames = Array.isArray(this.animation?.frames)
+                ? this.animation.frames
+                : [];
+            this.duration = getDuration(this.animation, data);
+            this.totalFrames = this.frames.length > 0
+                ? this.frames.length
+                : getTotalFrames(data);
             console.log('Workspace updated.');
             return this.data;
         }
@@ -50,4 +60,20 @@ function getTotalFrames(data) {
         if (Number.isInteger(frames) && frames > 0) return frames;
     }
     return 1;
+}
+
+function getAnimation(data) {
+    if (data?.animation && typeof data.animation === 'object') return data.animation;
+    if (data?.scene?.animation && typeof data.scene.animation === 'object') {
+        return data.scene.animation;
+    }
+    if (Array.isArray(data?.frames)) {
+        return { frames: data.frames, duration: data.duration };
+    }
+    return null;
+}
+
+function getDuration(animation, data) {
+    const duration = Number(animation?.duration ?? data?.duration ?? 0);
+    return Number.isFinite(duration) && duration >= 0 ? duration : 0;
 }
