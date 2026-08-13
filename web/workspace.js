@@ -7,6 +7,7 @@ export class Workspace {
         this.animation = null;
         this.frames = [];
         this.duration = 0;
+        this.playbackState = 'Stopped';
     }
 
     load(data = null) {
@@ -14,6 +15,7 @@ export class Workspace {
             this.data = data;
             this.selectedNode = null;
             this.currentFrame = 0;
+            this.playbackState = 'Stopped';
             this.animation = getAnimation(data);
             this.frames = Array.isArray(this.animation?.frames)
                 ? this.animation.frames

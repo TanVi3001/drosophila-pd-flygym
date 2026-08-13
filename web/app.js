@@ -6,6 +6,7 @@ import { Layout } from './layout.js';
 import { JSONLoader } from './json_loader.js';
 import { Inspector } from './inspector.js';
 import { ViewportRenderer } from './viewport_renderer.js';
+import { PlaybackController } from './playback_controller.js';
 
 export class App {
     constructor() {
@@ -15,6 +16,7 @@ export class App {
         this.timeline = new Timeline(this.workspace, () => this.viewportRenderer.render());
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.inspector = new Inspector(this.workspace);
+        this.playbackController = new PlaybackController(this.workspace);
         this.toolbar = new Toolbar({
             onLoadJSON: (file) => this.loadSceneFile(file),
             onResetView: () => this.viewportRenderer.resetView(),
