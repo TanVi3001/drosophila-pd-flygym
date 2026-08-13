@@ -92,6 +92,24 @@ body {
     color: var(--text-primary);
 }
 
+.scene-tree-node-label {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 2px 0;
+    text-align: left;
+    width: 100%;
+}
+
+.scene-tree-node.selected > details > summary,
+.scene-tree-node.selected > .scene-tree-node-label {
+    background-color: var(--accent);
+    color: #ffffff;
+    outline: 1px solid var(--accent);
+}
+
 .scene-tree-node summary {
     cursor: pointer;
     padding: 2px 0;

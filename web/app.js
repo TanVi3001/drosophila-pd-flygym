@@ -12,7 +12,7 @@ export class App {
         this.layout = new Layout();
         this.viewer = new Viewer();
         this.timeline = new Timeline();
-        this.sidebar = new Sidebar();
+        this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.toolbar = new Toolbar({ onLoadJSON: (file) => this.loadSceneFile(file) });
     }
 
@@ -34,7 +34,7 @@ export class App {
 
             // Commit the new state only after parsing and validation succeed.
             this.workspace.load(data);
-            this.sidebar.render(this.workspace.data);
+            this.sidebar.render(this.workspace.data, this.workspace.selectedNode);
 
             console.info('Loaded scene', file.name);
             console.info('Node count:', summary.nodeCount);
@@ -44,6 +44,12 @@ export class App {
             console.error('Failed to load scene JSON:', error);
             window.alert(`Unable to load scene JSON: ${error.message}`);
         }
+    }
+
+    selectNode(node) {
+        this.workspace.selectNode(node);
+        this.sidebar.render(this.workspace.data, this.workspace.selectedNode);
+        console.info('Selected node:', node.name ?? node.id ?? node.type ?? node.kind ?? 'Unnamed node');
     }
 
     setupKeyboardShortcuts() {

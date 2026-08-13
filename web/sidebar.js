@@ -1,8 +1,9 @@
 import { JSONLoader } from './json_loader.js';
 
 export class Sidebar {
-    constructor() {
+    constructor({ onSelectNode = null } = {}) {
         this.container = null;
+        this.onSelectNode = onSelectNode;
     }
 
     init(container) {
@@ -10,7 +11,7 @@ export class Sidebar {
         this.render();
     }
 
-    render(data = {}) {
+    render(data = {}, selectedNode = null) {
         if (!this.container) return;
         const summary = Array.isArray(data.nodes)
             ? JSONLoader.summarizeScene(data)
@@ -46,29 +47,37 @@ export class Sidebar {
 
         const tree = document.createElement('ul');
         tree.className = 'scene-tree';
-        appendNodes(tree, nodes);
+        appendNodes(tree, nodes, selectedNode, this.onSelectNode);
         treeContent.appendChild(tree);
     }
 }
 
-function appendNodes(list, nodes) {
+function appendNodes(list, nodes, selectedNode, onSelectNode) {
     nodes.forEach((node) => {
-        const element = createNodeElement(node);
+        const element = createNodeElement(node, selectedNode, onSelectNode);
         if (element) list.appendChild(element);
     });
 }
 
-function createNodeElement(node) {
+function createNodeElement(node, selectedNode, onSelectNode) {
     if (!node || typeof node !== 'object' || Array.isArray(node)) return null;
 
     const item = document.createElement('li');
     item.className = 'scene-tree-node';
+    if (node === selectedNode) item.classList.add('selected');
     const children = Array.isArray(node.children)
         ? node.children.filter((child) => child && typeof child === 'object')
         : [];
 
     if (children.length === 0) {
-        item.textContent = getNodeLabel(node);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'scene-tree-node-label';
+        button.textContent = getNodeLabel(node);
+        button.addEventListener('click', () => {
+            if (onSelectNode) onSelectNode(node);
+        });
+        item.appendChild(button);
         return item;
     }
 
@@ -76,10 +85,13 @@ function createNodeElement(node) {
     details.open = true;
     const label = document.createElement('summary');
     label.textContent = getNodeLabel(node);
+    label.addEventListener('click', () => {
+        if (onSelectNode) onSelectNode(node);
+    });
     details.appendChild(label);
 
     const childList = document.createElement('ul');
-    appendNodes(childList, children);
+    appendNodes(childList, children, selectedNode, onSelectNode);
     details.appendChild(childList);
     item.appendChild(details);
     return item;
