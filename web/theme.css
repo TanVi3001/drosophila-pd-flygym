@@ -244,6 +244,10 @@ body {
     z-index: 2;
 }
 
+.timeline-keyframe.current {
+    border-color: #ffffff;
+}
+
 .timeline-keyframe.selected {
     background-color: #ffffff;
     border-color: var(--accent);

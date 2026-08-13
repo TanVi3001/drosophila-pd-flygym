@@ -19,13 +19,14 @@ export class Timeline {
             totalFrames - 1,
         );
         this.workspace.currentFrame = currentFrame;
-        const keyframes = getKeyframePositions(this.workspace, totalFrames);
+        const keyframes = getKeyframeEntries(this.workspace, totalFrames);
         this.container.innerHTML = `
             <div class="timeline-panel">
                 <div class="timeline-readout">
                     <span>Current Frame: <strong>${currentFrame}</strong></span>
                     <span>Total Frames: <strong>${totalFrames}</strong></span>
                     <span>Keyframes: <strong>${keyframes.length}</strong></span>
+                    <span>Selected Keyframe: <strong>${getSelectedKeyframeFrame(this.workspace)}</strong></span>
                 </div>
                 <div class="timeline-track">
                     <input
@@ -39,21 +40,33 @@ export class Timeline {
                         ${totalFrames === 1 ? 'disabled' : ''}
                     >
                     <div class="timeline-keyframes" aria-label="Animation keyframes">
-                        ${keyframes.map((frame) => renderKeyframeMarker(frame, currentFrame, totalFrames)).join('')}
+                        ${keyframes.map((entry) => renderKeyframeMarker(
+                            entry,
+                            currentFrame,
+                            this.workspace.selectedKeyframe,
+                            totalFrames,
+                        )).join('')}
                     </div>
                 </div>
             </div>
         `;
 
+        const panel = this.container.querySelector('.timeline-panel');
         const slider = this.container.querySelector('.timeline-slider');
         slider.addEventListener('input', (event) => {
             this.seek(Number(event.target.value));
         });
         this.container.querySelectorAll('.timeline-keyframe').forEach((marker) => {
-            marker.addEventListener('click', () => {
-                this.seek(Number(marker.dataset.frame));
+            marker.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const entry = keyframes.find((candidate) => (
+                    candidate.frame === Number(marker.dataset.frame)
+                ));
+                if (entry) this.selectKeyframe(entry);
             });
         });
+        slider.addEventListener('click', (event) => event.stopPropagation());
+        panel.addEventListener('click', () => this.clearKeyframeSelection());
     }
 
     seek(frame) {
@@ -62,9 +75,21 @@ export class Timeline {
         this.render();
         if (this.onSeekFrame) this.onSeekFrame(this.workspace.currentFrame);
     }
+
+    selectKeyframe(entry) {
+        this.workspace.selectKeyframe(entry.data, entry.frame);
+        this.render();
+        if (this.onSeekFrame) this.onSeekFrame(this.workspace.currentFrame);
+    }
+
+    clearKeyframeSelection() {
+        if (!this.workspace.selectedKeyframe) return;
+        this.workspace.clearKeyframeSelection();
+        this.render();
+    }
 }
 
-function getKeyframePositions(workspace, totalFrames) {
+function getKeyframeEntries(workspace, totalFrames) {
     const animation = workspace.animation;
     const explicitKeyframes = Array.isArray(animation?.keyframes);
     const source = explicitKeyframes
@@ -75,12 +100,22 @@ function getKeyframePositions(workspace, totalFrames) {
         && typeof entry === 'object'
         && (entry.keyframe !== undefined || entry.isKeyframe !== undefined)
     ));
-    const positions = source
+    const entries = source
         .filter((entry) => !hasFlags || entry?.keyframe === true || entry?.isKeyframe === true)
-        .map((entry, index) => getKeyframeFrame(entry, index))
-        .filter((frame) => Number.isInteger(frame) && frame >= 0)
-        .map((frame) => Math.min(frame, totalFrames - 1));
-    return [...new Set(positions)].sort((left, right) => left - right);
+        .map((entry, index) => ({
+            data: entry,
+            frame: getKeyframeFrame(entry, index),
+        }))
+        .filter((entry) => Number.isInteger(entry.frame) && entry.frame >= 0)
+        .map((entry) => ({
+            ...entry,
+            frame: Math.min(entry.frame, totalFrames - 1),
+        }));
+    const uniqueEntries = new Map();
+    entries.forEach((entry) => {
+        if (!uniqueEntries.has(entry.frame)) uniqueEntries.set(entry.frame, entry);
+    });
+    return [...uniqueEntries.values()].sort((left, right) => left.frame - right.frame);
 }
 
 function getKeyframeFrame(keyframe, fallback) {
@@ -92,21 +127,28 @@ function getKeyframeFrame(keyframe, fallback) {
     return Number.isFinite(frame) ? Math.round(frame) : fallback;
 }
 
-function renderKeyframeMarker(frame, currentFrame, totalFrames) {
+function renderKeyframeMarker(entry, currentFrame, selectedKeyframe, totalFrames) {
     const percentage = totalFrames <= 1
         ? 0
-        : (frame / (totalFrames - 1)) * 100;
-    const selected = frame === currentFrame ? ' selected' : '';
+        : (entry.frame / (totalFrames - 1)) * 100;
+    const selected = selectedKeyframe?.frame === entry.frame ? ' selected' : '';
+    const current = entry.frame === currentFrame ? ' current' : '';
     return `
         <button
-            class="timeline-keyframe${selected}"
+            class="timeline-keyframe${selected}${current}"
             type="button"
             style="left: ${percentage}%"
-            data-frame="${frame}"
-            aria-label="Keyframe at frame ${frame}"
-            title="Keyframe ${frame}"
+            data-frame="${entry.frame}"
+            aria-label="Keyframe at frame ${entry.frame}"
+            title="Keyframe ${entry.frame}"
         ></button>
     `;
+}
+
+function getSelectedKeyframeFrame(workspace) {
+    return workspace.selectedKeyframe
+        ? workspace.selectedKeyframe.frame
+        : 'None';
 }
 
 function clamp(value, minimum, maximum) {

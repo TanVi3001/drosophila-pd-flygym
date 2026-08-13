@@ -2,6 +2,7 @@ export class Workspace {
     constructor() {
         this.data = {};
         this.selectedNode = null;
+        this.selectedKeyframe = null;
         this.currentFrame = 0;
         this.totalFrames = 1;
         this.animation = null;
@@ -14,6 +15,7 @@ export class Workspace {
         if (data !== null) {
             this.data = data;
             this.selectedNode = null;
+            this.selectedKeyframe = null;
             this.currentFrame = 0;
             this.playbackState = 'Stopped';
             this.animation = getAnimation(data);
@@ -35,6 +37,26 @@ export class Workspace {
     selectNode(node) {
         this.selectedNode = node || null;
         return this.selectedNode;
+    }
+
+    selectKeyframe(keyframe, frame) {
+        const selectedFrame = Number(frame);
+        if (!Number.isInteger(selectedFrame) || selectedFrame < 0) {
+            this.selectedKeyframe = null;
+            return this.selectedKeyframe;
+        }
+
+        this.selectedKeyframe = {
+            frame: selectedFrame,
+            data: keyframe,
+        };
+        this.currentFrame = selectedFrame;
+        return this.selectedKeyframe;
+    }
+
+    clearKeyframeSelection() {
+        this.selectedKeyframe = null;
+        return this.selectedKeyframe;
     }
 
     save() {
