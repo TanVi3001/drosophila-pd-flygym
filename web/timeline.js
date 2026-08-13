@@ -30,6 +30,9 @@ export class Timeline {
                     <span class="timeline-selected-keyframe">Selected Keyframe: <strong>${getSelectedKeyframeFrame(this.workspace)}</strong></span>
                 </div>
                 <div class="timeline-track">
+                    <div class="timeline-ruler" aria-label="Frame ruler">
+                        ${renderRuler(totalFrames)}
+                    </div>
                     <input
                         class="timeline-slider"
                         type="range"
@@ -111,8 +114,12 @@ export class Timeline {
         event.preventDefault();
         const nextFrame = this.frameFromPointer(event, this.dragState.track);
         const result = this.workspace.moveSelectedKeyframe(nextFrame, { recordHistory: false });
-        if (!result?.updated) return;
+        if (!result?.updated) {
+            this.dragState.marker.classList.add('collision');
+            return;
+        }
 
+        this.dragState.marker.classList.remove('collision');
         this.dragState.entry.frame = result.keyframe.frame;
         this.updateMarkerPosition(result.keyframe.frame);
         this.updateMarkerState();
@@ -124,6 +131,7 @@ export class Timeline {
         if (this.dragState.marker.hasPointerCapture(event.pointerId)) {
             this.dragState.marker.releasePointerCapture(event.pointerId);
         }
+        this.dragState.marker.classList.remove('collision');
         const { entry, startFrame } = this.dragState;
         const endFrame = entry.frame;
         if (endFrame !== startFrame) {
@@ -205,6 +213,16 @@ function renderKeyframeMarker(entry, currentFrame, selectedKeyframes, totalFrame
             title="Keyframe ${entry.frame}"
         ></button>
     `;
+}
+
+function renderRuler(totalFrames) {
+    const count = Math.min(11, totalFrames);
+    if (count <= 1) return '<span class="timeline-ruler-tick" style="left: 0%">0</span>';
+    return Array.from({ length: count }, (_, index) => {
+        const frame = Math.round((index / (count - 1)) * (totalFrames - 1));
+        const percentage = (index / (count - 1)) * 100;
+        return `<span class="timeline-ruler-tick" style="left: ${percentage}%">${frame}</span>`;
+    }).join('');
 }
 
 function getSelectedKeyframeFrame(workspace) {

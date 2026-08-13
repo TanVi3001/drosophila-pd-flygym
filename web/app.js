@@ -158,7 +158,7 @@ export class App {
             this.refreshEditor();
         } else if (!modifier && event.key.toLowerCase() === 'f' && !editingText) {
             event.preventDefault();
-            this.viewportRenderer.resetView();
+            this.viewportRenderer.focusAnimation();
         }
     }
 

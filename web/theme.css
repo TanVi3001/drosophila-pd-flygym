@@ -251,6 +251,21 @@ body {
 
 .timeline-track {
     position: relative;
+    padding-top: 18px;
+}
+
+.timeline-ruler {
+    color: var(--text-secondary);
+    font-size: 0.72em;
+    inset: 0 8px auto;
+    height: 16px;
+    position: absolute;
+}
+
+.timeline-ruler-tick {
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
 }
 
 .timeline-keyframes {
@@ -283,6 +298,16 @@ body {
     background-color: #ffffff;
     border-color: var(--accent);
     box-shadow: 0 0 0 2px var(--accent);
+}
+
+.timeline-keyframe.collision {
+    background-color: #d64545;
+    border-color: #ffffff;
+}
+
+.timeline-keyframe:hover {
+    filter: brightness(1.25);
+    transform: translate(-50%, -50%) scale(1.2);
 }
 
 .hidden {

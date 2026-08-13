@@ -135,6 +135,7 @@ export class ViewportRenderer {
         applyAnimationFrame(layout, animationFrame, this.width, this.height);
         this.context.save();
         this.applyCameraTransform();
+        this.drawGrid();
         this.drawLinks(layout);
         this.drawNodes(layout, this.workspace.selectedNode, currentFrame);
         this.context.restore();
@@ -147,6 +148,10 @@ export class ViewportRenderer {
         );
         this.context.scale(this.zoom, this.zoom);
         this.context.translate(-this.width / 2, -this.height / 2);
+    }
+
+    focusAnimation() {
+        this.resetView();
     }
 
     handleWheel(event) {
@@ -212,6 +217,30 @@ export class ViewportRenderer {
         this.context.textAlign = 'center';
         this.context.textBaseline = 'middle';
         this.context.fillText(message, this.width / 2, this.height / 2);
+    }
+
+    drawGrid() {
+        const spacing = 40;
+        this.context.strokeStyle = '#202b34';
+        this.context.lineWidth = 1;
+        this.context.beginPath();
+        for (let x = 0; x <= this.width; x += spacing) {
+            this.context.moveTo(x, 0);
+            this.context.lineTo(x, this.height);
+        }
+        for (let y = 0; y <= this.height; y += spacing) {
+            this.context.moveTo(0, y);
+            this.context.lineTo(this.width, y);
+        }
+        this.context.stroke();
+
+        this.context.strokeStyle = '#496070';
+        this.context.beginPath();
+        this.context.moveTo(this.width / 2, 0);
+        this.context.lineTo(this.width / 2, this.height);
+        this.context.moveTo(0, this.height / 2);
+        this.context.lineTo(this.width, this.height / 2);
+        this.context.stroke();
     }
 
     drawLinks(layout) {
