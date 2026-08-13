@@ -50,6 +50,53 @@ body {
     overflow-y: auto;
 }
 
+#inspector {
+    width: 280px;
+    background-color: var(--bg-surface);
+    border-left: 1px solid var(--border);
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#inspector h3,
+#inspector h4 {
+    margin-top: 0;
+}
+
+#inspector h4 {
+    margin-bottom: 8px;
+}
+
+#inspector dl {
+    margin: 0;
+}
+
+#inspector dt {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin-top: 10px;
+}
+
+#inspector dd {
+    margin: 2px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.inspector-empty {
+    color: var(--text-secondary);
+}
+
+.inspector-metadata {
+    background-color: var(--bg-base);
+    border: 1px solid var(--border);
+    margin: 0;
+    max-height: 260px;
+    overflow: auto;
+    padding: 8px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 .project-summary {
     list-style: none;
     margin: 0 0 18px;

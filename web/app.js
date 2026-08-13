@@ -5,6 +5,7 @@ import { Toolbar } from './toolbar.js';
 import { Workspace } from './workspace.js';
 import { Layout } from './layout.js';
 import { JSONLoader } from './json_loader.js';
+import { Inspector } from './inspector.js';
 
 export class App {
     constructor() {
@@ -13,6 +14,7 @@ export class App {
         this.viewer = new Viewer();
         this.timeline = new Timeline();
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
+        this.inspector = new Inspector(this.workspace);
         this.toolbar = new Toolbar({ onLoadJSON: (file) => this.loadSceneFile(file) });
     }
 
@@ -22,6 +24,7 @@ export class App {
         this.viewer.init(document.getElementById('viewer'));
         this.timeline.init(document.getElementById('timeline'));
         this.sidebar.init(document.getElementById('sidebar'));
+        this.inspector.init(document.getElementById('inspector'));
         this.toolbar.init(document.getElementById('toolbar'));
 
         this.setupKeyboardShortcuts();
@@ -35,6 +38,7 @@ export class App {
             // Commit the new state only after parsing and validation succeed.
             this.workspace.load(data);
             this.sidebar.render(this.workspace.data, this.workspace.selectedNode);
+            this.inspector.render();
 
             console.info('Loaded scene', file.name);
             console.info('Node count:', summary.nodeCount);
@@ -49,6 +53,7 @@ export class App {
     selectNode(node) {
         this.workspace.selectNode(node);
         this.sidebar.render(this.workspace.data, this.workspace.selectedNode);
+        this.inspector.render();
         console.info('Selected node:', node.name ?? node.id ?? node.type ?? node.kind ?? 'Unnamed node');
     }
 
