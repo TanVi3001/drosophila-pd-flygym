@@ -3,6 +3,7 @@ export class Timeline {
         this.workspace = workspace;
         this.container = null;
         this.onSeekFrame = onSeekFrame;
+        this.dragState = null;
     }
 
     init(container) {
@@ -19,14 +20,14 @@ export class Timeline {
             totalFrames - 1,
         );
         this.workspace.currentFrame = currentFrame;
-        const keyframes = getKeyframeEntries(this.workspace, totalFrames);
+        const keyframes = this.workspace.getKeyframeEntries();
         this.container.innerHTML = `
             <div class="timeline-panel">
                 <div class="timeline-readout">
-                    <span>Current Frame: <strong>${currentFrame}</strong></span>
+                    <span class="timeline-current-frame">Current Frame: <strong>${currentFrame}</strong></span>
                     <span>Total Frames: <strong>${totalFrames}</strong></span>
                     <span>Keyframes: <strong>${keyframes.length}</strong></span>
-                    <span>Selected Keyframe: <strong>${getSelectedKeyframeFrame(this.workspace)}</strong></span>
+                    <span class="timeline-selected-keyframe">Selected Keyframe: <strong>${getSelectedKeyframeFrame(this.workspace)}</strong></span>
                 </div>
                 <div class="timeline-track">
                     <input
@@ -52,6 +53,7 @@ export class Timeline {
         `;
 
         const panel = this.container.querySelector('.timeline-panel');
+        const track = this.container.querySelector('.timeline-track');
         const slider = this.container.querySelector('.timeline-slider');
         slider.addEventListener('input', (event) => {
             this.seek(Number(event.target.value));
@@ -64,6 +66,16 @@ export class Timeline {
                 ));
                 if (entry) this.selectKeyframe(entry);
             });
+            const entry = keyframes.find((candidate) => (
+                candidate.frame === Number(marker.dataset.frame)
+            ));
+            if (!entry) return;
+            marker.addEventListener('pointerdown', (event) => (
+                this.startDrag(event, entry, marker, track)
+            ));
+            marker.addEventListener('pointermove', (event) => this.drag(event));
+            marker.addEventListener('pointerup', (event) => this.endDrag(event));
+            marker.addEventListener('pointercancel', (event) => this.endDrag(event));
         });
         slider.addEventListener('click', (event) => event.stopPropagation());
         panel.addEventListener('click', () => this.clearKeyframeSelection());
@@ -76,8 +88,79 @@ export class Timeline {
         if (this.onSeekFrame) this.onSeekFrame(this.workspace.currentFrame);
     }
 
+    startDrag(event, entry, marker, track) {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        this.workspace.selectKeyframe(entry.data, entry.frame, entry.sourceIndex);
+        this.dragState = {
+            entry,
+            marker,
+            pointerId: event.pointerId,
+            track,
+            totalFrames: Math.max(1, this.workspace.totalFrames),
+        };
+        marker.setPointerCapture(event.pointerId);
+        this.updateMarkerState();
+        if (this.onSeekFrame) this.onSeekFrame(this.workspace.currentFrame);
+    }
+
+    drag(event) {
+        if (!this.dragState || event.pointerId !== this.dragState.pointerId) return;
+        event.preventDefault();
+        const nextFrame = this.frameFromPointer(event, this.dragState.track);
+        const result = this.workspace.moveSelectedKeyframe(nextFrame);
+        if (!result?.updated) return;
+
+        this.dragState.entry.frame = result.keyframe.frame;
+        this.updateMarkerPosition(result.keyframe.frame);
+        this.updateMarkerState();
+        if (this.onSeekFrame) this.onSeekFrame(this.workspace.currentFrame);
+    }
+
+    endDrag(event) {
+        if (!this.dragState || event.pointerId !== this.dragState.pointerId) return;
+        if (this.dragState.marker.hasPointerCapture(event.pointerId)) {
+            this.dragState.marker.releasePointerCapture(event.pointerId);
+        }
+        this.dragState = null;
+    }
+
+    frameFromPointer(event, track) {
+        const bounds = track.getBoundingClientRect();
+        if (bounds.width <= 0) return this.workspace.currentFrame;
+        const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
+        return Math.round(ratio * (Math.max(1, this.workspace.totalFrames) - 1));
+    }
+
+    updateMarkerPosition(frame) {
+        if (!this.dragState) return;
+        const totalFrames = this.dragState.totalFrames;
+        const percentage = totalFrames <= 1
+            ? 0
+            : (frame / (totalFrames - 1)) * 100;
+        this.dragState.marker.style.left = `${percentage}%`;
+        this.dragState.marker.dataset.frame = String(frame);
+        this.dragState.marker.setAttribute('aria-label', `Keyframe at frame ${frame}`);
+        this.dragState.marker.title = `Keyframe ${frame}`;
+        const currentReadout = this.container.querySelector('.timeline-current-frame strong');
+        const selectedReadout = this.container.querySelector('.timeline-selected-keyframe strong');
+        if (currentReadout) currentReadout.textContent = String(frame);
+        if (selectedReadout) selectedReadout.textContent = String(frame);
+    }
+
+    updateMarkerState() {
+        const currentFrame = this.workspace.currentFrame;
+        const selectedFrame = this.workspace.selectedKeyframe?.frame;
+        this.container.querySelectorAll('.timeline-keyframe').forEach((marker) => {
+            const frame = Number(marker.dataset.frame);
+            marker.classList.toggle('current', frame === currentFrame);
+            marker.classList.toggle('selected', frame === selectedFrame);
+        });
+    }
+
     selectKeyframe(entry) {
-        this.workspace.selectKeyframe(entry.data, entry.frame);
+        this.workspace.selectKeyframe(entry.data, entry.frame, entry.sourceIndex);
         this.render();
         if (this.onSeekFrame) this.onSeekFrame(this.workspace.currentFrame);
     }
@@ -87,44 +170,6 @@ export class Timeline {
         this.workspace.clearKeyframeSelection();
         this.render();
     }
-}
-
-function getKeyframeEntries(workspace, totalFrames) {
-    const animation = workspace.animation;
-    const explicitKeyframes = Array.isArray(animation?.keyframes);
-    const source = explicitKeyframes
-        ? animation.keyframes
-        : Array.isArray(workspace.frames) ? workspace.frames : [];
-    const hasFlags = !explicitKeyframes && source.some((entry) => (
-        entry
-        && typeof entry === 'object'
-        && (entry.keyframe !== undefined || entry.isKeyframe !== undefined)
-    ));
-    const entries = source
-        .filter((entry) => !hasFlags || entry?.keyframe === true || entry?.isKeyframe === true)
-        .map((entry, index) => ({
-            data: entry,
-            frame: getKeyframeFrame(entry, index),
-        }))
-        .filter((entry) => Number.isInteger(entry.frame) && entry.frame >= 0)
-        .map((entry) => ({
-            ...entry,
-            frame: Math.min(entry.frame, totalFrames - 1),
-        }));
-    const uniqueEntries = new Map();
-    entries.forEach((entry) => {
-        if (!uniqueEntries.has(entry.frame)) uniqueEntries.set(entry.frame, entry);
-    });
-    return [...uniqueEntries.values()].sort((left, right) => left.frame - right.frame);
-}
-
-function getKeyframeFrame(keyframe, fallback) {
-    if (typeof keyframe === 'number') return Math.round(keyframe);
-    if (!keyframe || typeof keyframe !== 'object') return fallback;
-
-    const position = keyframe.frame ?? keyframe.frameIndex ?? keyframe.at;
-    const frame = Number(position);
-    return Number.isFinite(frame) ? Math.round(frame) : fallback;
 }
 
 function renderKeyframeMarker(entry, currentFrame, selectedKeyframe, totalFrames) {

@@ -269,6 +269,7 @@ body {
     padding: 0;
     pointer-events: auto;
     position: absolute;
+    touch-action: none;
     transform: translate(-50%, -50%);
     width: 10px;
     z-index: 2;

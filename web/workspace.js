@@ -39,7 +39,7 @@ export class Workspace {
         return this.selectedNode;
     }
 
-    selectKeyframe(keyframe, frame) {
+    selectKeyframe(keyframe, frame, sourceIndex = null) {
         const selectedFrame = Number(frame);
         if (!Number.isInteger(selectedFrame) || selectedFrame < 0) {
             this.selectedKeyframe = null;
@@ -49,6 +49,7 @@ export class Workspace {
         this.selectedKeyframe = {
             frame: selectedFrame,
             data: keyframe,
+            sourceIndex,
         };
         this.currentFrame = selectedFrame;
         return this.selectedKeyframe;
@@ -59,16 +60,55 @@ export class Workspace {
         return this.selectedKeyframe;
     }
 
-    updateSelectedKeyframeFrame(frame) {
+    getKeyframeEntries() {
+        const explicitKeyframes = Array.isArray(this.animation?.keyframes);
+        const source = explicitKeyframes
+            ? this.animation.keyframes
+            : Array.isArray(this.frames) ? this.frames : [];
+        const hasFlags = !explicitKeyframes && source.some((entry) => (
+            entry
+            && typeof entry === 'object'
+            && (entry.keyframe !== undefined || entry.isKeyframe !== undefined)
+        ));
+        const totalFrames = Math.max(1, this.totalFrames);
+        const entries = source
+            .filter((entry) => !hasFlags || entry?.keyframe === true || entry?.isKeyframe === true)
+            .map((entry, sourceIndex) => ({
+                data: entry,
+                frame: getKeyframeFrame(entry, sourceIndex),
+                sourceIndex,
+            }))
+            .filter((entry) => Number.isInteger(entry.frame) && entry.frame >= 0)
+            .map((entry) => ({
+                ...entry,
+                frame: Math.min(entry.frame, totalFrames - 1),
+            }));
+        const uniqueEntries = new Map();
+        entries.forEach((entry) => {
+            if (!uniqueEntries.has(entry.frame)) uniqueEntries.set(entry.frame, entry);
+        });
+        return [...uniqueEntries.values()].sort((left, right) => left.frame - right.frame);
+    }
+
+    moveSelectedKeyframe(frame) {
         if (!this.selectedKeyframe) return null;
 
         const parsedFrame = Number(frame);
         if (!Number.isInteger(parsedFrame) || parsedFrame < 0) {
-            return this.selectedKeyframe;
+            return { updated: false, reason: 'invalid-frame', keyframe: this.selectedKeyframe };
         }
 
         const maximumFrame = Math.max(0, this.totalFrames - 1);
         const nextFrame = Math.min(parsedFrame, maximumFrame);
+        const collision = this.getKeyframeEntries().some((entry) => (
+            entry.frame === nextFrame
+            && entry.data !== this.selectedKeyframe.data
+            && entry.sourceIndex !== this.selectedKeyframe.sourceIndex
+        ));
+        if (collision) {
+            return { updated: false, reason: 'collision', keyframe: this.selectedKeyframe };
+        }
+
         const data = this.selectedKeyframe.data;
         if (data && typeof data === 'object' && !Array.isArray(data)) {
             const positionKey = getPositionKey(data) || 'frame';
@@ -77,7 +117,12 @@ export class Workspace {
 
         this.selectedKeyframe.frame = nextFrame;
         this.currentFrame = nextFrame;
-        return this.selectedKeyframe;
+        return { updated: true, keyframe: this.selectedKeyframe };
+    }
+
+    updateSelectedKeyframeFrame(frame) {
+        const result = this.moveSelectedKeyframe(frame);
+        return result?.keyframe ?? null;
     }
 
     updateSelectedKeyframeMetadata(metadata) {
@@ -121,6 +166,15 @@ export class Workspace {
 
 function getPositionKey(data) {
     return ['frame', 'frameIndex', 'at'].find((key) => hasOwn(data, key));
+}
+
+function getKeyframeFrame(keyframe, fallback) {
+    if (typeof keyframe === 'number') return Math.round(keyframe);
+    if (!keyframe || typeof keyframe !== 'object') return fallback;
+
+    const position = keyframe.frame ?? keyframe.frameIndex ?? keyframe.at;
+    const frame = Number(position);
+    return Number.isFinite(frame) ? Math.round(frame) : fallback;
 }
 
 function hasOwn(object, key) {
