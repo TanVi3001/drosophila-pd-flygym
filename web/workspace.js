@@ -59,9 +59,72 @@ export class Workspace {
         return this.selectedKeyframe;
     }
 
+    updateSelectedKeyframeFrame(frame) {
+        if (!this.selectedKeyframe) return null;
+
+        const parsedFrame = Number(frame);
+        if (!Number.isInteger(parsedFrame) || parsedFrame < 0) {
+            return this.selectedKeyframe;
+        }
+
+        const maximumFrame = Math.max(0, this.totalFrames - 1);
+        const nextFrame = Math.min(parsedFrame, maximumFrame);
+        const data = this.selectedKeyframe.data;
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+            const positionKey = getPositionKey(data) || 'frame';
+            data[positionKey] = nextFrame;
+        }
+
+        this.selectedKeyframe.frame = nextFrame;
+        this.currentFrame = nextFrame;
+        return this.selectedKeyframe;
+    }
+
+    updateSelectedKeyframeMetadata(metadata) {
+        if (!this.selectedKeyframe) return null;
+        const data = this.selectedKeyframe.data;
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            return this.selectedKeyframe;
+        }
+
+        if (metadata === undefined) {
+            delete data.metadata;
+        } else {
+            data.metadata = metadata;
+        }
+        return this.selectedKeyframe;
+    }
+
+    updateSelectedKeyframeDuration(duration) {
+        if (!this.selectedKeyframe) return null;
+
+        const parsedDuration = Number(duration);
+        if (!Number.isFinite(parsedDuration) || parsedDuration < 0) {
+            return this.selectedKeyframe;
+        }
+
+        const data = this.selectedKeyframe.data;
+        if (data && typeof data === 'object' && !Array.isArray(data)
+            && hasOwn(data, 'duration')) {
+            data.duration = parsedDuration;
+        } else if (this.animation && hasOwn(this.animation, 'duration')) {
+            this.animation.duration = parsedDuration;
+            this.duration = parsedDuration;
+        }
+        return this.selectedKeyframe;
+    }
+
     save() {
         console.log("Workspace saved.");
     }
+}
+
+function getPositionKey(data) {
+    return ['frame', 'frameIndex', 'at'].find((key) => hasOwn(data, key));
+}
+
+function hasOwn(object, key) {
+    return Object.prototype.hasOwnProperty.call(object, key);
 }
 
 function getTotalFrames(data) {

@@ -13,9 +13,9 @@ export class App {
         this.workspace = new Workspace();
         this.layout = new Layout();
         this.viewportRenderer = new ViewportRenderer(this.workspace);
-        this.timeline = new Timeline(this.workspace, () => this.viewportRenderer.render());
+        this.timeline = new Timeline(this.workspace, () => this.handleTimelineChange());
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
-        this.inspector = new Inspector(this.workspace);
+        this.inspector = new Inspector(this.workspace, () => this.handleInspectorChange());
         this.playbackController = new PlaybackController(this.workspace);
         this.toolbar = new Toolbar({
             onLoadJSON: (file) => this.loadSceneFile(file),
@@ -62,6 +62,17 @@ export class App {
         this.inspector.render();
         this.viewportRenderer.render();
         console.info('Selected node:', node.name ?? node.id ?? node.type ?? node.kind ?? 'Unnamed node');
+    }
+
+    handleTimelineChange() {
+        this.inspector.render();
+        this.viewportRenderer.render();
+    }
+
+    handleInspectorChange() {
+        this.timeline.render();
+        this.inspector.render();
+        this.viewportRenderer.render();
     }
 
 }

@@ -82,6 +82,36 @@ body {
     overflow-wrap: anywhere;
 }
 
+.inspector-field {
+    color: var(--text-secondary);
+    display: block;
+    font-size: 0.85em;
+    margin-top: 10px;
+}
+
+.inspector-input {
+    background-color: var(--bg-base);
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+    color: var(--text-primary);
+    display: block;
+    font: inherit;
+    margin-top: 4px;
+    padding: 5px;
+    width: 100%;
+}
+
+.inspector-textarea {
+    font-family: Consolas, 'Courier New', monospace;
+    resize: vertical;
+}
+
+.inspector-status {
+    color: #f0b429;
+    font-size: 0.8em;
+    min-height: 1em;
+}
+
 .inspector-empty {
     color: var(--text-secondary);
 }
