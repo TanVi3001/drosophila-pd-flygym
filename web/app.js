@@ -20,7 +20,15 @@ export class App {
         this.toolbar = new Toolbar({
             onLoadJSON: (file) => this.loadSceneFile(file),
             onResetView: () => this.viewportRenderer.resetView(),
+            onUndo: () => this.undo(),
+            onRedo: () => this.redo(),
+            onInsert: () => this.insertKeyframe(),
+            onDuplicate: () => this.duplicateKeyframes(),
+            onDelete: () => this.deleteKeyframes(),
+            onFramePrevious: () => this.nudgeSelectedKeyframe(-1),
+            onFrameNext: () => this.nudgeSelectedKeyframe(1),
         });
+        this.keyDownHandler = (event) => this.handleKeyDown(event);
     }
 
     init() {
@@ -31,6 +39,7 @@ export class App {
         this.sidebar.init(document.getElementById('sidebar'));
         this.inspector.init(document.getElementById('inspector'));
         this.toolbar.init(document.getElementById('toolbar'));
+        window.addEventListener('keydown', this.keyDownHandler);
 
     }
 
@@ -73,6 +82,84 @@ export class App {
         this.timeline.render();
         this.inspector.render();
         this.viewportRenderer.render();
+    }
+
+    insertKeyframe() {
+        this.runEdit(() => this.workspace.insertKeyframe());
+    }
+
+    duplicateKeyframes() {
+        this.runEdit(() => this.workspace.duplicateSelectedKeyframes());
+    }
+
+    deleteKeyframes() {
+        this.runEdit(() => this.workspace.deleteSelectedKeyframes());
+    }
+
+    nudgeSelectedKeyframe(delta) {
+        const frame = this.workspace.selectedKeyframe?.frame;
+        if (!Number.isInteger(frame)) return;
+        this.runEdit(() => this.workspace.moveSelectedKeyframe(frame + delta));
+    }
+
+    undo() {
+        if (this.workspace.undo()) this.refreshEditor();
+    }
+
+    redo() {
+        if (this.workspace.redo()) this.refreshEditor();
+    }
+
+    runEdit(operation) {
+        const result = operation();
+        if (result?.updated) this.refreshEditor();
+        return result;
+    }
+
+    refreshEditor() {
+        this.timeline.render();
+        this.inspector.render();
+        this.viewportRenderer.render();
+    }
+
+    handleKeyDown(event) {
+        if (event.isComposing) return;
+        const target = event.target;
+        const editingText = target && (
+            target.tagName === 'INPUT' || target.tagName === 'TEXTAREA'
+        );
+        if (editingText) return;
+
+        const modifier = event.ctrlKey || event.metaKey;
+        if (modifier && event.shiftKey && event.key.toLowerCase() === 'z') {
+            event.preventDefault();
+            this.redo();
+        } else if (modifier && event.key.toLowerCase() === 'z') {
+            event.preventDefault();
+            this.undo();
+        } else if (modifier && event.key.toLowerCase() === 'd') {
+            event.preventDefault();
+            this.duplicateKeyframes();
+        } else if (modifier && event.key.toLowerCase() === 'c') {
+            event.preventDefault();
+            this.workspace.copySelectedKeyframes();
+        } else if (modifier && event.key.toLowerCase() === 'v') {
+            event.preventDefault();
+            this.runEdit(() => this.workspace.pasteKeyframes());
+        } else if (!modifier && event.key === 'Delete') {
+            event.preventDefault();
+            this.deleteKeyframes();
+        } else if (!modifier && event.key === 'Escape') {
+            this.workspace.clearKeyframeSelection();
+            this.refreshEditor();
+        } else if (!modifier && event.key.toLowerCase() === 'a' && !editingText) {
+            event.preventDefault();
+            this.workspace.selectAllKeyframes();
+            this.refreshEditor();
+        } else if (!modifier && event.key.toLowerCase() === 'f' && !editingText) {
+            event.preventDefault();
+            this.viewportRenderer.resetView();
+        }
     }
 
 }

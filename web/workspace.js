@@ -3,12 +3,16 @@ export class Workspace {
         this.data = {};
         this.selectedNode = null;
         this.selectedKeyframe = null;
+        this.selectedKeyframes = [];
         this.currentFrame = 0;
         this.totalFrames = 1;
         this.animation = null;
         this.frames = [];
         this.duration = 0;
         this.playbackState = 'Stopped';
+        this.clipboard = [];
+        this.undoStack = [];
+        this.redoStack = [];
     }
 
     load(data = null) {
@@ -16,8 +20,12 @@ export class Workspace {
             this.data = data;
             this.selectedNode = null;
             this.selectedKeyframe = null;
+            this.selectedKeyframes = [];
             this.currentFrame = 0;
             this.playbackState = 'Stopped';
+            this.clipboard = [];
+            this.undoStack = [];
+            this.redoStack = [];
             this.animation = getAnimation(data);
             this.frames = Array.isArray(this.animation?.frames)
                 ? this.animation.frames
@@ -51,13 +59,48 @@ export class Workspace {
             data: keyframe,
             sourceIndex,
         };
+        this.selectedKeyframes = [this.selectedKeyframe];
         this.currentFrame = selectedFrame;
         return this.selectedKeyframe;
     }
 
+    selectKeyframes(entries) {
+        const selected = (Array.isArray(entries) ? entries : [])
+            .filter((entry) => entry && Number.isInteger(entry.frame))
+            .map((entry) => ({
+                frame: entry.frame,
+                data: entry.data,
+                sourceIndex: entry.sourceIndex ?? null,
+            }));
+        this.selectedKeyframes = selected;
+        this.selectedKeyframe = selected[0] ?? null;
+        if (this.selectedKeyframe) this.currentFrame = this.selectedKeyframe.frame;
+        return this.selectedKeyframes;
+    }
+
+    toggleKeyframeSelection(entry) {
+        const current = this.selectedKeyframes.filter((candidate) => (
+            candidate.data !== entry?.data
+            && candidate.sourceIndex !== entry?.sourceIndex
+        ));
+        if (current.length === this.selectedKeyframes.length) current.push(entry);
+        return this.selectKeyframes(current);
+    }
+
+    selectAllKeyframes() {
+        return this.selectKeyframes(this.getKeyframeEntries());
+    }
+
     clearKeyframeSelection() {
         this.selectedKeyframe = null;
+        this.selectedKeyframes = [];
         return this.selectedKeyframe;
+    }
+
+    getKeyframeSource() {
+        if (Array.isArray(this.animation?.keyframes)) return this.animation.keyframes;
+        if (Array.isArray(this.frames)) return this.frames;
+        return null;
     }
 
     getKeyframeEntries() {
@@ -90,7 +133,7 @@ export class Workspace {
         return [...uniqueEntries.values()].sort((left, right) => left.frame - right.frame);
     }
 
-    moveSelectedKeyframe(frame) {
+    moveSelectedKeyframe(frame, { recordHistory = true } = {}) {
         if (!this.selectedKeyframe) return null;
 
         const parsedFrame = Number(frame);
@@ -109,14 +152,24 @@ export class Workspace {
             return { updated: false, reason: 'collision', keyframe: this.selectedKeyframe };
         }
 
-        const data = this.selectedKeyframe.data;
+        const movedKeyframe = this.selectedKeyframe;
+        const previousFrame = movedKeyframe.frame;
+        const data = movedKeyframe.data;
         if (data && typeof data === 'object' && !Array.isArray(data)) {
             const positionKey = getPositionKey(data) || 'frame';
             data[positionKey] = nextFrame;
         }
 
-        this.selectedKeyframe.frame = nextFrame;
+        movedKeyframe.frame = nextFrame;
+        this.syncSelectedKeyframeFrame(movedKeyframe);
         this.currentFrame = nextFrame;
+        if (recordHistory && previousFrame !== nextFrame) {
+            this.recordCommand({
+                label: 'Move keyframe',
+                undo: () => this.setKeyframeFrame(movedKeyframe, previousFrame),
+                redo: () => this.setKeyframeFrame(movedKeyframe, nextFrame),
+            });
+        }
         return { updated: true, keyframe: this.selectedKeyframe };
     }
 
@@ -132,11 +185,17 @@ export class Workspace {
             return this.selectedKeyframe;
         }
 
+        const before = cloneValue(data.metadata);
         if (metadata === undefined) {
             delete data.metadata;
         } else {
             data.metadata = metadata;
         }
+        this.recordCommand({
+            label: 'Edit metadata',
+            undo: () => setMetadata(data, before),
+            redo: () => setMetadata(data, metadata),
+        });
         return this.selectedKeyframe;
     }
 
@@ -149,6 +208,9 @@ export class Workspace {
         }
 
         const data = this.selectedKeyframe.data;
+        const before = data && typeof data === 'object' && hasOwn(data, 'duration')
+            ? data.duration
+            : this.animation?.duration;
         if (data && typeof data === 'object' && !Array.isArray(data)
             && hasOwn(data, 'duration')) {
             data.duration = parsedDuration;
@@ -156,7 +218,146 @@ export class Workspace {
             this.animation.duration = parsedDuration;
             this.duration = parsedDuration;
         }
+        this.recordCommand({
+            label: 'Edit duration',
+            undo: () => setDuration(this, data, before),
+            redo: () => setDuration(this, data, parsedDuration),
+        });
         return this.selectedKeyframe;
+    }
+
+    insertKeyframe(frame = this.currentFrame, data = {}) {
+        const source = this.getKeyframeSource();
+        const nextFrame = Number(frame);
+        if (!source || !Number.isInteger(nextFrame) || nextFrame < 0) {
+            return { updated: false, reason: 'invalid-frame' };
+        }
+        if (this.getKeyframeEntries().some((entry) => entry.frame === nextFrame)) {
+            return { updated: false, reason: 'collision' };
+        }
+
+        const keyframe = cloneValue(data) || {};
+        if (typeof keyframe !== 'object' || Array.isArray(keyframe)) return { updated: false, reason: 'invalid-data' };
+        keyframe[getPositionKey(keyframe) || 'frame'] = nextFrame;
+        source.push(keyframe);
+        this.totalFrames = Math.max(this.totalFrames, nextFrame + 1);
+        const entry = { data: keyframe, frame: nextFrame, sourceIndex: source.length - 1 };
+        this.selectKeyframe(keyframe, nextFrame, entry.sourceIndex);
+        this.recordCommand({
+            label: 'Insert keyframe',
+            undo: () => this.removeKeyframeData(keyframe),
+            redo: () => this.restoreKeyframeData(keyframe),
+        });
+        return { updated: true, keyframe: entry };
+    }
+
+    deleteSelectedKeyframes() {
+        const source = this.getKeyframeSource();
+        const selected = [...this.selectedKeyframes];
+        if (!source || selected.length === 0) return { updated: false, reason: 'no-selection' };
+        const removed = selected
+            .map((entry) => ({ data: entry.data, index: source.indexOf(entry.data) }))
+            .filter((entry) => entry.index >= 0)
+            .sort((left, right) => right.index - left.index);
+        if (removed.length === 0) return { updated: false, reason: 'not-found' };
+        removed.forEach((entry) => source.splice(entry.index, 1));
+        this.clearKeyframeSelection();
+        this.recordCommand({
+            label: 'Delete keyframe',
+            undo: () => removed.slice().reverse().forEach((entry) => source.splice(entry.index, 0, entry.data)),
+            redo: () => removed.forEach((entry) => source.splice(source.indexOf(entry.data), 1)),
+        });
+        return { updated: true, count: removed.length };
+    }
+
+    duplicateSelectedKeyframes() {
+        const selected = [...this.selectedKeyframes];
+        if (selected.length === 0) return { updated: false, reason: 'no-selection' };
+        const created = [];
+        for (const entry of selected) {
+            let frame = entry.frame + 1;
+            while (this.getKeyframeEntries().some((candidate) => candidate.frame === frame)) frame += 1;
+            const result = this.insertKeyframe(frame, entry.data);
+            if (result.updated) created.push(result.keyframe);
+        }
+        if (created.length === 0) return { updated: false, reason: 'no-space' };
+        this.selectKeyframes(created);
+        return { updated: true, keyframes: created };
+    }
+
+    copySelectedKeyframes() {
+        this.clipboard = this.selectedKeyframes.map((entry) => ({
+            frame: entry.frame,
+            data: cloneValue(entry.data),
+        }));
+        return this.clipboard;
+    }
+
+    pasteKeyframes(frame = this.currentFrame) {
+        if (this.clipboard.length === 0) return { updated: false, reason: 'empty-clipboard' };
+        const origin = this.clipboard[0].frame;
+        const created = [];
+        for (const item of this.clipboard) {
+            const targetFrame = Number(frame) + item.frame - origin;
+            const result = this.insertKeyframe(targetFrame, item.data);
+            if (result.updated) created.push(result.keyframe);
+        }
+        if (created.length === 0) return { updated: false, reason: 'collision' };
+        this.selectKeyframes(created);
+        return { updated: true, keyframes: created };
+    }
+
+    recordCommand(command) {
+        if (!command || typeof command.undo !== 'function' || typeof command.redo !== 'function') return;
+        this.undoStack.push(command);
+        this.redoStack = [];
+    }
+
+    undo() {
+        const command = this.undoStack.pop();
+        if (!command) return false;
+        command.undo();
+        this.redoStack.push(command);
+        return true;
+    }
+
+    redo() {
+        const command = this.redoStack.pop();
+        if (!command) return false;
+        command.redo();
+        this.undoStack.push(command);
+        return true;
+    }
+
+    setKeyframeFrame(entry, frame) {
+        if (!entry) return;
+        const data = entry.data;
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+            data[getPositionKey(data) || 'frame'] = frame;
+        }
+        entry.frame = frame;
+        this.syncSelectedKeyframeFrame(entry);
+        this.currentFrame = frame;
+    }
+
+    syncSelectedKeyframeFrame(entry) {
+        this.selectedKeyframes.forEach((candidate) => {
+            if (candidate.data === entry.data) candidate.frame = entry.frame;
+        });
+        if (this.selectedKeyframe?.data === entry.data) this.selectedKeyframe.frame = entry.frame;
+    }
+
+    removeKeyframeData(data) {
+        const source = this.getKeyframeSource();
+        const index = source?.indexOf(data) ?? -1;
+        if (index >= 0) source.splice(index, 1);
+        this.clearKeyframeSelection();
+    }
+
+    restoreKeyframeData(data) {
+        const source = this.getKeyframeSource();
+        if (source && !source.includes(data)) source.push(data);
+        this.selectKeyframe(data, getKeyframeFrame(data, source?.length ?? 0), source?.indexOf(data));
     }
 
     save() {
@@ -166,6 +367,25 @@ export class Workspace {
 
 function getPositionKey(data) {
     return ['frame', 'frameIndex', 'at'].find((key) => hasOwn(data, key));
+}
+
+function setMetadata(data, metadata) {
+    if (metadata === undefined) delete data.metadata;
+    else data.metadata = cloneValue(metadata);
+}
+
+function setDuration(workspace, data, duration) {
+    if (data && hasOwn(data, 'duration')) data.duration = duration;
+    else if (workspace.animation && hasOwn(workspace.animation, 'duration')) {
+        workspace.animation.duration = duration;
+    }
+    workspace.duration = Number(duration) || 0;
+}
+
+function cloneValue(value) {
+    if (value === undefined) return undefined;
+    if (value === null || typeof value !== 'object') return value;
+    return JSON.parse(JSON.stringify(value));
 }
 
 function getKeyframeFrame(keyframe, fallback) {
