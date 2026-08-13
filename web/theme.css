@@ -50,6 +50,63 @@ body {
     overflow-y: auto;
 }
 
+.project-summary {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+}
+
+.project-summary li {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+}
+
+.project-summary span {
+    color: var(--text-secondary);
+}
+
+.scene-tree-panel {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.scene-tree-panel h4 {
+    margin: 0 0 8px;
+    color: var(--text-primary);
+}
+
+.scene-tree,
+.scene-tree ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 16px;
+}
+
+.scene-tree {
+    padding-left: 0;
+}
+
+.scene-tree-node {
+    padding: 2px 0;
+    color: var(--text-primary);
+}
+
+.scene-tree-node summary {
+    cursor: pointer;
+    padding: 2px 0;
+}
+
+.scene-tree-node summary::marker {
+    color: var(--accent);
+}
+
+.scene-tree-empty {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin: 0;
+}
+
 #viewer-container {
     flex: 1;
     position: relative;
