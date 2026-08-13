@@ -12,7 +12,7 @@ export class App {
         this.workspace = new Workspace();
         this.layout = new Layout();
         this.viewportRenderer = new ViewportRenderer(this.workspace);
-        this.timeline = new Timeline();
+        this.timeline = new Timeline(this.workspace, () => this.viewportRenderer.render());
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.inspector = new Inspector(this.workspace);
         this.toolbar = new Toolbar({
@@ -30,7 +30,6 @@ export class App {
         this.inspector.init(document.getElementById('inspector'));
         this.toolbar.init(document.getElementById('toolbar'));
 
-        this.setupKeyboardShortcuts();
     }
 
     async loadSceneFile(file) {
@@ -40,6 +39,7 @@ export class App {
 
             // Commit the new state only after parsing and validation succeed.
             this.workspace.load(data);
+            this.timeline.render();
             this.sidebar.render(this.workspace.data, this.workspace.selectedNode);
             this.inspector.render();
             this.viewportRenderer.render();
@@ -62,16 +62,4 @@ export class App {
         console.info('Selected node:', node.name ?? node.id ?? node.type ?? node.kind ?? 'Unnamed node');
     }
 
-    setupKeyboardShortcuts() {
-        window.addEventListener('keydown', (e) => {
-            if (e.code !== 'Space' || e.repeat) return;
-            e.preventDefault();
-        });
-        window.addEventListener('keyup', (e) => {
-            if (e.code !== 'Space') return;
-            if (!this.viewportRenderer.consumeSpacePan()) {
-                this.timeline.togglePlayback();
-            }
-        });
-    }
 }

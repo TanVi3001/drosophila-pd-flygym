@@ -122,6 +122,9 @@ export class ViewportRenderer {
         const nodes = Array.isArray(this.workspace.data?.nodes)
             ? this.workspace.data.nodes
             : [];
+        const currentFrame = Number.isInteger(this.workspace.currentFrame)
+            ? this.workspace.currentFrame
+            : 0;
         if (nodes.length === 0) {
             this.drawMessage('No Scene Loaded');
             return;
@@ -131,7 +134,7 @@ export class ViewportRenderer {
         this.context.save();
         this.applyCameraTransform();
         this.drawLinks(layout);
-        this.drawNodes(layout, this.workspace.selectedNode);
+        this.drawNodes(layout, this.workspace.selectedNode, currentFrame);
         this.context.restore();
     }
 
@@ -224,7 +227,9 @@ export class ViewportRenderer {
         this.context.stroke();
     }
 
-    drawNodes(layout, selectedNode) {
+    drawNodes(layout, selectedNode, currentFrame) {
+        // The frame is intentionally read-only here; playback will use it later.
+        void currentFrame;
         this.context.font = '12px sans-serif';
         this.context.textAlign = 'left';
         this.context.textBaseline = 'middle';

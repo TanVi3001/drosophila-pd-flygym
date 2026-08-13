@@ -203,6 +203,22 @@ body {
     flex-direction: column;
 }
 
+.timeline-panel {
+    padding: 12px;
+}
+
+.timeline-readout {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 10px;
+}
+
+.timeline-slider {
+    accent-color: var(--accent);
+    display: block;
+    width: 100%;
+}
+
 .hidden {
     display: none !important;
 }
