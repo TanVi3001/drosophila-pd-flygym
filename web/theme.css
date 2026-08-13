@@ -219,6 +219,37 @@ body {
     width: 100%;
 }
 
+.timeline-track {
+    position: relative;
+}
+
+.timeline-keyframes {
+    inset: 50% 8px auto;
+    height: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.timeline-keyframe {
+    background-color: #f0b429;
+    border: 1px solid #fff2b2;
+    border-radius: 50%;
+    cursor: pointer;
+    height: 10px;
+    padding: 0;
+    pointer-events: auto;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    z-index: 2;
+}
+
+.timeline-keyframe.selected {
+    background-color: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
 .hidden {
     display: none !important;
 }

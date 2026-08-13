@@ -51,9 +51,11 @@ function getTotalFrames(data) {
         data?.animation?.totalFrames,
         data?.animation?.frameCount,
         data?.animation?.frames?.length,
+        getKeyframeFrameCount(data?.animation?.keyframes),
         data?.frames?.length,
         data?.scene?.animation?.totalFrames,
         data?.scene?.animation?.frames?.length,
+        getKeyframeFrameCount(data?.scene?.animation?.keyframes),
         data?.scene?.frames?.length,
     ];
 
@@ -62,6 +64,17 @@ function getTotalFrames(data) {
         if (Number.isInteger(frames) && frames > 0) return frames;
     }
     return 1;
+}
+
+function getKeyframeFrameCount(keyframes) {
+    if (!Array.isArray(keyframes) || keyframes.length === 0) return 0;
+
+    const positions = keyframes.map((keyframe, index) => {
+        const position = keyframe?.frame ?? keyframe?.frameIndex ?? keyframe?.at;
+        const frame = Number(position);
+        return Number.isInteger(frame) && frame >= 0 ? frame : index;
+    });
+    return Math.max(...positions) + 1;
 }
 
 function getAnimation(data) {
