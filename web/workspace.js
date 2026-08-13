@@ -3,8 +3,15 @@ export class Workspace {
         this.data = {};
     }
 
-    load() {
-        console.log("Workspace loaded.");
+    load(data = null) {
+        if (data !== null) {
+            this.data = data;
+            console.log('Workspace updated.');
+            return this.data;
+        }
+
+        console.log('Workspace loaded.');
+        return this.data;
     }
 
     save() {

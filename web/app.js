@@ -4,6 +4,7 @@ import { Sidebar } from './sidebar.js';
 import { Toolbar } from './toolbar.js';
 import { Workspace } from './workspace.js';
 import { Layout } from './layout.js';
+import { JSONLoader } from './json_loader.js';
 
 export class App {
     constructor() {
@@ -12,7 +13,7 @@ export class App {
         this.viewer = new Viewer();
         this.timeline = new Timeline();
         this.sidebar = new Sidebar();
-        this.toolbar = new Toolbar();
+        this.toolbar = new Toolbar({ onLoadJSON: (file) => this.loadSceneFile(file) });
     }
 
     init() {
@@ -24,6 +25,25 @@ export class App {
         this.toolbar.init(document.getElementById('toolbar'));
 
         this.setupKeyboardShortcuts();
+    }
+
+    async loadSceneFile(file) {
+        try {
+            const data = await JSONLoader.parseFile(file);
+            const summary = JSONLoader.summarizeScene(data);
+
+            // Commit the new state only after parsing and validation succeed.
+            this.workspace.load(data);
+            this.sidebar.render(this.workspace.data);
+
+            console.info('Loaded scene', file.name);
+            console.info('Node count:', summary.nodeCount);
+            console.info('Camera count:', summary.cameraCount);
+            console.info('Trajectory count:', summary.trajectoryCount);
+        } catch (error) {
+            console.error('Failed to load scene JSON:', error);
+            window.alert(`Unable to load scene JSON: ${error.message}`);
+        }
     }
 
     setupKeyboardShortcuts() {

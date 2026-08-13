@@ -1,6 +1,7 @@
 export class Toolbar {
-    constructor() {
+    constructor({ onLoadJSON = null } = {}) {
         this.container = null;
+        this.onLoadJSON = onLoadJSON;
     }
 
     init(container) {
@@ -13,10 +14,20 @@ export class Toolbar {
         this.container.innerHTML = `
             <div style="font-weight: bold; color: var(--accent);">Fly Studio Web</div>
             <div style="margin-left: 20px;">
-                <button>Load JSON</button>
+                <button id="load-json-button" type="button">Load JSON</button>
+                <input id="load-json-input" type="file" accept=".json,application/json" hidden>
                 <button>Save Workspace</button>
                 <button>Settings</button>
             </div>
         `;
+
+        const loadButton = this.container.querySelector('#load-json-button');
+        const fileInput = this.container.querySelector('#load-json-input');
+        loadButton.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', async () => {
+            const [file] = fileInput.files;
+            if (file && this.onLoadJSON) await this.onLoadJSON(file);
+            fileInput.value = '';
+        });
     }
 }
