@@ -16,8 +16,10 @@ export class AnalysisPipeline {
 
     analyzeRollout(rollout, context = {}) {
         const key = cacheKey(rollout, context);
+        const features = this.cache.feature.getOrSet(`${key}:features`, () => this.engine.getFeatures(rollout));
         return this.cache.metric.getOrSet(key, () => {
             const graph = this.graph.evaluateAll({ rollout, context }, ['features', 'statistics', 'segmentation']);
+            graph.features = features;
             const quality = inspectBatchQuality([{ rollout }], context.qualityOptions).reports[0].report;
             const outliers = detectFeatureOutliers(graph.features, context.outlierOptions);
             return {
@@ -42,6 +44,8 @@ export class AnalysisPipeline {
         const normalized = normalizeBatch(analyses.map((item) => item.analysis.features), options.normalization ?? {});
         const reports = analyses.map((item, index) => ({ ...item, normalizedFeatures: normalized[index] }));
         const quality = inspectBatchQuality(reports.map((item) => ({ id: item.id, rollout: item.rollout })), options.qualityOptions);
+        const comparisonKey = JSON.stringify([reports.map((item) => item.id), options.comparison ?? {}]);
+        const comparisonMatrix = this.cache.comparison.getOrSet(comparisonKey, () => buildComparisonMatrix(reports.map((item) => ({ label: item.label ?? item.id, analysis: item.analysis })), options.comparison ?? {}));
         return {
             version: 1,
             scope: 'Computational batch analysis only; no biological interpretation is implied.',
@@ -49,7 +53,7 @@ export class AnalysisPipeline {
             count: reports.length,
             reports,
             quality,
-            comparisonMatrix: buildComparisonMatrix(reports.map((item) => ({ label: item.label ?? item.id, analysis: item.analysis })), options.comparison ?? {}),
+            comparisonMatrix,
             report: buildPipelineReport(reports, quality),
         };
     }

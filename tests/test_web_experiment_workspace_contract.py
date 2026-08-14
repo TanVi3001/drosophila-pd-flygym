@@ -92,3 +92,15 @@ def test_statistical_engine_backend_contract():
     for filename, markers in required.items():
         text = (WEB / filename).read_text(encoding="utf-8")
         assert all(marker.lower() in text.lower() for marker in markers), filename
+
+
+def test_integration_workflow_contract_and_failure_paths():
+    text = (WEB / "integration_workflow.js").read_text(encoding="utf-8")
+    required = [
+        "importRollout", "analyzeBatch", "benchmark", "persistAndVerify", "restoreSnapshot",
+        "rolledBack", "MemoryStorage", "FlyGymRolloutLoader", "AnalysisPipeline",
+        "StatisticalEngine", "AnalyticsExporter", "renderAnalyticsSVG",
+    ]
+    assert all(marker in text for marker in required)
+    for path in ("tests", "docs/v2"):
+        assert (ROOT / path).exists()
