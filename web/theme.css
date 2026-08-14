@@ -28,12 +28,13 @@ body {
 }
 
 #toolbar {
-    height: 40px;
+    min-height: 40px;
     background-color: var(--bg-surface);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     padding: 0 10px;
+    overflow-x: auto;
 }
 
 #main-content {
@@ -50,18 +51,443 @@ body {
     overflow-y: auto;
 }
 
+#inspector {
+    width: 280px;
+    background-color: var(--bg-surface);
+    border-left: 1px solid var(--border);
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#inspector h3,
+#inspector h4 {
+    margin-top: 0;
+}
+
+#inspector h4 {
+    margin-bottom: 8px;
+}
+
+#inspector dl {
+    margin: 0;
+}
+
+#inspector dt {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin-top: 10px;
+}
+
+#inspector dd {
+    margin: 2px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.inspector-field {
+    color: var(--text-secondary);
+    display: block;
+    font-size: 0.85em;
+    margin-top: 10px;
+}
+
+.inspector-input {
+    background-color: var(--bg-base);
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+    color: var(--text-primary);
+    display: block;
+    font: inherit;
+    margin-top: 4px;
+    padding: 5px;
+    width: 100%;
+}
+
+.inspector-textarea {
+    font-family: Consolas, 'Courier New', monospace;
+    resize: vertical;
+}
+
+.inspector-status {
+    color: #f0b429;
+    font-size: 0.8em;
+    min-height: 1em;
+}
+
+.inspector-empty {
+    color: var(--text-secondary);
+}
+
+.inspector-metadata {
+    background-color: var(--bg-base);
+    border: 1px solid var(--border);
+    margin: 0;
+    max-height: 260px;
+    overflow: auto;
+    padding: 8px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.project-summary {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+}
+
+.project-summary li {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+}
+
+.project-summary span {
+    color: var(--text-secondary);
+}
+
+.scene-tree-panel {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.scene-tree-panel h4 {
+    margin: 0 0 8px;
+    color: var(--text-primary);
+}
+
+.scene-tree,
+.scene-tree ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 16px;
+}
+
+.scene-tree {
+    padding-left: 0;
+}
+
+.scene-tree-node {
+    padding: 2px 0;
+    color: var(--text-primary);
+}
+
+.scene-tree-node-label {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 2px 0;
+    text-align: left;
+    width: 100%;
+}
+
+.scene-tree-node.selected > details > summary,
+.scene-tree-node.selected > .scene-tree-node-label {
+    background-color: var(--accent);
+    color: #ffffff;
+    outline: 1px solid var(--accent);
+}
+
+.scene-tree-node summary {
+    cursor: pointer;
+    padding: 2px 0;
+}
+
+.scene-tree-node summary::marker {
+    color: var(--accent);
+}
+
+.scene-tree-empty {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin: 0;
+}
+
 #viewer-container {
     flex: 1;
     position: relative;
     background-color: #000;
 }
 
+#viewer {
+    height: 100%;
+    width: 100%;
+}
+
+.viewport-canvas {
+    display: block;
+    height: 100%;
+    width: 100%;
+    cursor: default;
+    touch-action: none;
+}
+
+.viewport-canvas:active {
+    cursor: grabbing;
+}
+
 #timeline-container {
-    height: 150px;
+    height: 320px;
     background-color: var(--bg-surface);
     border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+}
+
+.behavior-timeline-panel {
+    border-top: 1px solid var(--border);
+    padding: 8px 12px;
+}
+
+.behavior-timeline-header {
+    align-items: center;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.behavior-timeline-header strong {
+    color: var(--text-primary);
+}
+
+.behavior-filter-input {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    min-width: 150px;
+    padding: 3px 6px;
+}
+
+.behavior-timeline-track {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    height: 24px;
+    position: relative;
+}
+
+.behavior-current-indicator {
+    background: #ffffff;
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 1px;
+    z-index: 2;
+}
+
+.behavior-segment {
+    border: 0;
+    bottom: 2px;
+    color: #111a22;
+    cursor: pointer;
+    font-size: 0.72em;
+    min-width: 4px;
+    overflow: hidden;
+    padding: 2px 4px;
+    position: absolute;
+    top: 2px;
+    white-space: nowrap;
+}
+
+#rollout-charts {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    padding: 8px 12px;
+}
+
+.rollout-chart-slot {
+    border: 1px solid var(--border);
+    min-height: 120px;
+}
+
+.rollout-chart-slot canvas {
+    display: block;
+    height: 120px;
+    width: 100%;
+}
+
+.comparison-viewer {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 10px;
+}
+
+.comparison-toolbar,
+.comparison-columns {
+    display: flex;
+    gap: 12px;
+}
+
+.comparison-toolbar {
+    justify-content: space-between;
+}
+
+.comparison-current-frame {
+    color: var(--text-secondary);
+}
+
+.comparison-condition {
+    border: 1px solid var(--border);
+    flex: 1;
+    min-width: 0;
+    padding: 8px;
+}
+
+.comparison-condition h4,
+.comparison-condition p {
+    margin: 0 0 4px;
+}
+
+.comparison-condition p,
+.comparison-differences {
+    color: var(--text-secondary);
+    font-size: 0.82em;
+}
+
+.comparison-differences {
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+.timeline-panel {
+    padding: 12px;
+}
+
+.timeline-readout {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 10px;
+}
+
+.timeline-slider {
+    accent-color: var(--accent);
+    display: block;
+    width: 100%;
+}
+
+.timeline-track {
+    position: relative;
+    padding-top: 18px;
+    touch-action: none;
+}
+
+.timeline-ruler {
+    color: var(--text-secondary);
+    font-size: 0.72em;
+    inset: 0 8px auto;
+    height: 16px;
+    position: absolute;
+}
+
+.timeline-ruler-tick {
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.timeline-keyframes {
+    inset: 50% 8px auto;
+    height: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.timeline-current-indicator,
+.timeline-hover-indicator {
+    background-color: #ffffff;
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 18px;
+    width: 1px;
+    z-index: 1;
+}
+
+.timeline-hover-indicator {
+    background-color: #f0b429;
+    opacity: 0.75;
+}
+
+.timeline-hover-indicator span {
+    background-color: var(--bg-panel);
+    color: var(--text-primary);
+    font-size: 0.72em;
+    left: 4px;
+    padding: 2px 4px;
+    position: absolute;
+    top: -18px;
+}
+
+.timeline-minimap {
+    background-color: var(--bg-base);
+    border: 1px solid var(--border);
+    height: 5px;
+    margin: 8px 12px 0;
+    position: relative;
+}
+
+.timeline-minimap-current {
+    background-color: var(--accent);
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    width: 2px;
+}
+
+.timeline-view-controls {
+    align-items: center;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin: 6px 12px 0;
+}
+
+.timeline-view-controls button {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    cursor: pointer;
+    min-width: 24px;
+}
+
+.timeline-keyframe {
+    background-color: #f0b429;
+    border: 1px solid #fff2b2;
+    border-radius: 50%;
+    cursor: pointer;
+    height: 10px;
+    padding: 0;
+    pointer-events: auto;
+    position: absolute;
+    touch-action: none;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    z-index: 2;
+}
+
+.timeline-keyframe.current {
+    border-color: #ffffff;
+}
+
+.timeline-keyframe.selected {
+    background-color: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.timeline-keyframe.collision {
+    background-color: #d64545;
+    border-color: #ffffff;
+}
+
+.timeline-keyframe:hover {
+    filter: brightness(1.25);
+    transform: translate(-50%, -50%) scale(1.2);
 }
 
 .hidden {
