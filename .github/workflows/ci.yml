@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PYTHONPATH: src
       MPLBACKEND: Agg
 
     steps:
@@ -28,10 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ -f requirements-docs.txt ]; then
-            pip install -r requirements-docs.txt
-          fi
-          pip install pytest numpy PyYAML matplotlib
+          python -m pip install -e ".[test,docs]"
 
       - name: Compile Python files
         run: |

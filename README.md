@@ -115,6 +115,29 @@ The verified Milestone C unperturbed baseline found:
 4. Save reproducibility metadata, metrics, logs, and selected small artifacts.
 5. Keep large raw artifacts outside Git unless explicitly curated.
 
+## Installation
+
+The repository uses a standard `src`-layout Python package and does not require
+`PYTHONPATH` to be set:
+
+```bash
+python -m venv .venv
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+# Linux/macOS: source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .
+python -m pip install pytest
+python -m drosophila_pd
+pytest -q -rs -p no:cacheprovider
+```
+
+Install the optional simulation environment only when FlyGym execution is
+authorized and available:
+
+```bash
+python -m pip install -e ".[simulation]"
+```
+
 ## V2 experiment management
 
 The Sprint 1 `drosophila_pd.experiment` package manages real caller-provided

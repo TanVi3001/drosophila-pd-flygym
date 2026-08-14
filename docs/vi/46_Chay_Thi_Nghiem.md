@@ -12,7 +12,7 @@ nhan context chua job, config, duong dan artifact va ket qua cac stage truoc.
 Vi du lenh:
 
 ```bash
-PYTHONPATH=src python scripts/run_experiment.py \
+python scripts/run_experiment.py \
   --config configs/v2/experiment/job.json \
   --output datasets/experiments \
   --handler rollout=my_pipeline:run_rollout \
