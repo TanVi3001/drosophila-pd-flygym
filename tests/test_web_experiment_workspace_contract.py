@@ -104,3 +104,78 @@ def test_integration_workflow_contract_and_failure_paths():
     assert all(marker in text for marker in required)
     for path in ("tests", "docs/v2"):
         assert (ROOT / path).exists()
+
+
+def test_verification_suite_contract_is_input_driven_and_scoped():
+    text = (WEB / "verification_suite.js").read_text(encoding="utf-8")
+    required = [
+        "VerificationSuite",
+        "verifyRollout",
+        "verifyRollback",
+        "verifyDeterminism",
+        "benchmarkStress",
+        "DEFAULT_STRESS_SIZES",
+        "syntheticDataUsed: false",
+        "noSimulationExecuted: true",
+        "insufficient-input",
+    ]
+    assert all(marker in text for marker in required)
+    assert "IntegrationWorkflow" in text
+    assert "FlyGymRolloutLoader" in text
+    assert "no biological" in text.lower()
+
+
+def test_verification_documentation_and_release_checklist_exist():
+    required = [
+        "architecture.md",
+        "verification_report.md",
+        "benchmark_report.md",
+        "reproducibility.md",
+        "coverage.md",
+        "release_candidate_checklist.md",
+        "known_issues.md",
+        "limitations.md",
+        "migration_guide.md",
+        "release_notes.md",
+        "manual_checklist.md",
+    ]
+    directory = ROOT / "docs" / "v2" / "verification_suite"
+    assert all((directory / filename).exists() for filename in required)
+
+
+def test_plugin_platform_contract_is_additive_and_manifest_driven():
+    text = (WEB / "plugin_platform.js").read_text(encoding="utf-8")
+    required = [
+        "PluginPlatform",
+        "PluginManifestError",
+        "PluginContext",
+        "PluginLoader",
+        "register",
+        "unregister",
+        "enable",
+        "disable",
+        "reload",
+        "unload",
+        "onImport",
+        "onWorkspaceLoaded",
+        "dependencies",
+        "capabilities",
+        "internal Workspace",
+    ]
+    assert all(marker in text for marker in required)
+    for filename, capability in (
+        ("analysis_plugin.js", "analysis"),
+        ("statistics_plugin.js", "statistics"),
+        ("export_plugin.js", "export"),
+    ):
+        example = (WEB / "plugins" / filename).read_text(encoding="utf-8")
+        assert "manifest" in example
+        assert capability in example
+        assert "run(input, context)" in example
+
+
+def test_experiment_workspace_exposes_platform_without_removing_legacy_registry():
+    text = (WEB / "experiment_workspace.js").read_text(encoding="utf-8")
+    assert "PluginPlatform" in text
+    assert "this.plugins = new PluginRegistry()" in text
+    assert "this.pluginPlatform = new PluginPlatform()" in text

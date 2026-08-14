@@ -1,3 +1,5 @@
+import { PluginPlatform } from './plugin_platform.js';
+
 const MAX_RECENT_ITEMS = 20;
 
 export const EXPERIMENT_KINDS = Object.freeze([
@@ -326,6 +328,8 @@ export class ExperimentWorkspace {
         this.snapshots = new SnapshotStore();
         this.layout = new LayoutManager();
         this.plugins = new PluginRegistry();
+        // Keep the original registry API and expose the additive manifest-based platform separately.
+        this.pluginPlatform = new PluginPlatform();
         this.filters = { behavior: '', animal: '', minTime: null, maxTime: null, minVelocity: null, maxVelocity: null, minEnergy: null, maxEnergy: null, minStride: null, maxStride: null, custom: null };
         this.activeExperimentId = null;
     }
