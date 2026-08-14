@@ -1,3 +1,5 @@
+import { ParkinsonAnalyticsEngine } from './parkinson_engine.js';
+
 const METRICS = Object.freeze([
     ['speed', 'Velocity'],
     ['strideFrequency', 'Stride frequency'],
@@ -7,10 +9,10 @@ const METRICS = Object.freeze([
     ['stepCount', 'Step count'],
 ]);
 
-export function buildAnalyticsDashboard(entries = [], filter = {}) {
+export function buildAnalyticsDashboard(entries = [], filter = {}, engine = new ParkinsonAnalyticsEngine()) {
     const rows = entries
         .filter((entry) => entry?.rollout)
-        .map((entry) => summarizeEntry(entry))
+        .map((entry) => summarizeEntry(entry, engine))
         .filter(Boolean);
     const summary = Object.fromEntries(METRICS.map(([key, label]) => [
         key,
@@ -34,6 +36,7 @@ export function buildAnalyticsDashboard(entries = [], filter = {}) {
 export class AnalyticsDashboard {
     constructor(experimentWorkspace) {
         this.experimentWorkspace = experimentWorkspace;
+        this.engine = new ParkinsonAnalyticsEngine();
         this.lastReport = null;
     }
 
@@ -41,6 +44,7 @@ export class AnalyticsDashboard {
         this.lastReport = buildAnalyticsDashboard(
             this.experimentWorkspace.filteredDataset(),
             this.experimentWorkspace.filters,
+            this.engine,
         );
         return this.lastReport;
     }
@@ -69,16 +73,19 @@ export class AnalyticsDashboard {
     }
 }
 
-function summarizeEntry(entry) {
+function summarizeEntry(entry, engine) {
     const statistics = entry.rollout.statistics ?? {};
     const summary = statistics.summary ?? {};
+    const analysis = engine.analyze(entry.rollout);
     return {
         id: entry.id,
         experimentId: entry.experimentId,
+        segmentation: analysis.segmentationSummary,
+        featureAvailability: analysis.features.availability,
         metrics: {
-            speed: numberOrNull(summary.speed?.mean),
-            strideFrequency: numberOrNull(summary.strideFrequency),
-            energy: numberOrNull(summary.energy),
+            speed: numberOrNull(summary.speed?.mean ?? analysis.statistics.features.speed?.mean),
+            strideFrequency: numberOrNull(summary.strideFrequency ?? analysis.statistics.features.stepFrequency?.mean),
+            energy: numberOrNull(summary.energy ?? analysis.statistics.features.energyEstimate?.mean),
             bodyAngle: numberOrNull(summary.bodyAngle?.mean),
             jointRange: mean(Object.values(summary.jointRange ?? {}).map((item) => item?.range).filter(Number.isFinite)),
             stepCount: numberOrNull(summary.stepCount),
