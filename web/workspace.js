@@ -31,6 +31,9 @@ export class Workspace {
         this.animation = null;
         this.frames = [];
         this.duration = 0;
+        this.rollout = null;
+        this.rolloutStatistics = null;
+        this.behaviorFilter = { query: '', labels: [], types: [] };
         this.playbackState = 'Stopped';
         this.clipboard = [];
         this.undoStack = [];
@@ -78,12 +81,22 @@ export class Workspace {
             this.totalFrames = this.frames.length > 0
                 ? this.frames.length
                 : getTotalFrames(data);
+            this.rollout = data.flygymRollout ?? null;
+            this.rolloutStatistics = null;
+            this.behaviorFilter = { query: '', labels: [], types: [] };
             console.log('Workspace updated.');
             return this.data;
         }
 
         console.log('Workspace loaded.');
         return this.data;
+    }
+
+    loadRollout(rollout) {
+        if (!rollout?.workspaceData) throw new Error('A normalized FlyGym rollout is required.');
+        this.load(rollout.workspaceData);
+        this.rollout = rollout;
+        return this.rollout;
     }
 
     selectNode(node) {

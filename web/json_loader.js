@@ -16,6 +16,10 @@ export class JSONLoader {
     }
 
     static async parseFile(file) {
+        return JSONLoader.validateScene(await JSONLoader.parseRawFile(file));
+    }
+
+    static async parseRawFile(file) {
         if (!file) {
             throw new Error('No JSON file was selected.');
         }
@@ -31,8 +35,7 @@ export class JSONLoader {
         } catch (error) {
             throw new Error(`Invalid JSON: ${error.message}`);
         }
-
-        return JSONLoader.validateScene(data);
+        return data;
     }
 
     static summarizeScene(data) {

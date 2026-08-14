@@ -7,6 +7,13 @@ import { JSONLoader } from './json_loader.js';
 import { Inspector } from './inspector.js';
 import { ViewportRenderer } from './viewport_renderer.js';
 import { PlaybackController } from './playback_controller.js';
+import { FlyGymRolloutLoader } from './flygym_rollout.js';
+import { computeRolloutStatistics } from './rollout_statistics.js';
+import { BehaviorTimeline } from './behavior_timeline.js';
+import { RolloutChartRenderer } from './rollout_charts.js';
+import { RolloutExporter } from './rollout_export.js';
+import { SessionRecorder } from './session_recorder.js';
+import { WorkspacePersistence } from './workspace_persistence.js';
 
 export class App {
     constructor() {
@@ -17,6 +24,10 @@ export class App {
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.inspector = new Inspector(this.workspace, () => this.handleInspectorChange());
         this.playbackController = new PlaybackController(this.workspace);
+        this.behaviorTimeline = new BehaviorTimeline(this.workspace);
+        this.chartRenderer = new RolloutChartRenderer();
+        this.persistence = new WorkspacePersistence(this.workspace);
+        this.sessionRecorder = new SessionRecorder(this.workspace);
         this.toolbar = new Toolbar({
             onLoadJSON: (file) => this.loadSceneFile(file),
             onResetView: () => this.viewportRenderer.resetView(),
@@ -40,6 +51,12 @@ export class App {
             onTrajectoryColor: (color) => this.setTrajectoryOption('color', color),
             onTrajectoryThickness: (thickness) => this.setTrajectoryOption('thickness', Number(thickness)),
             onTrajectorySmoothing: (enabled) => this.setTrajectoryOption('smoothing', enabled),
+            onSaveWorkspace: () => this.saveWorkspace(),
+            onRestoreWorkspace: () => this.restoreWorkspace(),
+            onExportJSON: () => this.exportRollout('json'),
+            onExportCSV: () => this.exportRollout('csv'),
+            onExportSVG: () => this.exportRollout('svg'),
+            onRecordToggle: (recording) => this.toggleRecording(recording),
         });
         this.keyDownHandler = (event) => this.handleKeyDown(event);
     }
@@ -49,31 +66,49 @@ export class App {
         this.workspace.load();
         this.viewportRenderer.init(document.getElementById('viewer'));
         this.timeline.init(document.getElementById('timeline'));
+        this.behaviorTimeline.init(document.getElementById('behavior-timeline'));
         this.sidebar.init(document.getElementById('sidebar'));
         this.inspector.init(document.getElementById('inspector'));
         this.toolbar.init(document.getElementById('toolbar'));
         this.toolbar.updatePlaybackState(this.workspace);
         this.bindWorkspaceEvents();
+        this.persistence.startAutosave();
         window.addEventListener('keydown', this.keyDownHandler);
 
     }
 
     async loadSceneFile(file) {
         try {
-            const data = await JSONLoader.parseFile(file);
-            const summary = JSONLoader.summarizeScene(data);
+            const rawData = await JSONLoader.parseRawFile(file);
+            if (FlyGymRolloutLoader.canLoad(rawData)) {
+                const rollout = FlyGymRolloutLoader.parseData(rawData, { sourceName: file.name });
+                rollout.statistics = computeRolloutStatistics(rollout);
+                this.workspace.loadRollout(rollout);
+                this.workspace.rolloutStatistics = rollout.statistics;
+                this.persistence.addRecentFile({ name: file.name, type: 'flygym-rollout' });
+                this.renderRolloutViews();
+                console.info('Loaded FlyGym rollout', file.name);
+                console.info('Rollout format:', rollout.source.format);
+                console.info('Frame count:', rollout.frameCount);
+                console.info('Trajectory channels:', Object.keys(rollout.channels));
+            } else {
+                const data = JSONLoader.validateScene(rawData);
+                const summary = JSONLoader.summarizeScene(data);
 
-            // Commit the new state only after parsing and validation succeed.
-            this.workspace.load(data);
+                // Commit the new state only after parsing and validation succeed.
+                this.workspace.load(data);
+                this.persistence.addRecentFile({ name: file.name, type: 'scene' });
+                document.getElementById('rollout-charts')?.replaceChildren();
+                console.info('Loaded scene', file.name);
+                console.info('Node count:', summary.nodeCount);
+                console.info('Camera count:', summary.cameraCount);
+                console.info('Trajectory count:', summary.trajectoryCount);
+            }
             this.timeline.render();
             this.sidebar.render(this.workspace.data, this.workspace.selectedNode);
             this.inspector.render();
             this.viewportRenderer.render();
-
-            console.info('Loaded scene', file.name);
-            console.info('Node count:', summary.nodeCount);
-            console.info('Camera count:', summary.cameraCount);
-            console.info('Trajectory count:', summary.trajectoryCount);
+            this.behaviorTimeline.render();
         } catch (error) {
             console.error('Failed to load scene JSON:', error);
             window.alert(`Unable to load scene JSON: ${error.message}`);
@@ -139,6 +174,7 @@ export class App {
 
     handlePlaybackChange() {
         this.timeline.updatePlaybackDisplay();
+        this.behaviorTimeline.updateFrame();
         this.viewportRenderer.render();
         this.toolbar.updatePlaybackState(this.workspace);
     }
@@ -147,6 +183,71 @@ export class App {
         this.workspace.trajectorySettings[name] = value;
         this.viewportRenderer.render();
         this.toolbar.updatePlaybackState(this.workspace);
+    }
+
+    renderRolloutViews() {
+        const chartRoot = document.getElementById('rollout-charts');
+        if (!chartRoot || !this.workspace.rollout) return;
+        chartRoot.innerHTML = `
+            ${['velocity', 'joint', 'com', 'angular', 'timeline', 'behavior'].map((type) => `
+                <div class="rollout-chart-slot" data-chart="${type}"></div>
+            `).join('')}
+        `;
+        const targets = Object.fromEntries([...chartRoot.querySelectorAll('[data-chart]')]
+            .map((element) => [element.dataset.chart, element]));
+        this.chartRenderer.renderAll(targets, this.workspace.rollout);
+    }
+
+    saveWorkspace() {
+        this.persistence.save('manual-save');
+        console.info('Workspace saved.');
+    }
+
+    restoreWorkspace() {
+        try {
+            const snapshot = this.persistence.restore('manual-save');
+            if (snapshot) {
+                if (this.workspace.rollout) this.renderRolloutViews();
+                this.refreshEditor();
+                this.behaviorTimeline.render();
+            }
+        } catch (error) {
+            console.error('Failed to restore workspace:', error);
+            window.alert(`Unable to restore workspace: ${error.message}`);
+        }
+    }
+
+    exportRollout(format) {
+        const rollout = this.workspace.rollout;
+        if (!rollout) {
+            window.alert('Load a FlyGym rollout before exporting rollout data.');
+            return;
+        }
+        const base = rollout.source.name?.replace(/\.json$/i, '') ?? 'flygym-rollout';
+        if (format === 'json') RolloutExporter.download(RolloutExporter.toJSON(rollout, { pretty: true }), `${base}.json`, 'application/json');
+        if (format === 'csv') RolloutExporter.download(RolloutExporter.toCSV(rollout), `${base}-thorax.csv`, 'text/csv');
+        if (format === 'svg') RolloutExporter.exportSVG('velocity', rollout, `${base}-velocity.svg`);
+    }
+
+    toggleRecording(recording) {
+        if (recording) {
+            this.sessionRecorder.start({ source: this.workspace.rollout?.source ?? null });
+            return;
+        }
+        const recordingData = this.sessionRecorder.stop();
+        if (recordingData.length) {
+            const recording = this.sessionRecorder.export();
+            this.persistence.addRecentSession({
+                savedAt: recording.events[0]?.time ?? new Date().toISOString(),
+                eventCount: recording.events.length,
+            });
+            console.info('Session recording:', recording);
+            RolloutExporter.download(
+                JSON.stringify(recording, null, 2),
+                'fly-studio-session-recording.json',
+                'application/json',
+            );
+        }
     }
 
     bindWorkspaceEvents() {

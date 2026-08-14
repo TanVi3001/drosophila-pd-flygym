@@ -22,6 +22,12 @@ export class Toolbar {
         onTrajectoryColor = null,
         onTrajectoryThickness = null,
         onTrajectorySmoothing = null,
+        onSaveWorkspace = null,
+        onRestoreWorkspace = null,
+        onExportJSON = null,
+        onExportCSV = null,
+        onExportSVG = null,
+        onRecordToggle = null,
     } = {}) {
         this.container = null;
         this.onLoadJSON = onLoadJSON;
@@ -46,6 +52,12 @@ export class Toolbar {
         this.onTrajectoryColor = onTrajectoryColor;
         this.onTrajectoryThickness = onTrajectoryThickness;
         this.onTrajectorySmoothing = onTrajectorySmoothing;
+        this.onSaveWorkspace = onSaveWorkspace;
+        this.onRestoreWorkspace = onRestoreWorkspace;
+        this.onExportJSON = onExportJSON;
+        this.onExportCSV = onExportCSV;
+        this.onExportSVG = onExportSVG;
+        this.onRecordToggle = onRecordToggle;
     }
 
     init(container) {
@@ -81,8 +93,13 @@ export class Toolbar {
                 <label>Trail Color <input id="trajectory-color-input" type="color" value="#58c4dd"></label>
                 <label>Trail Width <input id="trajectory-thickness-input" type="number" min="1" step="1" value="2"></label>
                 <label>Smooth <input id="trajectory-smoothing-input" type="checkbox"></label>
-                <button>Save Workspace</button>
-                <button>Settings</button>
+                <button id="save-workspace-button" type="button">Save Workspace</button>
+                <button id="restore-workspace-button" type="button">Restore</button>
+                <button id="export-rollout-json-button" type="button">Export JSON</button>
+                <button id="export-rollout-csv-button" type="button">Export CSV</button>
+                <button id="export-rollout-svg-button" type="button">Export SVG</button>
+                <label>Record <input id="record-session-input" type="checkbox"></label>
+                <button type="button">Settings</button>
             </div>
         `;
 
@@ -109,6 +126,12 @@ export class Toolbar {
         const trajectoryColorInput = this.container.querySelector('#trajectory-color-input');
         const trajectoryThicknessInput = this.container.querySelector('#trajectory-thickness-input');
         const trajectorySmoothingInput = this.container.querySelector('#trajectory-smoothing-input');
+        const saveWorkspaceButton = this.container.querySelector('#save-workspace-button');
+        const restoreWorkspaceButton = this.container.querySelector('#restore-workspace-button');
+        const exportJSONButton = this.container.querySelector('#export-rollout-json-button');
+        const exportCSVButton = this.container.querySelector('#export-rollout-csv-button');
+        const exportSVGButton = this.container.querySelector('#export-rollout-svg-button');
+        const recordSessionInput = this.container.querySelector('#record-session-input');
         loadButton.addEventListener('click', () => fileInput.click());
         resetViewButton.addEventListener('click', () => {
             if (this.onResetView) this.onResetView();
@@ -133,6 +156,12 @@ export class Toolbar {
         trajectoryColorInput.addEventListener('change', () => { if (this.onTrajectoryColor) this.onTrajectoryColor(trajectoryColorInput.value); });
         trajectoryThicknessInput.addEventListener('change', () => { if (this.onTrajectoryThickness) this.onTrajectoryThickness(trajectoryThicknessInput.value); });
         trajectorySmoothingInput.addEventListener('change', () => { if (this.onTrajectorySmoothing) this.onTrajectorySmoothing(trajectorySmoothingInput.checked); });
+        saveWorkspaceButton.addEventListener('click', () => { if (this.onSaveWorkspace) this.onSaveWorkspace(); });
+        restoreWorkspaceButton.addEventListener('click', () => { if (this.onRestoreWorkspace) this.onRestoreWorkspace(); });
+        exportJSONButton.addEventListener('click', () => { if (this.onExportJSON) this.onExportJSON(); });
+        exportCSVButton.addEventListener('click', () => { if (this.onExportCSV) this.onExportCSV(); });
+        exportSVGButton.addEventListener('click', () => { if (this.onExportSVG) this.onExportSVG(); });
+        recordSessionInput.addEventListener('change', () => { if (this.onRecordToggle) this.onRecordToggle(recordSessionInput.checked); });
         fileInput.addEventListener('change', async () => {
             const [file] = fileInput.files;
             if (file && this.onLoadJSON) await this.onLoadJSON(file);

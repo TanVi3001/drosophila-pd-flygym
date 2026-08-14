@@ -28,12 +28,13 @@ body {
 }
 
 #toolbar {
-    height: 40px;
+    min-height: 40px;
     background-color: var(--bg-surface);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     padding: 0 10px;
+    overflow-x: auto;
 }
 
 #main-content {
@@ -226,11 +227,130 @@ body {
 }
 
 #timeline-container {
-    height: 150px;
+    height: 320px;
     background-color: var(--bg-surface);
     border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+}
+
+.behavior-timeline-panel {
+    border-top: 1px solid var(--border);
+    padding: 8px 12px;
+}
+
+.behavior-timeline-header {
+    align-items: center;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.behavior-timeline-header strong {
+    color: var(--text-primary);
+}
+
+.behavior-filter-input {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    min-width: 150px;
+    padding: 3px 6px;
+}
+
+.behavior-timeline-track {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    height: 24px;
+    position: relative;
+}
+
+.behavior-current-indicator {
+    background: #ffffff;
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 1px;
+    z-index: 2;
+}
+
+.behavior-segment {
+    border: 0;
+    bottom: 2px;
+    color: #111a22;
+    cursor: pointer;
+    font-size: 0.72em;
+    min-width: 4px;
+    overflow: hidden;
+    padding: 2px 4px;
+    position: absolute;
+    top: 2px;
+    white-space: nowrap;
+}
+
+#rollout-charts {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    padding: 8px 12px;
+}
+
+.rollout-chart-slot {
+    border: 1px solid var(--border);
+    min-height: 120px;
+}
+
+.rollout-chart-slot canvas {
+    display: block;
+    height: 120px;
+    width: 100%;
+}
+
+.comparison-viewer {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 10px;
+}
+
+.comparison-toolbar,
+.comparison-columns {
+    display: flex;
+    gap: 12px;
+}
+
+.comparison-toolbar {
+    justify-content: space-between;
+}
+
+.comparison-current-frame {
+    color: var(--text-secondary);
+}
+
+.comparison-condition {
+    border: 1px solid var(--border);
+    flex: 1;
+    min-width: 0;
+    padding: 8px;
+}
+
+.comparison-condition h4,
+.comparison-condition p {
+    margin: 0 0 4px;
+}
+
+.comparison-condition p,
+.comparison-differences {
+    color: var(--text-secondary);
+    font-size: 0.82em;
+}
+
+.comparison-differences {
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+    padding-top: 8px;
 }
 
 .timeline-panel {
