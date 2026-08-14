@@ -54,3 +54,7 @@ này chỉ đọc source/configuration hoặc chạy operation do developer truy
 Lớp `drosophila_pd.parkinson` nằm sau rollout và measurement: nó đọc
 `RolloutData`, tính motor features, behavior timeline, computational index và
 report. Lớp này không sở hữu FlyGym/MuJoCo state.
+
+Lớp `drosophila_pd.scientific_validation` nằm sau analysis và đọc observed/
+reference arrays. Nó tạo agreement metrics, reproducibility checks, benchmark,
+figures và report mà không chạy lại simulation.

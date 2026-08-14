@@ -17,3 +17,5 @@ check và cập nhật tài liệu tương ứng.
 
 9. Duy trì Epic 16 như lớp computational phenotype analysis trên rollout
    thật; không suy diễn thành chẩn đoán hoặc validation sinh học.
+10. Duy trì Epic 17 như lớp kiểm định agreement, reproducibility và hiệu năng
+    trên dữ liệu tham chiếu đã import; không nâng cấp thành biological claim.
