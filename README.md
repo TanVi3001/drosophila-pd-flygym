@@ -129,6 +129,18 @@ The registry does not run FlyGym or MuJoCo, create rollout data, alter
 scientific algorithms, or make biological claims. Missing or invalid data
 remains `WAITING_DATASET` or `FAILED`.
 
+## Project Y - Large-scale Experiment Campaign Manager
+
+Project Y adds `drosophila_pd.campaign` for campaign planning, declarative
+execution matrices, explicit state transitions, deterministic queueing,
+progress and artifact tracking, provenance, dashboard reports, and publication
+planning. Templates for Healthy, PD, Candidate, Control, Validation,
+Benchmark, Longitudinal, Perturbation, Recovery, and generic parameter
+screening are in `configs/campaign_templates/`.
+
+The manager is orchestration-only. It does not execute FlyGym, create rollouts,
+generate data, add Parkinson algorithms, or make biological claims.
+
 ## Repository Layout
 
 - `src/drosophila_pd/anatomy/` - anatomy and FlyGym mapping audit helpers

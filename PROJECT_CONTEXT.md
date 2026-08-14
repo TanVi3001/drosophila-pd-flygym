@@ -976,3 +976,18 @@ scientific algorithm, and adds no Parkinson interpretation. Empty or missing
 dataset roots remain `WAITING_DATASET`; invalid packages are `FAILED`. A
 `READY` health result means software/data integrity only, not biological
 validation.
+
+## Project Y - Large-scale Experiment Campaign Manager
+
+Project Y adds the additive `drosophila_pd.campaign` package for managing
+large-scale research campaign plans. It provides declarative experiment
+matrices, explicit campaign states, deterministic scheduler queueing, progress
+and artifact accounting, provenance/history, dashboard files, and publication
+planning assets. Ten execution-disabled templates live under
+`configs/campaign_templates/`.
+
+Project Y does not run FlyGym or MuJoCo, create rollouts or data, change
+scientific algorithms, or introduce a Parkinson interpretation. Dataset
+absence remains `WAITING_DATASET`; planning `READY` is not scientific or
+biological validation. Existing `research_campaign` and execution packages are
+unchanged for backward compatibility.
