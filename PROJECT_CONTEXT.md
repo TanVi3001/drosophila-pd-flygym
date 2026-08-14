@@ -845,3 +845,24 @@ No V5 rollout, dataset, figure, table, or scientific conclusion has been
 created. Execution requires explicit authorization, a new output path, and the
 existing documented Healthy baseline pipeline. The Healthy baseline remains a
 computational simulation baseline, not biological validation.
+
+## V6 Experimental Campaign Execution Framework
+
+V6 adds an execution-only `drosophila_pd.research_execution` package and
+`scripts/run_campaign.py`. The runtime discovers manifest, metadata, and
+checksum files under `datasets/` and `research/` without parsing
+rollout arrays. Planning templates and missing payloads remain outside the
+execution path.
+
+The explicit state machine is `WAITING_DATASET`, `READY`, `RUNNING`,
+`VALIDATING`, `EXPORTING`, `COMPLETED`, `FAILED`, and `CANCELLED`. In the
+current repository the canonical command returns `WAITING_DATASET` because no
+executable dataset payload exists. It does not create rollouts, simulate,
+modify FlyGym, or fabricate execution results.
+
+When a real approved dataset is available, V6 delegates to the existing
+`StudyOrchestrator` and registers its reports, validation, publication, and
+bundle artifacts. V6 does not duplicate or alter Analysis, Statistics,
+Computational PD, Scientific Validation, Campaign, Digital Twin, or manuscript
+logic. Its outputs are operational execution reports, not new scientific
+evidence or biological validation.

@@ -627,3 +627,20 @@ or a statistical-significance claim.
 10. Healthy vs PD-like comparison
 11. Potential biological-rescue interpretation, only after external evidence
    and explicit authorization
+
+## V6 Execution Runtime
+
+V6 adds a dataset-gated execution layer for the prepared campaign. It reads
+manifest metadata, provenance, and declared payload paths without parsing
+rollouts. With no executable dataset present, the runtime returns
+`WAITING_DATASET` and does not invoke the research pipeline or create scientific
+data.
+
+```bash
+python scripts/run_campaign.py discover
+python scripts/run_campaign.py execute
+```
+
+When an approved real dataset is placed under `datasets/` with an executable
+manifest, the runtime delegates to the existing `StudyOrchestrator`. See
+[`docs/v6/120_V6_Architecture.md`](docs/v6/120_V6_Architecture.md).

@@ -49,6 +49,15 @@ from .research_pipeline import (  # noqa: E402
     StudyResult,
     run_study,
 )
+from .research_execution import (  # noqa: E402
+    ArtifactRegistry as ExecutionArtifactRegistry,
+    DatasetDiscovery,
+    ExecutionContext,
+    ExecutionHistory,
+    ExecutionResult,
+    ExecutionRuntime,
+    ExecutionState,
+)
 
 __all__ = [
     "__version__",
@@ -85,4 +94,11 @@ __all__ = [
     "StudyRequest",
     "StudyResult",
     "run_study",
+    "ExecutionArtifactRegistry",
+    "DatasetDiscovery",
+    "ExecutionContext",
+    "ExecutionHistory",
+    "ExecutionResult",
+    "ExecutionRuntime",
+    "ExecutionState",
 ]
