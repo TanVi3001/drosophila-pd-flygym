@@ -104,3 +104,40 @@ def test_integration_workflow_contract_and_failure_paths():
     assert all(marker in text for marker in required)
     for path in ("tests", "docs/v2"):
         assert (ROOT / path).exists()
+
+
+def test_verification_suite_contract_is_input_driven_and_scoped():
+    text = (WEB / "verification_suite.js").read_text(encoding="utf-8")
+    required = [
+        "VerificationSuite",
+        "verifyRollout",
+        "verifyRollback",
+        "verifyDeterminism",
+        "benchmarkStress",
+        "DEFAULT_STRESS_SIZES",
+        "syntheticDataUsed: false",
+        "noSimulationExecuted: true",
+        "insufficient-input",
+    ]
+    assert all(marker in text for marker in required)
+    assert "IntegrationWorkflow" in text
+    assert "FlyGymRolloutLoader" in text
+    assert "no biological" in text.lower()
+
+
+def test_verification_documentation_and_release_checklist_exist():
+    required = [
+        "architecture.md",
+        "verification_report.md",
+        "benchmark_report.md",
+        "reproducibility.md",
+        "coverage.md",
+        "release_candidate_checklist.md",
+        "known_issues.md",
+        "limitations.md",
+        "migration_guide.md",
+        "release_notes.md",
+        "manual_checklist.md",
+    ]
+    directory = ROOT / "docs" / "v2" / "verification_suite"
+    assert all((directory / filename).exists() for filename in required)
