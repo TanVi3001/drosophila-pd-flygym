@@ -80,6 +80,21 @@ from .experiment_runtime import (  # noqa: E402
     OutputPaths,
     SessionState,
 )
+from .research_kernel import (  # noqa: E402
+    KernelContext,
+    KernelEvent,
+    KernelEventType,
+    KernelState,
+    ResearchBus,
+    ResearchKernel,
+    ResourceManager,
+    ResourceRecord,
+    ServiceRecord,
+    ServiceRegistry,
+    TaskResult,
+    TaskScheduler,
+    TaskSpec,
+)
 
 __all__ = [
     "__version__",
@@ -141,4 +156,17 @@ __all__ = [
     "ExperimentSummary",
     "OutputPaths",
     "SessionState",
+    "KernelContext",
+    "KernelEvent",
+    "KernelEventType",
+    "KernelState",
+    "ResearchBus",
+    "ResearchKernel",
+    "ResourceManager",
+    "ResourceRecord",
+    "ServiceRecord",
+    "ServiceRegistry",
+    "TaskResult",
+    "TaskScheduler",
+    "TaskSpec",
 ]

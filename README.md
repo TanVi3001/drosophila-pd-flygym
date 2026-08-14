@@ -677,3 +677,21 @@ python scripts/experiment_runtime.py summary
 ```
 
 See [`docs/v8/132_V8_Architecture.md`](docs/v8/132_V8_Architecture.md).
+
+## V9 Scientific Operating System
+
+V9 adds an orchestration-only Research Kernel over the existing V7 dataset
+adapter and V8 experiment runtime. It provides a research event bus, service
+registry, resource tracking, dependency scheduler, and kernel CLI without
+adding simulation or scientific computation.
+
+```bash
+python scripts/kernel.py boot
+python scripts/kernel.py status
+python scripts/kernel.py resources
+python scripts/kernel.py events
+python scripts/kernel.py shutdown
+```
+
+With no approved rollout dataset present, the kernel stops at
+`WAITING_DATASET`. See [`docs/v9/138_V9_Architecture.md`](docs/v9/138_V9_Architecture.md).

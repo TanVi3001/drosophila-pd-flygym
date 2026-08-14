@@ -907,3 +907,23 @@ Because this repository has no real rollout dataset, V8 currently stops at
 `WAITING_DATASET` and does not call the study pipeline. A ready dataset will
 use the existing `StudyOrchestrator`; V8 adds no analysis, statistics,
 validation, Digital Twin, dashboard, simulation, or biological interpretation.
+
+## V9 Scientific Operating System
+
+V9 adds the orchestration-only `drosophila_pd.research_kernel` package and
+`scripts/kernel.py`. The kernel coordinates the existing V7 Dataset Adapter,
+V8 Experiment Runtime, Campaign API, and Study API through a Research Bus,
+Service Registry, Resource Manager, and dependency-aware Task Scheduler.
+
+The kernel persists `kernel.log`, `events.json`, `timeline.json`,
+`kernel_state.json`, `resources.json`, and `registry.json` under its operational
+output directory. Its task graph is `prepare -> bind -> run -> validate ->
+package -> archive`; downstream tasks are not marked complete when the V7/V8
+dataset gate returns `WAITING_DATASET`.
+
+The current repository has no approved rollout dataset, so V9 boot currently
+stops at `WAITING_DATASET`. Existing Digital Twin, Analysis, Statistics,
+Computational PD, Validation, and Publication services are recorded as
+unavailable bindings until their existing public APIs are explicitly connected.
+V9 adds no scientific algorithm, simulation, rollout, biological interpretation,
+or new evidence.
