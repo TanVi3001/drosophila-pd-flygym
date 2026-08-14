@@ -10,6 +10,7 @@ tự tạo thêm kết luận khoa học.
 5. Bổ sung plugin documentation khi API capability mở rộng.
 6. Chỉ sau khi review và test mới xem xét các extension cho workflow cụ thể.
 7. Duy trì Digital Fly Model như lớp dữ liệu canonical cho các workflow V2.
+8. Duy trì 3D motion engine như lớp hậu xử lý/hiển thị cho trajectory thật.
 
 Mọi thay đổi phải giữ backward compatibility, chạy compileall/pytest/diff
 check và cập nhật tài liệu tương ứng.

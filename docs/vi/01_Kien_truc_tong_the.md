@@ -14,6 +14,9 @@ FlyGym / Scene JSON
       Digital Fly
  (body, skeleton, trajectory)
         ↓
+ Digital Fly 3D Motion Engine
+       (FK / pose / viewer)
+        ↓
    Analysis + Statistics
         ↓
  Visualization + Reports

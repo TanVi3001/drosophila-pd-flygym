@@ -21,6 +21,7 @@ import { ExperimentReportGenerator } from './experiment_reports.js';
 import { ExperimentComparisonModel } from './experiment_comparison.js';
 import { DigitalLaboratory } from './digital_laboratory.js';
 import { DigitalFly } from './digital_fly.js';
+import { DigitalFly3D } from './digital_fly_3d.js';
 
 export class App {
     constructor() {
@@ -28,6 +29,7 @@ export class App {
         this.experimentWorkspace = new ExperimentWorkspace();
         this.laboratory = new DigitalLaboratory({ experimentWorkspace: this.experimentWorkspace });
         this.digitalFly = null;
+        this.digitalFly3D = null;
         this.layout = new Layout();
         this.viewportRenderer = new ViewportRenderer(this.workspace);
         this.timeline = new Timeline(this.workspace, () => this.handleTimelineChange());
@@ -105,6 +107,8 @@ export class App {
                 this.workspace.loadRollout(rollout);
                 this.workspace.rolloutStatistics = rollout.statistics;
                 this.digitalFly = DigitalFly.fromRollout(rollout, { name: file.name });
+                this.digitalFly3D = DigitalFly3D.fromDigitalFly(this.digitalFly, { metadata: { source: 'FlyGym rollout' } });
+                this.viewportRenderer.setDigitalFly3D(this.digitalFly3D);
                 this.laboratory.registerFly(this.digitalFly);
                 this.experimentWorkspace.importRollout(rollout, {
                     name: file.name.replace(/\.json$/i, ''),
@@ -124,6 +128,8 @@ export class App {
                 // Commit the new state only after parsing and validation succeed.
                 this.workspace.load(data);
                 this.digitalFly = null;
+                this.digitalFly3D = null;
+                this.viewportRenderer.setDigitalFly3D(null);
                 this.persistence.addRecentFile({ name: file.name, type: 'scene' });
                 document.getElementById('rollout-charts')?.replaceChildren();
                 console.info('Loaded scene', file.name);
