@@ -252,6 +252,7 @@ body {
 .timeline-track {
     position: relative;
     padding-top: 18px;
+    touch-action: none;
 }
 
 .timeline-ruler {
@@ -273,6 +274,65 @@ body {
     height: 0;
     pointer-events: none;
     position: absolute;
+}
+
+.timeline-current-indicator,
+.timeline-hover-indicator {
+    background-color: #ffffff;
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 18px;
+    width: 1px;
+    z-index: 1;
+}
+
+.timeline-hover-indicator {
+    background-color: #f0b429;
+    opacity: 0.75;
+}
+
+.timeline-hover-indicator span {
+    background-color: var(--bg-panel);
+    color: var(--text-primary);
+    font-size: 0.72em;
+    left: 4px;
+    padding: 2px 4px;
+    position: absolute;
+    top: -18px;
+}
+
+.timeline-minimap {
+    background-color: var(--bg-base);
+    border: 1px solid var(--border);
+    height: 5px;
+    margin: 8px 12px 0;
+    position: relative;
+}
+
+.timeline-minimap-current {
+    background-color: var(--accent);
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    width: 2px;
+}
+
+.timeline-view-controls {
+    align-items: center;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin: 6px 12px 0;
+}
+
+.timeline-view-controls button {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    cursor: pointer;
+    min-width: 24px;
 }
 
 .timeline-keyframe {

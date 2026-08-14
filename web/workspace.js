@@ -1,3 +1,12 @@
+export const WORKSPACE_EVENTS = Object.freeze({
+    FRAME_CHANGED: 'FrameChanged',
+    PLAYBACK_STARTED: 'PlaybackStarted',
+    PLAYBACK_PAUSED: 'PlaybackPaused',
+    PLAYBACK_STOPPED: 'PlaybackStopped',
+    PLAYBACK_LOOPED: 'PlaybackLooped',
+    PLAYBACK_FINISHED: 'PlaybackFinished',
+});
+
 export class Workspace {
     constructor() {
         this.data = {};
@@ -11,6 +20,14 @@ export class Workspace {
         this.speed = 1;
         this.loop = false;
         this.reverse = false;
+        this.trajectorySettings = {
+            visible: true,
+            ghostTrail: true,
+            historyTrail: true,
+            color: '#58c4dd',
+            thickness: 2,
+            smoothing: false,
+        };
         this.animation = null;
         this.frames = [];
         this.duration = 0;
@@ -18,6 +35,27 @@ export class Workspace {
         this.clipboard = [];
         this.undoStack = [];
         this.redoStack = [];
+        this.listeners = new Map();
+    }
+
+    on(eventName, listener) {
+        if (typeof listener !== 'function') return () => {};
+        const listeners = this.listeners.get(eventName) ?? new Set();
+        listeners.add(listener);
+        this.listeners.set(eventName, listeners);
+        return () => this.off(eventName, listener);
+    }
+
+    off(eventName, listener) {
+        this.listeners.get(eventName)?.delete(listener);
+    }
+
+    emit(eventName, detail = {}) {
+        this.listeners.get(eventName)?.forEach((listener) => listener({
+            type: eventName,
+            workspace: this,
+            ...detail,
+        }));
     }
 
     load(data = null) {
@@ -53,6 +91,29 @@ export class Workspace {
         return this.selectedNode;
     }
 
+    setFrame(frame, time = null) {
+        const totalFrames = Math.max(1, this.totalFrames);
+        const numericFrame = Number(frame);
+        if (!Number.isFinite(numericFrame)) return this.currentFrame;
+        const nextFrame = clamp(Math.round(numericFrame), 0, totalFrames - 1);
+        const frameDuration = this.duration > 0 && totalFrames > 1
+            ? this.duration / (totalFrames - 1)
+            : 1 / Math.max(1, this.fps);
+        const nextTime = time === null || time === undefined
+            ? nextFrame * frameDuration
+            : Math.max(0, Number(time) || 0);
+        const changed = this.currentFrame !== nextFrame || this.currentTime !== nextTime;
+        this.currentFrame = nextFrame;
+        this.currentTime = nextTime;
+        if (changed) {
+            this.emit(WORKSPACE_EVENTS.FRAME_CHANGED, {
+                frame: this.currentFrame,
+                time: this.currentTime,
+            });
+        }
+        return this.currentFrame;
+    }
+
     selectKeyframe(keyframe, frame, sourceIndex = null) {
         const selectedFrame = Number(frame);
         if (!Number.isInteger(selectedFrame) || selectedFrame < 0) {
@@ -66,7 +127,7 @@ export class Workspace {
             sourceIndex,
         };
         this.selectedKeyframes = [this.selectedKeyframe];
-        this.currentFrame = selectedFrame;
+        this.setFrame(selectedFrame);
         return this.selectedKeyframe;
     }
 
@@ -80,7 +141,7 @@ export class Workspace {
             }));
         this.selectedKeyframes = selected;
         this.selectedKeyframe = selected[0] ?? null;
-        if (this.selectedKeyframe) this.currentFrame = this.selectedKeyframe.frame;
+        if (this.selectedKeyframe) this.setFrame(this.selectedKeyframe.frame);
         return this.selectedKeyframes;
     }
 
@@ -168,7 +229,7 @@ export class Workspace {
 
         movedKeyframe.frame = nextFrame;
         this.syncSelectedKeyframeFrame(movedKeyframe);
-        this.currentFrame = nextFrame;
+        this.setFrame(nextFrame);
         if (recordHistory && previousFrame !== nextFrame) {
             this.recordCommand({
                 label: 'Move keyframe',
@@ -228,6 +289,22 @@ export class Workspace {
             label: 'Edit duration',
             undo: () => setDuration(this, data, before),
             redo: () => setDuration(this, data, parsedDuration),
+        });
+        return this.selectedKeyframe;
+    }
+
+    renameSelectedKeyframe(name) {
+        if (!this.selectedKeyframe || !this.selectedKeyframe.data
+            || typeof this.selectedKeyframe.data !== 'object') return null;
+        const nextName = String(name ?? '').trim();
+        if (!nextName) return this.selectedKeyframe;
+        const data = this.selectedKeyframe.data;
+        const before = data.name;
+        data.name = nextName;
+        this.recordCommand({
+            label: 'Rename keyframe',
+            undo: () => { data.name = before; },
+            redo: () => { data.name = nextName; },
         });
         return this.selectedKeyframe;
     }
@@ -343,7 +420,7 @@ export class Workspace {
         }
         entry.frame = frame;
         this.syncSelectedKeyframeFrame(entry);
-        this.currentFrame = frame;
+        this.setFrame(frame);
     }
 
     syncSelectedKeyframeFrame(entry) {
@@ -456,4 +533,8 @@ function getAnimation(data) {
 function getDuration(animation, data) {
     const duration = Number(animation?.duration ?? data?.duration ?? 0);
     return Number.isFinite(duration) && duration >= 0 ? duration : 0;
+}
+
+function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
 }

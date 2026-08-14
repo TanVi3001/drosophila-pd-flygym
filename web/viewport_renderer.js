@@ -21,6 +21,7 @@ export class ViewportRenderer {
         this.isPanning = false;
         this.spacePressed = false;
         this.spaceUsedForPan = false;
+        this.trajectoryCache = null;
         this.lastPointerX = 0;
         this.lastPointerY = 0;
         this.keyDownHandler = (event) => this.handleKeyDown(event);
@@ -136,6 +137,7 @@ export class ViewportRenderer {
         this.context.save();
         this.applyCameraTransform();
         this.drawGrid();
+        this.drawTrajectory();
         this.drawLinks(layout);
         this.drawNodes(layout, this.workspace.selectedNode, currentFrame);
         this.context.restore();
@@ -241,6 +243,76 @@ export class ViewportRenderer {
         this.context.moveTo(0, this.height / 2);
         this.context.lineTo(this.width, this.height / 2);
         this.context.stroke();
+    }
+
+    drawTrajectory() {
+        const settings = this.workspace.trajectorySettings;
+        if (!settings?.visible) return;
+        const points = this.getTrajectoryPoints();
+        if (points.length < 2) return;
+
+        const currentFrame = Number.isInteger(this.workspace.currentFrame)
+            ? this.workspace.currentFrame
+            : 0;
+        const visiblePoints = points.filter((point) => point.frame <= currentFrame);
+        if (settings.historyTrail && visiblePoints.length >= 2) {
+            this.drawTrajectoryLine(visiblePoints, settings.color, settings.thickness);
+        }
+        if (settings.ghostTrail && visiblePoints.length < points.length) {
+            this.drawTrajectoryLine(
+                points.filter((point) => point.frame > currentFrame),
+                settings.color,
+                Math.max(1, settings.thickness / 2),
+                true,
+            );
+        }
+    }
+
+    drawTrajectoryLine(points, color, thickness, ghost = false) {
+        if (points.length < 2) return;
+        this.context.save();
+        this.context.strokeStyle = color;
+        this.context.globalAlpha = ghost ? 0.3 : 0.85;
+        this.context.lineWidth = thickness;
+        this.context.beginPath();
+        points.forEach((point, index) => {
+            if (index === 0) this.context.moveTo(point.x, point.y);
+            else this.context.lineTo(point.x, point.y);
+        });
+        this.context.stroke();
+        this.context.restore();
+    }
+
+    getTrajectoryPoints() {
+        const smoothing = Boolean(this.workspace.trajectorySettings?.smoothing);
+        const source = this.workspace.data?.trajectories
+            ?? this.workspace.data?.trajectory
+            ?? this.workspace.data?.scene?.trajectories
+            ?? this.workspace.data?.scene?.trajectory;
+        if (this.trajectoryCache?.source === source
+            && this.trajectoryCache.width === this.width
+            && this.trajectoryCache.height === this.height
+            && this.trajectoryCache.smoothing === smoothing) {
+            return this.trajectoryCache.points;
+        }
+
+        const collection = Array.isArray(source)
+            ? source
+            : Array.isArray(source?.points)
+                ? [source.points]
+                : source && typeof source === 'object'
+                    ? Object.values(source)
+                    : [];
+        const rawPoints = collection.flatMap((item) => (
+            Array.isArray(item) ? item : item?.points ?? item?.trajectory ?? []
+        ));
+        const normalizedPoints = rawPoints
+            .map((point, index) => normalizeTrajectoryPoint(point, index, this.width, this.height))
+            .filter(Boolean)
+            .sort((left, right) => left.frame - right.frame);
+        const points = smoothing ? smoothTrajectoryPoints(normalizedPoints) : normalizedPoints;
+        this.trajectoryCache = { source, points, width: this.width, height: this.height, smoothing };
+        return points;
     }
 
     drawLinks(layout) {
@@ -387,6 +459,46 @@ function normalizePosition(x, y, width, height) {
         return { x: x * width, y: y * height };
     }
     return { x, y };
+}
+
+function normalizeTrajectoryPoint(point, index, width, height) {
+    if (Array.isArray(point) && point.length >= 2) {
+        return normalizeTrajectoryPosition(point[0], point[1], index, width, height);
+    }
+    if (!point || typeof point !== 'object') return null;
+    const position = point.position ?? point.translation ?? point;
+    return normalizeTrajectoryPosition(
+        position?.x,
+        position?.y,
+        point.frame ?? point.frameIndex ?? index,
+        width,
+        height,
+    );
+}
+
+function normalizeTrajectoryPosition(xValue, yValue, frame, width, height) {
+    const x = Number(xValue);
+    const y = Number(yValue);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    return {
+        x: x >= 0 && x <= 1 ? x * width : x,
+        y: y >= 0 && y <= 1 ? y * height : y,
+        frame: Number.isInteger(Number(frame)) ? Number(frame) : 0,
+    };
+}
+
+function smoothTrajectoryPoints(points) {
+    if (points.length < 3) return points;
+    return points.map((point, index) => {
+        const start = Math.max(0, index - 1);
+        const end = Math.min(points.length - 1, index + 1);
+        const window = points.slice(start, end + 1);
+        return {
+            ...point,
+            x: window.reduce((sum, item) => sum + item.x, 0) / window.length,
+            y: window.reduce((sum, item) => sum + item.y, 0) / window.length,
+        };
+    });
 }
 
 function clamp(value, minimum, maximum) {

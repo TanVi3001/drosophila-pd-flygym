@@ -1,7 +1,7 @@
 import { Timeline } from './timeline.js';
 import { Sidebar } from './sidebar.js';
 import { Toolbar } from './toolbar.js';
-import { Workspace } from './workspace.js';
+import { Workspace, WORKSPACE_EVENTS } from './workspace.js';
 import { Layout } from './layout.js';
 import { JSONLoader } from './json_loader.js';
 import { Inspector } from './inspector.js';
@@ -16,10 +16,7 @@ export class App {
         this.timeline = new Timeline(this.workspace, () => this.handleTimelineChange());
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.inspector = new Inspector(this.workspace, () => this.handleInspectorChange());
-        this.playbackController = new PlaybackController(
-            this.workspace,
-            () => this.refreshEditor(),
-        );
+        this.playbackController = new PlaybackController(this.workspace);
         this.toolbar = new Toolbar({
             onLoadJSON: (file) => this.loadSceneFile(file),
             onResetView: () => this.viewportRenderer.resetView(),
@@ -30,6 +27,19 @@ export class App {
             onDelete: () => this.deleteKeyframes(),
             onFramePrevious: () => this.nudgeSelectedKeyframe(-1),
             onFrameNext: () => this.nudgeSelectedKeyframe(1),
+            onPlay: () => this.playbackController.play(),
+            onPause: () => this.playbackController.pause(),
+            onStop: () => this.playbackController.stop(),
+            onLoop: (enabled) => this.playbackController.setLoop(enabled),
+            onFps: (fps) => this.playbackController.setFps(fps),
+            onSpeed: (speed) => this.playbackController.setSpeed(speed),
+            onReverse: (enabled) => this.playbackController.setReverse(enabled),
+            onTrajectoryVisibility: (visible) => this.setTrajectoryOption('visible', visible),
+            onTrajectoryGhost: (enabled) => this.setTrajectoryOption('ghostTrail', enabled),
+            onTrajectoryHistory: (enabled) => this.setTrajectoryOption('historyTrail', enabled),
+            onTrajectoryColor: (color) => this.setTrajectoryOption('color', color),
+            onTrajectoryThickness: (thickness) => this.setTrajectoryOption('thickness', Number(thickness)),
+            onTrajectorySmoothing: (enabled) => this.setTrajectoryOption('smoothing', enabled),
         });
         this.keyDownHandler = (event) => this.handleKeyDown(event);
     }
@@ -42,6 +52,8 @@ export class App {
         this.sidebar.init(document.getElementById('sidebar'));
         this.inspector.init(document.getElementById('inspector'));
         this.toolbar.init(document.getElementById('toolbar'));
+        this.toolbar.updatePlaybackState(this.workspace);
+        this.bindWorkspaceEvents();
         window.addEventListener('keydown', this.keyDownHandler);
 
     }
@@ -123,6 +135,24 @@ export class App {
         this.timeline.render();
         this.inspector.render();
         this.viewportRenderer.render();
+    }
+
+    handlePlaybackChange() {
+        this.timeline.updatePlaybackDisplay();
+        this.viewportRenderer.render();
+        this.toolbar.updatePlaybackState(this.workspace);
+    }
+
+    setTrajectoryOption(name, value) {
+        this.workspace.trajectorySettings[name] = value;
+        this.viewportRenderer.render();
+        this.toolbar.updatePlaybackState(this.workspace);
+    }
+
+    bindWorkspaceEvents() {
+        Object.values(WORKSPACE_EVENTS).forEach((eventName) => {
+            this.workspace.on(eventName, () => this.handlePlaybackChange());
+        });
     }
 
     handleKeyDown(event) {

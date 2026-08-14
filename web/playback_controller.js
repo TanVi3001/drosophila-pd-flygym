@@ -1,3 +1,5 @@
+import { WORKSPACE_EVENTS } from './workspace.js';
+
 export const PLAYBACK_STATES = Object.freeze({
     STOPPED: 'Stopped',
     PAUSED: 'Paused',
@@ -29,8 +31,7 @@ export class PlaybackController {
 
     stop() {
         this.cancelScheduler();
-        this.workspace.currentTime = 0;
-        this.workspace.currentFrame = 0;
+        this.setTime(0);
         this.lastTimestamp = null;
         this.setState(PLAYBACK_STATES.STOPPED);
         this.notifyChange();
@@ -112,6 +113,7 @@ export class PlaybackController {
                 nextTime = nextTime >= duration
                     ? nextTime % duration
                     : duration + (nextTime % duration);
+                this.workspace.emit(WORKSPACE_EVENTS.PLAYBACK_LOOPED, { time: nextTime });
             } else {
                 nextTime = Math.min(duration, Math.max(0, nextTime));
                 finished = true;
@@ -121,6 +123,7 @@ export class PlaybackController {
         this.setTime(nextTime);
         if (finished) {
             this.cancelScheduler();
+            this.workspace.emit(WORKSPACE_EVENTS.PLAYBACK_FINISHED, { time: nextTime });
             this.setState(PLAYBACK_STATES.STOPPED);
         }
         this.notifyChange();
@@ -138,18 +141,17 @@ export class PlaybackController {
     setTime(time) {
         const duration = this.getPlaybackDuration();
         const nextTime = clamp(time, 0, duration);
-        this.workspace.currentTime = nextTime;
         const frameDuration = this.getFrameDuration();
-        this.workspace.currentFrame = frameDuration > 0
+        const nextFrame = frameDuration > 0
             ? clamp(Math.round(nextTime / frameDuration), 0, Math.max(0, this.workspace.totalFrames - 1))
             : 0;
+        this.workspace.setFrame(nextFrame, nextTime);
     }
 
     setFrame(frame) {
         const totalFrames = Math.max(1, this.workspace.totalFrames);
         const nextFrame = clamp(frame, 0, totalFrames - 1);
-        this.workspace.currentFrame = nextFrame;
-        this.workspace.currentTime = nextFrame * this.getFrameDuration();
+        this.workspace.setFrame(nextFrame, nextFrame * this.getFrameDuration());
     }
 
     getFrameDuration() {
@@ -179,7 +181,14 @@ export class PlaybackController {
     }
 
     setState(state) {
+        if (this.workspace.playbackState === state) return state;
         this.workspace.playbackState = state;
+        const eventByState = {
+            [PLAYBACK_STATES.PLAYING]: WORKSPACE_EVENTS.PLAYBACK_STARTED,
+            [PLAYBACK_STATES.PAUSED]: WORKSPACE_EVENTS.PLAYBACK_PAUSED,
+            [PLAYBACK_STATES.STOPPED]: WORKSPACE_EVENTS.PLAYBACK_STOPPED,
+        };
+        this.workspace.emit(eventByState[state], { state });
         return this.workspace.playbackState;
     }
 }
