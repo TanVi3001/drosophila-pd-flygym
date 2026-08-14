@@ -30,3 +30,24 @@ def test_app_wires_manager_dashboard_and_persistence():
     assert "AnalyticsDashboard" in text
     assert "ExperimentReportGenerator" in text
     assert "renderExperimentWorkspace" in text
+
+
+def test_parkinson_analytics_engine_contract_is_additive_and_scoped():
+    required = {
+        "parkinson_features.js": ["extractFeatureBundle", "FeatureCache", "trajectoryCurvature", "jointAcceleration"],
+        "parkinson_segmentation.js": ["Walking", "Turning", "Standing", "Grooming", "Unknown"],
+        "parkinson_statistics.js": ["median", "variance", "percentiles", "histogram"],
+        "parkinson_comparison.js": ["difference", "correlation", "similarity", "distance", "ranking"],
+        "parkinson_score.js": ["weightedFeatures", "not a diagnosis", "confidence"],
+        "parkinson_visualization.js": ["trajectorySVG", "matrixSVG", "renderCanvas"],
+        "parkinson_export.js": ["toJSON", "toCSV", "toMarkdown", "toHTML", "toSVG", "exportPNG"],
+        "parkinson_engine.js": ["ParkinsonAnalyticsEngine", "getFeatures", "getStatistics", "getSegmentation"],
+    }
+    for filename, markers in required.items():
+        text = (WEB / filename).read_text(encoding="utf-8")
+        assert all(marker.lower() in text.lower() for marker in markers), filename
+
+
+def test_frozen_scientific_paths_are_not_part_of_milestone_changes():
+    changed = {line for line in __import__("subprocess").check_output(["git", "diff", "--name-only", "HEAD~1"], text=True).splitlines()}
+    assert not any(path.startswith(("results/", "notebooks/", "docs/report/")) for path in changed)
