@@ -5,7 +5,12 @@ export class Workspace {
         this.selectedKeyframe = null;
         this.selectedKeyframes = [];
         this.currentFrame = 0;
+        this.currentTime = 0;
         this.totalFrames = 1;
+        this.fps = 30;
+        this.speed = 1;
+        this.loop = false;
+        this.reverse = false;
         this.animation = null;
         this.frames = [];
         this.duration = 0;
@@ -22,6 +27,7 @@ export class Workspace {
             this.selectedKeyframe = null;
             this.selectedKeyframes = [];
             this.currentFrame = 0;
+            this.currentTime = 0;
             this.playbackState = 'Stopped';
             this.clipboard = [];
             this.undoStack = [];

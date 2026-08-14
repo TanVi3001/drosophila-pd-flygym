@@ -16,7 +16,10 @@ export class App {
         this.timeline = new Timeline(this.workspace, () => this.handleTimelineChange());
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.inspector = new Inspector(this.workspace, () => this.handleInspectorChange());
-        this.playbackController = new PlaybackController(this.workspace);
+        this.playbackController = new PlaybackController(
+            this.workspace,
+            () => this.refreshEditor(),
+        );
         this.toolbar = new Toolbar({
             onLoadJSON: (file) => this.loadSceneFile(file),
             onResetView: () => this.viewportRenderer.resetView(),
