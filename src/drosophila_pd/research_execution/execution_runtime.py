@@ -306,7 +306,11 @@ def _record_from_manifest(manifest_path: Path, payload: Mapping[str, Any]) -> Da
     payload_paths: list[Path] = []
     missing_paths: list[Path] = []
     for entry in entries if isinstance(entries, (list, tuple)) else ():
-        value = entry.get("path", entry.get("source", entry.get("file"))) if isinstance(entry, Mapping) else entry
+        value = (
+            entry.get("relative_path", entry.get("path", entry.get("source", entry.get("file"))))
+            if isinstance(entry, Mapping)
+            else entry
+        )
         if not value:
             continue
         candidate = Path(str(value))

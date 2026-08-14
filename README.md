@@ -644,3 +644,19 @@ python scripts/run_campaign.py execute
 When an approved real dataset is placed under `datasets/` with an executable
 manifest, the runtime delegates to the existing `StudyOrchestrator`. See
 [`docs/v6/120_V6_Architecture.md`](docs/v6/120_V6_Architecture.md).
+
+## V7 FlyGym Dataset Integration
+
+V7 adds a read-only adapter for curated FlyGym datasets. It discovers
+`healthy`, `pd`, `candidate`, `control`, `validation`, and `benchmark` manifests,
+checks metadata, paths, checksums, trajectory files, and frame counts, and
+writes dataset reports without running simulation.
+
+```bash
+python scripts/dataset_cli.py discover
+python scripts/dataset_cli.py validate
+python scripts/dataset_cli.py report
+```
+
+No real rollout dataset is currently present, so the adapter reports
+`WAITING_DATASET`. See [`docs/v7/126_V7_Architecture.md`](docs/v7/126_V7_Architecture.md).

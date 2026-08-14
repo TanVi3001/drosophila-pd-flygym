@@ -58,6 +58,16 @@ from .research_execution import (  # noqa: E402
     ExecutionRuntime,
     ExecutionState,
 )
+from .dataset_adapter import (  # noqa: E402
+    DatasetDiscoveryReport,
+    DatasetMetadata,
+    DatasetValidationReport,
+    DatasetValidator,
+    FlyGymDataset,
+    RolloutFile,
+    RolloutLocator,
+    discover_datasets,
+)
 
 __all__ = [
     "__version__",
@@ -101,4 +111,12 @@ __all__ = [
     "ExecutionResult",
     "ExecutionRuntime",
     "ExecutionState",
+    "DatasetDiscoveryReport",
+    "DatasetMetadata",
+    "DatasetValidationReport",
+    "DatasetValidator",
+    "FlyGymDataset",
+    "RolloutFile",
+    "RolloutLocator",
+    "discover_datasets",
 ]

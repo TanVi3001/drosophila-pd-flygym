@@ -866,3 +866,26 @@ bundle artifacts. V6 does not duplicate or alter Analysis, Statistics,
 Computational PD, Scientific Validation, Campaign, Digital Twin, or manuscript
 logic. Its outputs are operational execution reports, not new scientific
 evidence or biological validation.
+
+## V7 Real FlyGym Dataset Integration
+
+V7 adds the read-only `drosophila_pd.dataset_adapter` package and
+`scripts/dataset_cli.py`. The adapter discovers the V4 dataset categories
+`healthy`, `pd`, `candidate`, `control`, `validation`, and `benchmark` under
+`datasets/` and `research/datasets/`.
+
+It reads manifests, metadata, declared rollout files, SHA-256 values, byte
+sizes, supported trajectory formats, and frame counts. It does not run FlyGym
+or MuJoCo, generate rollout data, mutate datasets, calculate scientific
+metrics, or alter the Analysis, Statistics, Computational-PD, Validation,
+Digital Twin, Campaign, or StudyOrchestrator implementations.
+
+The current repository contains no real rollout payload. Live discovery and
+validation therefore report `WAITING_DATASET` with all six dataset categories
+missing. When an approved manifest-backed dataset is added, the adapter can
+report `READY`; the existing V6 runtime remains the execution gate and the
+existing `StudyOrchestrator` remains the downstream integration point.
+
+Dataset validation is an integrity check only. It does not establish biological
+validity, Parkinson's disease validation, mechanistic equivalence, or any new
+scientific conclusion.
