@@ -50,3 +50,7 @@ là API additive cho manifest-based plugin; hai API không bị trộn trạng t
 Lớp release engineering nằm ngoài pipeline khoa học và cung cấp health scan,
 module index, dependency graph, debug trace và release report. Các utility
 này chỉ đọc source/configuration hoặc chạy operation do developer truyền vào.
+
+Lớp `drosophila_pd.parkinson` nằm sau rollout và measurement: nó đọc
+`RolloutData`, tính motor features, behavior timeline, computational index và
+report. Lớp này không sở hữu FlyGym/MuJoCo state.

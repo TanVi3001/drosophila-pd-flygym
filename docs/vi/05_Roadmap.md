@@ -14,3 +14,6 @@ tự tạo thêm kết luận khoa học.
 
 Mọi thay đổi phải giữ backward compatibility, chạy compileall/pytest/diff
 check và cập nhật tài liệu tương ứng.
+
+9. Duy trì Epic 16 như lớp computational phenotype analysis trên rollout
+   thật; không suy diễn thành chẩn đoán hoặc validation sinh học.

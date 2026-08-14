@@ -30,3 +30,7 @@
 
 CLI `scripts/generate_release_report.py` sinh report mới trong
 `docs/release_engineering/`; không ghi đè report package v1 trong `dist/`.
+
+Package Python `drosophila_pd.parkinson` là lớp hậu xử lý rollout cho
+feature, behavior state, computational index, validation và report. Nó không
+gọi simulation và không thay thế evidence v1.
