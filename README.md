@@ -96,6 +96,7 @@ The verified Milestone C unperturbed baseline found:
 - `src/drosophila_pd/controllers/` - controller interfaces
 - `src/drosophila_pd/perturbations/` - controlled perturbation interfaces
 - `src/drosophila_pd/experiments/` - experiment orchestration code
+- `src/drosophila_pd/experiment/` - explicit real-run orchestration, artifact, dataset, and benchmark management
 - `src/drosophila_pd/metrics/` - gait and locomotion metrics
 - `src/drosophila_pd/analysis/` - evidence-only synthesis of frozen reports
 - `configs/experiments/` - version-controlled experiment configuration
@@ -113,6 +114,14 @@ The verified Milestone C unperturbed baseline found:
 3. Pull the repository into Google Colab for FlyGym/MuJoCo execution.
 4. Save reproducibility metadata, metrics, logs, and selected small artifacts.
 5. Keep large raw artifacts outside Git unless explicitly curated.
+
+## V2 experiment management
+
+The Sprint 1 `drosophila_pd.experiment` package manages real caller-provided
+experiment stages, manifests, checksums, logs, retries, and publication asset
+registration. It has no default simulation handler: a FlyGym pipeline must be
+injected explicitly, so the package cannot fabricate rollout data. Dataset
+layout creation is metadata-only until existing files are registered.
 
 ## GitHub Discussions
 
