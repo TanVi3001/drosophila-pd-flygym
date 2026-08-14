@@ -160,6 +160,20 @@ python scripts/digital_twin_platform_cli.py validate --input platform.json
 The Vietnamese guides are in `docs/vi/73_Digital_Twin.md` through
 `docs/vi/82_Milestone4.md`.
 
+## Epic 20 Research Campaign Engine
+
+The additive campaign layer manages experiment plans, dependency-aware states,
+history, provenance, validation summaries, dashboards, reports, and publication
+bundles over existing computational artifacts. It does not run FlyGym/MuJoCo,
+create rollout data, modify the Digital Twin, or introduce scientific metrics.
+
+```bash
+python scripts/research_campaign_cli.py --help
+```
+
+The Vietnamese guides are in `docs/vi/83_Research_Campaign.md` through
+`docs/vi/90_Kien_Truc_Campaign.md`.
+
 ## Workflow
 
 1. Develop code, tests, and documentation locally with Codex.

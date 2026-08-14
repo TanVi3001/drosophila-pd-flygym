@@ -34,6 +34,14 @@ from .digital_twin_platform import (  # noqa: E402
     TwinAnnotation,
     VirtualLaboratorySession,
 )
+from .research_campaign import (  # noqa: E402
+    CampaignEvent as ResearchCampaignEvent,
+    CampaignHistory as ResearchCampaignHistory,
+    CampaignManager as ResearchCampaignManager,
+    CampaignManifest as ResearchCampaignManifest,
+    CampaignState as ResearchCampaignState,
+    ExperimentSpec as ResearchExperimentSpec,
+)
 
 __all__ = [
     "__version__",
@@ -59,4 +67,10 @@ __all__ = [
     "TemporalExplorer",
     "TwinAnnotation",
     "VirtualLaboratorySession",
+    "ResearchCampaignEvent",
+    "ResearchCampaignHistory",
+    "ResearchCampaignManager",
+    "ResearchCampaignManifest",
+    "ResearchCampaignState",
+    "ResearchExperimentSpec",
 ]
