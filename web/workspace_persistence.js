@@ -1,14 +1,15 @@
 const STORAGE_PREFIX = 'fly-studio:';
 
 export class WorkspacePersistence {
-    constructor(workspace, storage = globalThis.localStorage) {
+    constructor(workspace, storage = globalThis.localStorage, experimentWorkspace = null) {
         this.workspace = workspace;
         this.storage = storage;
+        this.experimentWorkspace = experimentWorkspace;
         this.autosaveId = null;
     }
 
     save(key = 'autosave') {
-        const snapshot = serializeWorkspace(this.workspace);
+        const snapshot = serializeWorkspace(this.workspace, this.experimentWorkspace);
         this.storage?.setItem(this.storageKey(key), JSON.stringify(snapshot));
         return snapshot;
     }
@@ -32,6 +33,9 @@ export class WorkspacePersistence {
             ...this.workspace.trajectorySettings,
             ...(snapshot.trajectorySettings ?? {}),
         };
+        if (this.experimentWorkspace && snapshot.experimentWorkspace) {
+            this.experimentWorkspace.restore(snapshot.experimentWorkspace);
+        }
         return snapshot;
     }
 
@@ -82,7 +86,7 @@ export class WorkspacePersistence {
     }
 }
 
-export function serializeWorkspace(workspace) {
+export function serializeWorkspace(workspace, experimentWorkspace = null) {
     return {
         version: 1,
         savedAt: new Date().toISOString(),
@@ -95,6 +99,7 @@ export function serializeWorkspace(workspace) {
         loop: workspace.loop,
         reverse: workspace.reverse,
         trajectorySettings: workspace.trajectorySettings,
+        experimentWorkspace: experimentWorkspace?.toJSON?.() ?? null,
         scope: 'Workspace state and loaded data only; not scientific evidence.',
     };
 }
