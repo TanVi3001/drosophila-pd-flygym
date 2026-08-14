@@ -119,6 +119,14 @@ Research-area anchors under `research/` and reusable documents under
 scientific evidence. The migration roadmap is
 [docs/vi/100_V3_Roadmap.md](docs/vi/100_V3_Roadmap.md).
 
+## V4 Real Scientific Campaign Preparation
+
+V4 adds protocol-driven preparation only: dataset specifications, experiment
+protocols, analysis and publication playbooks, SOPs, QA checklists, and
+readiness audits. It does not create datasets, run simulations, add framework
+modules, or introduce new scientific conclusions. Start at the
+[V4 preparation hub](docs/v4/README.md).
+
 ## Interactive Digital Fly Laboratory
 
 The Web Viewer can visualize imported FlyGym rollouts as an interactive Digital

@@ -820,3 +820,16 @@ Research directory anchors under `research/` and reusable document templates
 under `templates/` are organizational only. Existing scientific files are not
 moved for compatibility. The frozen evidence chain, manuscript, report
 artifacts, notebooks, and release metadata remain authoritative.
+
+## V4 Real Scientific Campaign Preparation
+
+V4 is a documentation-only preparation package. It defines dataset contracts for
+Healthy, PD-reserved computational, Candidate, Control, Validation, and
+Benchmark inputs; pre-execution experiment protocols; import-to-publication
+analysis playbooks; publication checklists; SOPs; QA gates; and readiness/audit
+reports under `docs/v4/`.
+
+V4 does not create datasets, run simulations, add managers/dashboards/plugins or
+Digital Twin/workflow modules, alter FlyGym, modify evidence, or introduce a
+scientific conclusion. The `pd` dataset label is reserved for a future
+computational condition and is not biological Parkinson's disease validation.
