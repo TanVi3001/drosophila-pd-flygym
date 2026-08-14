@@ -40,3 +40,7 @@ nhận `PluginContext` và dữ liệu được host truyền vào. Context khô
 
 `ExperimentWorkspace.plugins` vẫn giữ `PluginRegistry` cũ. `pluginPlatform`
 là API additive cho manifest-based plugin; hai API không bị trộn trạng thái.
+
+Lớp release engineering nằm ngoài pipeline khoa học và cung cấp health scan,
+module index, dependency graph, debug trace và release report. Các utility
+này chỉ đọc source/configuration hoặc chạy operation do developer truyền vào.

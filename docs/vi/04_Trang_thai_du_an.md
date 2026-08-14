@@ -17,6 +17,18 @@ Epic 11 bổ sung:
 - ba plugin examples cho analysis, statistics và export;
 - bộ tài liệu kỹ thuật tiếng Việt.
 
+## Epic 12
+
+Epic 12 bổ sung release engineering và developer experience:
+
+- release manifest, version metadata, compatibility và migration notes;
+- `ProjectHealth` cho health scan tĩnh;
+- module/API/dependency/hook/architecture explorers;
+- structured debug, timing, performance và diagnostic report;
+- benchmark suite không tự chạy simulation;
+- release report JSON/Markdown/HTML;
+- tài liệu tiếng Việt cho release và developer workflow.
+
 ## Phần chưa nên suy diễn
 
 Plugin platform không làm thay đổi simulation, controller, evidence JSON,

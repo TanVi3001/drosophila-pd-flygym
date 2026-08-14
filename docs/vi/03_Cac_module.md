@@ -10,6 +10,11 @@
 | `plugin_platform.js` | Lifecycle, manifest, hook và capability | plugin definition | plugin result/hook result |
 | `verification_suite.js` | Kiểm chứng workflow và benchmark | rollout thật | verification report |
 | `parkinson_export.js` | Export phân tích | analysis data | JSON/CSV/Markdown/HTML/SVG |
+| `release_engineering.py` | Manifest, version, compatibility, migration và notes | repository | release metadata |
+| `project_health.py` | Health scan tĩnh | repository | health checks |
+| `developer_tooling.py` | API/module/dependency/hook explorers | repository | architecture snapshot |
+| `debug_utils.py` | Event, timing, performance và diagnostic trace | caller events | diagnostic report |
+| `benchmarking.py` | Benchmark operation do caller cung cấp | callables | benchmark report |
 
 ## Plugin examples
 
@@ -18,3 +23,6 @@
 - `web/plugins/export_plugin.js`
 
 Đây là extension boundary và ví dụ API, không phải kết quả khoa học mới.
+
+CLI `scripts/generate_release_report.py` sinh report mới trong
+`docs/release_engineering/`; không ghi đè report package v1 trong `dist/`.
