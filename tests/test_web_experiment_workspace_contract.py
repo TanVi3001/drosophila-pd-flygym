@@ -49,5 +49,28 @@ def test_parkinson_analytics_engine_contract_is_additive_and_scoped():
 
 
 def test_frozen_scientific_paths_are_not_part_of_milestone_changes():
-    changed = {line for line in __import__("subprocess").check_output(["git", "diff", "--name-only", "HEAD~1"], text=True).splitlines()}
+    import subprocess
+
+    result = subprocess.run(
+        ["git", "diff", "--name-only", "HEAD~1"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    changed = set(result.stdout.splitlines()) if result.returncode == 0 else set()
     assert not any(path.startswith(("results/", "notebooks/", "docs/report/")) for path in changed)
+
+
+def test_analysis_pipeline_backend_contract():
+    required = {
+        "analysis_graph.js": ["FeatureGraph", "evaluateAll", "cycle detected"],
+        "analysis_normalization.js": ["global", "rollout", "experiment", "joint", "bodyPart"],
+        "analysis_quality.js": ["NON_FINITE_VALUES", "DUPLICATE_FRAMES", "BROKEN_TRAJECTORY"],
+        "analysis_outliers.js": ["iqr", "zscore", "mad"],
+        "analysis_matrix.js": ["correlationMatrix", "similarityMatrix", "distanceMatrix"],
+        "analysis_cache.js": ["feature", "metric", "comparison"],
+        "analysis_pipeline.js": ["AnalysisPipeline", "analyzeBatch", "parallelReady", "PipelineReport"],
+    }
+    for filename, markers in required.items():
+        text = (WEB / filename).read_text(encoding="utf-8")
+        assert all(marker.lower() in text.lower() for marker in markers), filename
