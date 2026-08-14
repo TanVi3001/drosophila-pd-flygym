@@ -50,6 +50,7 @@ class ExperimentStatus(str, Enum):
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     SKIPPED = "SKIPPED"
+    CANCELLED = "CANCELLED"
 
 
 def utc_timestamp() -> str:

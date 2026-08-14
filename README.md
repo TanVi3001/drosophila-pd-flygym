@@ -127,6 +127,23 @@ artifacts: it does not run simulations, create evidence, or make biological
 diagnoses. See the Vietnamese guides in `docs/vi/57_Workbench.md` through
 `docs/vi/62_Project_Bundle.md`.
 
+## Milestone 3 Automation
+
+The repository includes an additive, metadata-only automation layer for
+dataset catalogs, persistent experiment queues, reproducibility manifests,
+software benchmarks, artifact/publication packaging, project health, and
+developer inspection. It reuses the existing V2 campaign and experiment APIs;
+there is no default simulation executor and no fabricated rollout data.
+
+```bash
+python scripts/research_automation_cli.py health-check
+python scripts/research_automation_cli.py generate-manifest --output automation_manifest.json
+python scripts/research_automation_cli.py create-bundle --output bundle/
+```
+
+The Vietnamese guides are in `docs/vi/63_Dataset_Catalog.md` through
+`docs/vi/72_Kien_Truc_Milestone3.md`.
+
 ## Workflow
 
 1. Develop code, tests, and documentation locally with Codex.

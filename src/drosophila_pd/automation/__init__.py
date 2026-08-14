@@ -1,14 +1,8 @@
-"""Drosophila PD FlyGym computational research package."""
+"""Milestone 3 research automation and reproducibility services."""
 
-from importlib.metadata import PackageNotFoundError, version
-
-
-try:
-    __version__ = version("drosophila-pd-flygym")
-except PackageNotFoundError:  # Source checkouts before editable installation.
-    __version__ = "0+unknown"
-
-from .automation import (  # noqa: E402
+from .core import (
+    AUTOMATION_BENCHMARK_STAGES,
+    AUTOMATION_SCOPE,
     ArtifactManager,
     BenchmarkCenter,
     DatasetCatalog,
@@ -22,7 +16,8 @@ from .automation import (  # noqa: E402
 )
 
 __all__ = [
-    "__version__",
+    "AUTOMATION_BENCHMARK_STAGES",
+    "AUTOMATION_SCOPE",
     "ArtifactManager",
     "BenchmarkCenter",
     "DatasetCatalog",
