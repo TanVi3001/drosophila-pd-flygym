@@ -889,3 +889,21 @@ existing `StudyOrchestrator` remains the downstream integration point.
 Dataset validation is an integrity check only. It does not establish biological
 validity, Parkinson's disease validation, mechanistic equivalence, or any new
 scientific conclusion.
+
+## V8 Scientific Experiment Runtime
+
+V8 adds the orchestration-only `drosophila_pd.experiment_runtime` package and
+`scripts/experiment_runtime.py`. It binds the V7 dataset adapter result to an
+`ExperimentSession`, existing campaign metadata, and the existing
+`StudyOrchestrator` without parsing rollout data a second time.
+
+The runtime emits persisted lifecycle events including `DATASET_READY`,
+`SESSION_CREATED`, `PIPELINE_STARTED`, `PIPELINE_COMPLETED`,
+`VALIDATION_COMPLETED`, `PACKAGE_CREATED`, `FAILED`, and `WAITING_DATASET`.
+It writes session, execution, state, artifact, manifest, and summary files
+under the operational experiment output directory.
+
+Because this repository has no real rollout dataset, V8 currently stops at
+`WAITING_DATASET` and does not call the study pipeline. A ready dataset will
+use the existing `StudyOrchestrator`; V8 adds no analysis, statistics,
+validation, Digital Twin, dashboard, simulation, or biological interpretation.

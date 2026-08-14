@@ -68,6 +68,18 @@ from .dataset_adapter import (  # noqa: E402
     RolloutLocator,
     discover_datasets,
 )
+from .experiment_runtime import (  # noqa: E402
+    EventLog,
+    ExperimentContext,
+    ExperimentEvent,
+    ExperimentEventType,
+    ExperimentOutputs,
+    ExperimentRuntime,
+    ExperimentSession,
+    ExperimentSummary,
+    OutputPaths,
+    SessionState,
+)
 
 __all__ = [
     "__version__",
@@ -119,4 +131,14 @@ __all__ = [
     "RolloutFile",
     "RolloutLocator",
     "discover_datasets",
+    "EventLog",
+    "ExperimentContext",
+    "ExperimentEvent",
+    "ExperimentEventType",
+    "ExperimentOutputs",
+    "ExperimentRuntime",
+    "ExperimentSession",
+    "ExperimentSummary",
+    "OutputPaths",
+    "SessionState",
 ]

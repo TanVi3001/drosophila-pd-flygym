@@ -660,3 +660,20 @@ python scripts/dataset_cli.py report
 
 No real rollout dataset is currently present, so the adapter reports
 `WAITING_DATASET`. See [`docs/v7/126_V7_Architecture.md`](docs/v7/126_V7_Architecture.md).
+
+## V8 Scientific Experiment Runtime
+
+V8 adds session-based orchestration over the V7 dataset adapter. It persists
+session state, execution events, runtime manifests, artifacts, and summaries.
+When a dataset is absent, execution stops at `WAITING_DATASET`; when the V7
+adapter returns `READY`, the runtime delegates to the existing
+`StudyOrchestrator`.
+
+```bash
+python scripts/experiment_runtime.py prepare
+python scripts/experiment_runtime.py bind
+python scripts/experiment_runtime.py run
+python scripts/experiment_runtime.py summary
+```
+
+See [`docs/v8/132_V8_Architecture.md`](docs/v8/132_V8_Architecture.md).
