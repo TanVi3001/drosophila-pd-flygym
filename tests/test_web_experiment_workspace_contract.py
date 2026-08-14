@@ -74,3 +74,21 @@ def test_analysis_pipeline_backend_contract():
     for filename, markers in required.items():
         text = (WEB / filename).read_text(encoding="utf-8")
         assert all(marker.lower() in text.lower() for marker in markers), filename
+
+
+def test_statistical_engine_backend_contract():
+    required = {
+        "statistical_descriptive.js": ["mean", "median", "variance", "quartile", "percentiles", "distribution"],
+        "statistical_resampling.js": ["bootstrap", "confidenceLevel", "jackknife"],
+        "statistical_tests.js": ["welch-t-test", "mann-whitney", "wilcoxon", "ks", "permutation"],
+        "statistical_effects.js": ["cohensD", "glassDelta", "cliffsDelta", "rankBiserial"],
+        "statistical_corrections.js": ["bonferroni", "holm", "benjamini-hochberg", "falseDiscoveryRate"],
+        "statistical_correlation.js": ["pearson", "spearman", "kendall", "partialCorrelation"],
+        "statistical_regression.js": ["linearRegression", "polynomialRegression", "robustRegression", "residualAnalysis"],
+        "statistical_validation.js": ["normality", "varianceEquality", "missingData", "outlierSensitivity"],
+        "statistical_engine.js": ["StatisticalEngine", "compare", "report", "benchmark"],
+        "statistical_report.js": ["toJSON", "toMarkdown", "toHTML", "toCSV"],
+    }
+    for filename, markers in required.items():
+        text = (WEB / filename).read_text(encoding="utf-8")
+        assert all(marker.lower() in text.lower() for marker in markers), filename
