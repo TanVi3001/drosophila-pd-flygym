@@ -201,6 +201,10 @@ export class ComparisonWorkspace {
         this.selectedExperimentIds = [];
         this.alignment = { mode: 'frame', anchor: 0 };
         this.synchronized = true;
+        this.syncCamera = true;
+        this.syncSelection = true;
+        this.syncTimeline = true;
+        this.syncOverlays = true;
         this.currentFrame = 0;
     }
 
@@ -219,6 +223,13 @@ export class ComparisonWorkspace {
         return this.synchronized;
     }
 
+    setSynchronization(options = {}) {
+        ['syncCamera', 'syncSelection', 'syncTimeline', 'syncOverlays'].forEach((key) => {
+            if (options[key] !== undefined) this[key] = Boolean(options[key]);
+        });
+        return this.snapshot();
+    }
+
     setFrame(frame) {
         this.currentFrame = Math.max(0, Math.round(Number(frame) || 0));
         return this.currentFrame;
@@ -229,6 +240,10 @@ export class ComparisonWorkspace {
             selectedExperimentIds: [...this.selectedExperimentIds],
             alignment: clone(this.alignment),
             synchronized: this.synchronized,
+            syncCamera: this.syncCamera,
+            syncSelection: this.syncSelection,
+            syncTimeline: this.syncTimeline,
+            syncOverlays: this.syncOverlays,
             currentFrame: this.currentFrame,
         };
     }

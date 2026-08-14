@@ -117,6 +117,16 @@ These are presentation tools over imported computational data; they do not run
 simulations or add biological interpretation. The Vietnamese guides are in
 `docs/vi/51_3D_Viewer.md` through `docs/vi/56_Huong_Dan_3D.md`.
 
+## Parkinson Research Workbench
+
+The V2 Web Platform also provides a research workbench for imported rollouts.
+It combines named workspace layouts, multi-experiment comparison controls,
+validation summaries, figure composition, research notes, and a project bundle
+manifest. It is a management and presentation layer over existing computational
+artifacts: it does not run simulations, create evidence, or make biological
+diagnoses. See the Vietnamese guides in `docs/vi/57_Workbench.md` through
+`docs/vi/62_Project_Bundle.md`.
+
 ## Workflow
 
 1. Develop code, tests, and documentation locally with Codex.

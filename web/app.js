@@ -24,6 +24,8 @@ import { DigitalFly } from './digital_fly.js';
 import { DigitalFly3D } from './digital_fly_3d.js';
 import { LaboratoryDashboard } from './laboratory_dashboard.js';
 import { RolloutComparisonViewer } from './comparison_viewer.js';
+import { ResearchWorkbench } from './research_workbench.js';
+import { ResearchWorkbenchPanel } from './research_workbench_panel.js';
 
 export class App {
     constructor() {
@@ -53,6 +55,14 @@ export class App {
         this.reportGenerator = new ExperimentReportGenerator(this.experimentWorkspace, this.analyticsDashboard);
         this.comparisonModel = new ExperimentComparisonModel(this.experimentWorkspace);
         this.comparisonViewer = new RolloutComparisonViewer();
+        this.researchWorkbench = new ResearchWorkbench({
+            workspace: this.workspace,
+            experimentWorkspace: this.experimentWorkspace,
+            laboratory: this.laboratory,
+            analyticsDashboard: this.analyticsDashboard,
+            viewportRenderer: this.viewportRenderer,
+        });
+        this.researchWorkbenchPanel = new ResearchWorkbenchPanel(this.researchWorkbench);
         this.experimentPanel = new ExperimentWorkspacePanel(this.experimentWorkspace, {
             onImport: (file, options) => this.loadSceneFile(file, options),
             onChange: () => this.renderExperimentWorkspace(),
@@ -106,6 +116,7 @@ export class App {
         this.timeline.init(document.getElementById('timeline'));
         this.behaviorTimeline.init(document.getElementById('behavior-timeline'));
         this.experimentPanel.init(document.getElementById('experiment-manager'));
+        this.researchWorkbenchPanel.init(document.getElementById('research-workbench'));
         this.sidebar.init(document.getElementById('sidebar'));
         this.inspector.init(document.getElementById('inspector'));
         this.toolbar.init(document.getElementById('toolbar'));
@@ -235,6 +246,12 @@ export class App {
         this.behaviorTimeline.updateFrame();
         this.viewportRenderer.render();
         this.toolbar.updatePlaybackState(this.workspace);
+        const comparison = this.experimentWorkspace.comparison;
+        if (comparison.syncTimeline) {
+            comparison.setFrame(this.workspace.currentFrame);
+            this.comparisonViewer.setFrame(this.workspace.currentFrame);
+        }
+        this.researchWorkbenchPanel.updateLive();
     }
 
     setTrajectoryOption(name, value) {
@@ -262,6 +279,7 @@ export class App {
         this.laboratoryDashboard.render(dashboardRoot);
         const comparisonRoot = document.getElementById('comparison-viewer');
         if (comparisonRoot) this.comparisonViewer.render(comparisonRoot, this.comparisonModel.report());
+        this.researchWorkbenchPanel.render();
     }
 
     exportExperimentReport(format) {

@@ -563,6 +563,120 @@ body {
     padding: 8px 12px;
 }
 
+#research-workbench {
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    box-sizing: border-box;
+    max-height: 360px;
+    min-height: 180px;
+    overflow: auto;
+    padding: 8px 12px;
+}
+
+.research-workbench-heading h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.research-workbench-tabs,
+.research-check-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.research-workbench-tabs {
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+}
+
+.research-workbench-tabs button,
+.research-workbench-content button {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 4px 7px;
+}
+
+.research-workbench-tabs button.is-active {
+    border-color: var(--accent);
+}
+
+.research-workbench-content {
+    min-height: 86px;
+}
+
+.research-metric-grid {
+    display: grid;
+    gap: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.research-metric {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    display: grid;
+    gap: 2px;
+    padding: 5px;
+}
+
+.research-metric span,
+.research-section-heading small,
+.research-workbench-scope,
+.research-check,
+.research-note {
+    color: var(--text-secondary);
+}
+
+.research-section-heading {
+    align-items: baseline;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.research-section-heading h3 {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.research-check {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+}
+
+.research-list-row,
+.research-notebook-entry {
+    border-top: 1px solid var(--border);
+    padding: 5px 0;
+}
+
+.research-notebook-entry small {
+    color: var(--text-secondary);
+    display: block;
+}
+
+.research-notebook-entry p {
+    margin: 3px 0 0;
+    white-space: pre-wrap;
+}
+
+.research-notebook-input {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+    color: var(--text-primary);
+    display: block;
+    min-height: 44px;
+    margin-bottom: 5px;
+    padding: 5px;
+    resize: vertical;
+    width: min(560px, 100%);
+}
+
 #toolbar select,
 #toolbar input[type="number"],
 #toolbar input[type="color"] {
