@@ -961,3 +961,18 @@ computational planning category, not biological Parkinson's disease
 validation. The existing V7 adapter and V6/V8/V9 orchestration remain the
 execution path, and absence of an approved dataset must remain
 `WAITING_DATASET`.
+
+## Project X - Real Dataset Acquisition Pipeline
+
+Project X adds the additive `drosophila_pd.dataset_registry` package. It owns
+caller-authorized intake and management of real dataset files only: typed
+manifest/version/checksum/metadata models, source scanning, directory/ZIP/
+single/multiple-rollout import, duplicate and checksum verification, metadata
+and payload health checks, searchable indexing, and explicit report artifact
+generation.
+
+The registry creates no rollout, runs no FlyGym or MuJoCo simulation, changes no
+scientific algorithm, and adds no Parkinson interpretation. Empty or missing
+dataset roots remain `WAITING_DATASET`; invalid packages are `FAILED`. A
+`READY` health result means software/data integrity only, not biological
+validation.

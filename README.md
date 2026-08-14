@@ -117,6 +117,18 @@ is created. The `pd` dataset label is a computational planning category only.
 Until an approved dataset and computational configuration exist, the existing
 CLI/runtime correctly stops at `WAITING_DATASET`.
 
+## Project X - Real Dataset Acquisition Pipeline
+
+Project X adds the additive `drosophila_pd.dataset_registry` package for
+receiving caller-supplied FlyGym datasets. It supports manifest-backed scanning,
+directory/ZIP/single/multiple-rollout import, checksum and duplicate checks,
+metadata and payload health reports, searchable indexing, and explicit CSV/JSON/
+Markdown/SHA-256 artifact reports.
+
+The registry does not run FlyGym or MuJoCo, create rollout data, alter
+scientific algorithms, or make biological claims. Missing or invalid data
+remains `WAITING_DATASET` or `FAILED`.
+
 ## Repository Layout
 
 - `src/drosophila_pd/anatomy/` - anatomy and FlyGym mapping audit helpers
