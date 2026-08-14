@@ -833,3 +833,15 @@ V4 does not create datasets, run simulations, add managers/dashboards/plugins or
 Digital Twin/workflow modules, alter FlyGym, modify evidence, or introduce a
 scientific conclusion. The `pd` dataset label is reserved for a future
 computational condition and is not biological Parkinson's disease validation.
+
+## V5 Experimental Campaign 01 - Healthy Baseline
+
+V5 is a planning-only package under `research/campaigns/healthy_baseline/` for
+100 future unperturbed computational baseline experiments (`Healthy_001` to
+`Healthy_100`, seeds 0-99). It contains schemas, templates, a campaign plan,
+execution sequence, publication planning, and reviewer gates.
+
+No V5 rollout, dataset, figure, table, or scientific conclusion has been
+created. Execution requires explicit authorization, a new output path, and the
+existing documented Healthy baseline pipeline. The Healthy baseline remains a
+computational simulation baseline, not biological validation.

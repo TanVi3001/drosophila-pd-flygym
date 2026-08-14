@@ -127,6 +127,15 @@ readiness audits. It does not create datasets, run simulations, add framework
 modules, or introduce new scientific conclusions. Start at the
 [V4 preparation hub](docs/v4/README.md).
 
+## V5 Experimental Campaign 01
+
+V5 prepares the first real Healthy baseline campaign without running it. The
+100-experiment matrix, manifest/metadata/checksum templates, execution plan,
+figure/table plans, publication asset layout, notebook template, and reviewer
+checklist are under
+`research/campaigns/healthy_baseline/`. No rollout, figure, table, or new
+scientific conclusion is included. See the [V5 planning hub](docs/v5/README.md).
+
 ## Interactive Digital Fly Laboratory
 
 The Web Viewer can visualize imported FlyGym rollouts as an interactive Digital
