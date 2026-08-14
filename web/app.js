@@ -19,11 +19,13 @@ import { ExperimentWorkspacePanel } from './experiment_workspace_panel.js';
 import { AnalyticsDashboard } from './experiment_analytics.js';
 import { ExperimentReportGenerator } from './experiment_reports.js';
 import { ExperimentComparisonModel } from './experiment_comparison.js';
+import { DigitalLaboratory } from './digital_laboratory.js';
 
 export class App {
     constructor() {
         this.workspace = new Workspace();
         this.experimentWorkspace = new ExperimentWorkspace();
+        this.laboratory = new DigitalLaboratory({ experimentWorkspace: this.experimentWorkspace });
         this.layout = new Layout();
         this.viewportRenderer = new ViewportRenderer(this.workspace);
         this.timeline = new Timeline(this.workspace, () => this.handleTimelineChange());

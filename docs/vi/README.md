@@ -20,3 +20,8 @@ liệu này phải được cập nhật cùng mỗi thay đổi kiến trúc.
 12. [Hướng dẫn viết Plugin](10_Huong_dan_Viet_Plugin.md)
 13. [Cấu trúc source code](11_Cau_truc_Source_Code.md)
 14. [FAQ](12_FAQ.md)
+15. [Phòng thí nghiệm số](13_Phong_thi_nghiem_so.md)
+16. [Quản lý dự án](14_Quan_ly_Du_an.md)
+17. [Hướng dẫn phân tích](15_Huong_dan_Phan_tich.md)
+18. [Hướng dẫn xuất báo cáo](16_Huong_dan_Xuat_Bao_cao.md)
+19. [Cấu trúc phòng thí nghiệm](17_Cau_truc_Phong_thi_nghiem.md)
