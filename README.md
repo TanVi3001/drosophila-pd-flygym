@@ -144,6 +144,22 @@ python scripts/research_automation_cli.py create-bundle --output bundle/
 The Vietnamese guides are in `docs/vi/63_Dataset_Catalog.md` through
 `docs/vi/72_Kien_Truc_Milestone3.md`.
 
+## Milestone 4 Digital Twin Platform
+
+The V2 platform includes a management layer for multiple Digital Twin records
+derived from imported rollouts. It provides snapshot/restore/branch history,
+state diffs, temporal exploration, scenario workflow records, annotations,
+knowledge-graph links, virtual-laboratory sessions, and collaboration history.
+These are computational workflow tools only: they do not run simulations,
+create rollout data, add scientific metrics, or make biological claims.
+
+```bash
+python scripts/digital_twin_platform_cli.py validate --input platform.json
+```
+
+The Vietnamese guides are in `docs/vi/73_Digital_Twin.md` through
+`docs/vi/82_Milestone4.md`.
+
 ## Workflow
 
 1. Develop code, tests, and documentation locally with Codex.

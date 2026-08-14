@@ -20,6 +20,20 @@ from .automation import (  # noqa: E402
     ReproducibilityCenter,
     ResearchAutomationPlatform,
 )
+from .digital_twin_platform import (  # noqa: E402
+    CollaborationLayer,
+    DigitalTwinManager,
+    DigitalTwinPlatform,
+    DigitalTwinRecord,
+    KnowledgeGraph,
+    ScenarioRecord,
+    ScenarioWorkspace,
+    StateDiff,
+    StateDiffEngine,
+    TemporalExplorer,
+    TwinAnnotation,
+    VirtualLaboratorySession,
+)
 
 __all__ = [
     "__version__",
@@ -33,4 +47,16 @@ __all__ = [
     "PublicationBuilder",
     "ReproducibilityCenter",
     "ResearchAutomationPlatform",
+    "CollaborationLayer",
+    "DigitalTwinManager",
+    "DigitalTwinPlatform",
+    "DigitalTwinRecord",
+    "KnowledgeGraph",
+    "ScenarioRecord",
+    "ScenarioWorkspace",
+    "StateDiff",
+    "StateDiffEngine",
+    "TemporalExplorer",
+    "TwinAnnotation",
+    "VirtualLaboratorySession",
 ]
