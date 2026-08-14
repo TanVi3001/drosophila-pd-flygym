@@ -104,6 +104,19 @@ by Project A. When an approved real dataset is supplied under
 `datasets/healthy/`, the existing V7-V9 gates and downstream pipeline remain
 the execution path. A ready/integrity result is not biological validation.
 
+## Project B - Parkinson Study Preparation
+
+Project B is a planning-only package for 100 future computational-condition
+experiments (`PD_001` through `PD_100`, seeds 0-99). Its protocol, dataset
+contract, expected outputs, validation gates, reviewer checklists, and paper
+skeleton are under `research/campaigns/parkinson_study/`,
+`paper/parkinson_study/`, and `docs/v10/Project_B/`.
+
+No PD rollout, simulation, synthetic data, new algorithm, or biological claim
+is created. The `pd` dataset label is a computational planning category only.
+Until an approved dataset and computational configuration exist, the existing
+CLI/runtime correctly stops at `WAITING_DATASET`.
+
 ## Repository Layout
 
 - `src/drosophila_pd/anatomy/` - anatomy and FlyGym mapping audit helpers

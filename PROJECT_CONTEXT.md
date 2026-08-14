@@ -945,3 +945,19 @@ path. Their integrity checks and `WAITING_DATASET` gate do not establish
 biological validation. Project A does not modify scientific modules, FlyGym,
 simulation code, frozen evidence, notebooks, manuscript content, or release
 artifacts.
+
+## Project B - Parkinson Study Preparation
+
+Project B is planning-only preparation for 100 future computational-condition
+experiments, `PD_001` through `PD_100`, with deterministic seeds 0 through 99.
+It adds the study protocol, campaign matrix, separate `pd` manifest contract,
+metrics and validation specifications, expected-output and artifact
+inventories, reviewer/reproducibility checklists, paper skeleton, and
+`docs/v10/Project_B/` operational guidance.
+
+No approved PD configuration, rollout, simulation, synthetic data, new
+algorithm, or scientific conclusion is present. The `pd` label is a
+computational planning category, not biological Parkinson's disease
+validation. The existing V7 adapter and V6/V8/V9 orchestration remain the
+execution path, and absence of an approved dataset must remain
+`WAITING_DATASET`.
