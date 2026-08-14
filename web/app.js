@@ -22,6 +22,7 @@ import { ExperimentComparisonModel } from './experiment_comparison.js';
 import { DigitalLaboratory } from './digital_laboratory.js';
 import { DigitalFly } from './digital_fly.js';
 import { DigitalFly3D } from './digital_fly_3d.js';
+import { LaboratoryDashboard } from './laboratory_dashboard.js';
 
 export class App {
     constructor() {
@@ -41,6 +42,11 @@ export class App {
         this.persistence = new WorkspacePersistence(this.workspace, globalThis.localStorage, this.experimentWorkspace);
         this.sessionRecorder = new SessionRecorder(this.workspace);
         this.analyticsDashboard = new AnalyticsDashboard(this.experimentWorkspace);
+        this.laboratoryDashboard = new LaboratoryDashboard({
+            laboratory: this.laboratory,
+            experimentWorkspace: this.experimentWorkspace,
+            analyticsDashboard: this.analyticsDashboard,
+        });
         this.reportGenerator = new ExperimentReportGenerator(this.experimentWorkspace, this.analyticsDashboard);
         this.comparisonModel = new ExperimentComparisonModel(this.experimentWorkspace);
         this.experimentPanel = new ExperimentWorkspacePanel(this.experimentWorkspace, {
@@ -235,7 +241,7 @@ export class App {
     renderExperimentWorkspace() {
         this.experimentPanel.render();
         const dashboardRoot = document.getElementById('experiment-dashboard');
-        this.analyticsDashboard.render(dashboardRoot);
+        this.laboratoryDashboard.render(dashboardRoot);
     }
 
     exportExperimentReport(format) {
