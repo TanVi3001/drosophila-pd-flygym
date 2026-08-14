@@ -141,3 +141,41 @@ def test_verification_documentation_and_release_checklist_exist():
     ]
     directory = ROOT / "docs" / "v2" / "verification_suite"
     assert all((directory / filename).exists() for filename in required)
+
+
+def test_plugin_platform_contract_is_additive_and_manifest_driven():
+    text = (WEB / "plugin_platform.js").read_text(encoding="utf-8")
+    required = [
+        "PluginPlatform",
+        "PluginManifestError",
+        "PluginContext",
+        "PluginLoader",
+        "register",
+        "unregister",
+        "enable",
+        "disable",
+        "reload",
+        "unload",
+        "onImport",
+        "onWorkspaceLoaded",
+        "dependencies",
+        "capabilities",
+        "internal Workspace",
+    ]
+    assert all(marker in text for marker in required)
+    for filename, capability in (
+        ("analysis_plugin.js", "analysis"),
+        ("statistics_plugin.js", "statistics"),
+        ("export_plugin.js", "export"),
+    ):
+        example = (WEB / "plugins" / filename).read_text(encoding="utf-8")
+        assert "manifest" in example
+        assert capability in example
+        assert "run(input, context)" in example
+
+
+def test_experiment_workspace_exposes_platform_without_removing_legacy_registry():
+    text = (WEB / "experiment_workspace.js").read_text(encoding="utf-8")
+    assert "PluginPlatform" in text
+    assert "this.plugins = new PluginRegistry()" in text
+    assert "this.pluginPlatform = new PluginPlatform()" in text
