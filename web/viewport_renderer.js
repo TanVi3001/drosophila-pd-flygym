@@ -5,9 +5,10 @@ const SELECTED_COLOR = '#ffcc66';
 const TEXT_COLOR = '#d8dee5';
 
 import { DigitalFly3DRenderer } from './digital_fly_3d_renderer.js';
+import { Camera } from './camera.js';
 
 export class ViewportRenderer {
-    constructor(workspace) {
+    constructor(workspace, { onSelect = null } = {}) {
         this.workspace = workspace;
         this.container = null;
         this.canvas = null;
@@ -17,6 +18,7 @@ export class ViewportRenderer {
         this.devicePixelRatio = 1;
         this.width = 0;
         this.height = 0;
+        this.camera = new Camera();
         this.cameraOffsetX = 0;
         this.cameraOffsetY = 0;
         this.zoom = 1;
@@ -31,6 +33,8 @@ export class ViewportRenderer {
         this.trajectoryCache = null;
         this.lastPointerX = 0;
         this.lastPointerY = 0;
+        this.clickCandidate = false;
+        this.onSelect = onSelect;
         this.keyDownHandler = (event) => this.handleKeyDown(event);
         this.keyUpHandler = (event) => this.handleKeyUp(event);
     }
@@ -72,11 +76,8 @@ export class ViewportRenderer {
     }
 
     resetView() {
-        this.cameraOffsetX = 0;
-        this.cameraOffsetY = 0;
-        this.zoom = 1;
-        this.orbitYaw = 0.55;
-        this.orbitPitch = -0.35;
+        this.camera.reset();
+        this.syncLegacyCamera();
         this.renderer3D.resetCamera();
         this.render();
     }
@@ -86,11 +87,118 @@ export class ViewportRenderer {
         this.render();
     }
 
+    setCameraType(type) {
+        this.camera.setType(type);
+        this.render();
+        return this.camera.type;
+    }
+
+    setCameraPreset(preset) {
+        this.camera.setPreset(preset);
+        this.orbitYaw = this.camera.yaw;
+        this.orbitPitch = this.camera.pitch;
+        this.render();
+        return this.camera.preset;
+    }
+
+    setOverlay(name, enabled) {
+        const value = this.renderer3D.setOverlay(name, enabled);
+        this.render();
+        return value;
+    }
+
+    setBodyPartVisibility(part, visible) {
+        const value = this.renderer3D.setBodyPartVisibility(part, visible);
+        this.render();
+        return value;
+    }
+
+    setMeshOpacity(opacity) {
+        this.renderer3D.opacity = clamp(Number(opacity) || 0, 0, 1);
+        this.render();
+        return this.renderer3D.opacity;
+    }
+
+    focusBodyPart() {
+        this.focusSelectedNode();
+    }
+
+    getViewState() {
+        this.syncCameraFromLegacy();
+        return {
+            ...this.camera.toJSON(),
+            orbitYaw: this.camera.yaw,
+            orbitPitch: this.camera.pitch,
+        };
+    }
+
+    getCaptureCapabilities() {
+        return {
+            png: Boolean(this.canvas?.toDataURL),
+            svg: true,
+            video: Boolean(this.canvas?.captureStream && globalThis.MediaRecorder),
+            gif: false,
+            note: 'GIF export requires an encoder supplied by the host environment.',
+        };
+    }
+
+    exportPNG(filename = 'fly-studio-view.png', scale = 1) {
+        if (!this.canvas?.toDataURL) return false;
+        const factor = clamp(Number(scale) || 1, 1, 4);
+        let source = this.canvas;
+        if (factor !== 1 && typeof document !== 'undefined') {
+            const scaled = document.createElement('canvas');
+            scaled.width = Math.floor(this.canvas.width * factor);
+            scaled.height = Math.floor(this.canvas.height * factor);
+            scaled.getContext('2d')?.drawImage(this.canvas, 0, 0, scaled.width, scaled.height);
+            source = scaled;
+        }
+        const dataUrl = source.toDataURL('image/png');
+        downloadDataUrl(dataUrl, filename);
+        return true;
+    }
+
+    exportSVG(filename = 'fly-studio-view.svg') {
+        const png = this.canvas?.toDataURL?.('image/png') ?? '';
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${this.width}" height="${this.height}"><image href="${png}" width="100%" height="100%"/></svg>`;
+        downloadDataUrl(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, filename);
+        return true;
+    }
+
+    async recordVideo({ durationMs = 1000, filename = 'fly-studio-view.webm' } = {}) {
+        if (!this.canvas?.captureStream || typeof globalThis.MediaRecorder !== 'function') return false;
+        const stream = this.canvas.captureStream();
+        const mimeType = ['video/webm;codecs=vp9', 'video/webm'].find((type) => globalThis.MediaRecorder.isTypeSupported?.(type));
+        const recorder = new globalThis.MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+        const chunks = [];
+        recorder.ondataavailable = (event) => { if (event.data?.size) chunks.push(event.data); };
+        const finished = new Promise((resolve) => {
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+                downloadBlob(blob, filename);
+                stream.getTracks().forEach((track) => track.stop());
+                resolve(true);
+            };
+        });
+        recorder.start();
+        globalThis.setTimeout(() => recorder.stop(), Math.max(100, Number(durationMs) || 1000));
+        return finished;
+    }
+
+    destroy() {
+        this.resizeObserver?.disconnect();
+        this.resizeObserver = null;
+        window.removeEventListener('resize', this.resizeHandler);
+        window.removeEventListener('keydown', this.keyDownHandler);
+        window.removeEventListener('keyup', this.keyUpHandler);
+    }
+
     focusSelectedNode() {
         if (this.digitalFly3D) {
             this.renderer3D.focusSelectedNode(this.digitalFly3D, this.workspace.selectedNode);
             this.cameraOffsetX = 0;
             this.cameraOffsetY = 0;
+            this.syncCameraFromLegacy();
             this.render();
             return;
         }
@@ -151,13 +259,15 @@ export class ViewportRenderer {
             : 0;
         const animationFrame = this.workspace.animation?.frames?.[currentFrame] ?? null;
         if (this.digitalFly3D) {
+            this.syncCameraFromLegacy();
             this.digitalFly3D.updateFrame(currentFrame);
             this.renderer3D.render(this.context, this.width, this.height, this.digitalFly3D, {
-                offsetX: this.cameraOffsetX,
-                offsetY: this.cameraOffsetY,
-                zoom: this.zoom,
-                orbitYaw: this.orbitYaw,
-                orbitPitch: this.orbitPitch,
+                offsetX: this.camera.offsetX,
+                offsetY: this.camera.offsetY,
+                zoom: this.camera.zoom,
+                orbitYaw: this.camera.yaw,
+                orbitPitch: this.camera.pitch,
+                cameraType: this.camera.type,
                 selectedNode: this.workspace.selectedNode,
                 frame: currentFrame,
             });
@@ -199,7 +309,7 @@ export class ViewportRenderer {
     }
 
     zoomAt(factor, x, y) {
-        const nextZoom = clamp(this.zoom * factor, 0.25, 4);
+        const nextZoom = clamp(this.zoom * factor, 0.15, 8);
         const centerX = this.width / 2;
         const centerY = this.height / 2;
         const worldX = centerX + (x - centerX - this.cameraOffsetX) / this.zoom;
@@ -207,6 +317,7 @@ export class ViewportRenderer {
         this.zoom = nextZoom;
         this.cameraOffsetX = x - centerX - this.zoom * (worldX - centerX);
         this.cameraOffsetY = y - centerY - this.zoom * (worldY - centerY);
+        this.syncCameraFromLegacy();
         this.render();
     }
 
@@ -214,7 +325,15 @@ export class ViewportRenderer {
         const middleButton = event.button === 1;
         const spaceDrag = event.button === 0 && this.spacePressed;
         const orbitDrag = event.button === 2 || (event.button === 1 && event.shiftKey);
-        if (!middleButton && !spaceDrag && !orbitDrag) return;
+        const click = event.button === 0 && !this.spacePressed && !event.shiftKey && Boolean(this.digitalFly3D);
+        if (!middleButton && !spaceDrag && !orbitDrag && !click) return;
+
+        if (click) {
+            this.clickCandidate = true;
+            this.lastPointerX = event.clientX;
+            this.lastPointerY = event.clientY;
+            return;
+        }
 
         event.preventDefault();
         this.isPanning = true;
@@ -226,24 +345,43 @@ export class ViewportRenderer {
     }
 
     handlePointerMove(event) {
+        if (this.clickCandidate) {
+            if (Math.hypot(event.clientX - this.lastPointerX, event.clientY - this.lastPointerY) > 4) this.clickCandidate = false;
+            return;
+        }
         if (!this.isPanning) return;
         event.preventDefault();
         if (this.orbiting && this.digitalFly3D) {
-            this.orbitYaw += (event.clientX - this.lastPointerX) * 0.01;
-            this.orbitPitch = clamp(this.orbitPitch + (event.clientY - this.lastPointerY) * 0.01, -1.45, 1.45);
+            this.camera.orbit((event.clientX - this.lastPointerX) * 0.01, (event.clientY - this.lastPointerY) * 0.01);
+            this.orbitYaw = this.camera.yaw;
+            this.orbitPitch = this.camera.pitch;
             this.lastPointerX = event.clientX;
             this.lastPointerY = event.clientY;
             this.render();
             return;
         }
-        this.cameraOffsetX += event.clientX - this.lastPointerX;
-        this.cameraOffsetY += event.clientY - this.lastPointerY;
+        this.camera.pan(event.clientX - this.lastPointerX, event.clientY - this.lastPointerY);
+        this.syncLegacyCamera();
         this.lastPointerX = event.clientX;
         this.lastPointerY = event.clientY;
         this.render();
     }
 
     handlePointerUp(event) {
+        if (this.clickCandidate) {
+            this.clickCandidate = false;
+            const rect = this.canvas.getBoundingClientRect();
+            const selected = this.renderer3D.hitTest(
+                this.width,
+                this.height,
+                this.digitalFly3D,
+                { ...this.getViewState(), selectedNode: this.workspace.selectedNode },
+                event.clientX - rect.left,
+                event.clientY - rect.top,
+            );
+            if (selected && this.onSelect) this.onSelect(selected);
+            return;
+        }
         if (!this.isPanning) return;
         this.isPanning = false;
         this.orbiting = false;
@@ -258,6 +396,22 @@ export class ViewportRenderer {
 
     handleKeyUp(event) {
         if (event.code === 'Space') this.spacePressed = false;
+    }
+
+    syncCameraFromLegacy() {
+        this.camera.offsetX = Number(this.cameraOffsetX) || 0;
+        this.camera.offsetY = Number(this.cameraOffsetY) || 0;
+        this.camera.zoom = clamp(Number(this.zoom) || 1, 0.15, 8);
+        this.camera.yaw = Number.isFinite(Number(this.orbitYaw)) ? Number(this.orbitYaw) : this.camera.yaw;
+        this.camera.pitch = clamp(Number.isFinite(Number(this.orbitPitch)) ? Number(this.orbitPitch) : this.camera.pitch, -1.55, 1.55);
+    }
+
+    syncLegacyCamera() {
+        this.cameraOffsetX = this.camera.offsetX;
+        this.cameraOffsetY = this.camera.offsetY;
+        this.zoom = this.camera.zoom;
+        this.orbitYaw = this.camera.yaw;
+        this.orbitPitch = this.camera.pitch;
     }
 
     drawMessage(message) {
@@ -550,4 +704,19 @@ function smoothTrajectoryPoints(points) {
 
 function clamp(value, minimum, maximum) {
     return Math.min(maximum, Math.max(minimum, value));
+}
+
+function downloadDataUrl(dataUrl, filename) {
+    if (typeof document === 'undefined') return;
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    link.click();
+}
+
+function downloadBlob(blob, filename) {
+    if (typeof URL === 'undefined' || typeof document === 'undefined') return;
+    const url = URL.createObjectURL(blob);
+    downloadDataUrl(url, filename);
+    globalThis.setTimeout(() => URL.revokeObjectURL(url), 0);
 }

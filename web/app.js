@@ -23,6 +23,7 @@ import { DigitalLaboratory } from './digital_laboratory.js';
 import { DigitalFly } from './digital_fly.js';
 import { DigitalFly3D } from './digital_fly_3d.js';
 import { LaboratoryDashboard } from './laboratory_dashboard.js';
+import { RolloutComparisonViewer } from './comparison_viewer.js';
 
 export class App {
     constructor() {
@@ -32,7 +33,9 @@ export class App {
         this.digitalFly = null;
         this.digitalFly3D = null;
         this.layout = new Layout();
-        this.viewportRenderer = new ViewportRenderer(this.workspace);
+        this.viewportRenderer = new ViewportRenderer(this.workspace, {
+            onSelect: (node) => this.selectNode(node),
+        });
         this.timeline = new Timeline(this.workspace, () => this.handleTimelineChange());
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.inspector = new Inspector(this.workspace, () => this.handleInspectorChange());
@@ -49,6 +52,7 @@ export class App {
         });
         this.reportGenerator = new ExperimentReportGenerator(this.experimentWorkspace, this.analyticsDashboard);
         this.comparisonModel = new ExperimentComparisonModel(this.experimentWorkspace);
+        this.comparisonViewer = new RolloutComparisonViewer();
         this.experimentPanel = new ExperimentWorkspacePanel(this.experimentWorkspace, {
             onImport: (file, options) => this.loadSceneFile(file, options),
             onChange: () => this.renderExperimentWorkspace(),
@@ -83,6 +87,14 @@ export class App {
             onExportCSV: () => this.exportRollout('csv'),
             onExportSVG: () => this.exportRollout('svg'),
             onRecordToggle: (recording) => this.toggleRecording(recording),
+            onCameraType: (type) => this.viewportRenderer.setCameraType(type),
+            onCameraPreset: (preset) => this.viewportRenderer.setCameraPreset(preset),
+            onFocusSelected: () => this.viewportRenderer.focusBodyPart(),
+            onOverlay: (name, enabled) => this.viewportRenderer.setOverlay(name, enabled),
+            onBodyPartVisibility: (part, visible) => this.viewportRenderer.setBodyPartVisibility(part, visible),
+            onMeshOpacity: (opacity) => this.viewportRenderer.setMeshOpacity(opacity),
+            onExportPNG: () => this.viewportRenderer.exportPNG('fly-studio-view.png'),
+            onExportViewSVG: () => this.viewportRenderer.exportSVG('fly-studio-view.svg'),
         });
         this.keyDownHandler = (event) => this.handleKeyDown(event);
     }
@@ -156,11 +168,17 @@ export class App {
     }
 
     selectNode(node) {
-        this.workspace.selectNode(node);
+        const nodes = Array.isArray(this.workspace.data?.nodes) ? this.workspace.data.nodes : [];
+        const canonicalNode = nodes.find((candidate) => (
+            candidate === node
+            || (node?.id && candidate?.id === node.id)
+            || (node?.name && candidate?.name === node.name)
+        )) ?? node;
+        this.workspace.selectNode(canonicalNode);
         this.sidebar.render(this.workspace.data, this.workspace.selectedNode);
         this.inspector.render();
         this.viewportRenderer.render();
-        console.info('Selected node:', node.name ?? node.id ?? node.type ?? node.kind ?? 'Unnamed node');
+        console.info('Selected node:', canonicalNode?.name ?? canonicalNode?.id ?? canonicalNode?.type ?? canonicalNode?.kind ?? 'Unnamed node');
     }
 
     handleTimelineChange() {
@@ -242,6 +260,8 @@ export class App {
         this.experimentPanel.render();
         const dashboardRoot = document.getElementById('experiment-dashboard');
         this.laboratoryDashboard.render(dashboardRoot);
+        const comparisonRoot = document.getElementById('comparison-viewer');
+        if (comparisonRoot) this.comparisonViewer.render(comparisonRoot, this.comparisonModel.report());
     }
 
     exportExperimentReport(format) {
@@ -255,9 +275,7 @@ export class App {
     saveWorkspace() {
         this.experimentWorkspace.saveSnapshot('manual-save', {
             camera: {
-                offsetX: this.viewportRenderer.cameraOffsetX,
-                offsetY: this.viewportRenderer.cameraOffsetY,
-                zoom: this.viewportRenderer.zoom,
+                ...this.viewportRenderer.getViewState(),
             },
             timeline: { currentFrame: this.workspace.currentFrame, totalFrames: this.workspace.totalFrames },
             selection: { node: this.workspace.selectedNode, keyframe: this.workspace.selectedKeyframe },
@@ -274,9 +292,8 @@ export class App {
             if (snapshot) {
                 const experimentSnapshot = this.experimentWorkspace.snapshots.list()[0]?.state;
                 if (experimentSnapshot?.camera) {
-                    this.viewportRenderer.cameraOffsetX = Number(experimentSnapshot.camera.offsetX) || 0;
-                    this.viewportRenderer.cameraOffsetY = Number(experimentSnapshot.camera.offsetY) || 0;
-                    this.viewportRenderer.zoom = Number(experimentSnapshot.camera.zoom) || 1;
+                    this.viewportRenderer.camera.restore(experimentSnapshot.camera);
+                    this.viewportRenderer.syncLegacyCamera();
                 }
                 if (this.workspace.rollout) this.renderRolloutViews();
                 this.refreshEditor();

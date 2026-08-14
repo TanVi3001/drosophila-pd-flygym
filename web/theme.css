@@ -544,6 +544,37 @@ body {
     font-size: 0.82em;
 }
 
+.comparison-frame-slider {
+    accent-color: var(--accent);
+    margin: 8px 0;
+    width: 100%;
+}
+
+.comparison-canvas {
+    background: #0b0b0b;
+    border: 1px solid var(--border);
+    display: block;
+    height: 160px;
+    max-width: 100%;
+    width: 320px;
+}
+
+#comparison-viewer {
+    padding: 8px 12px;
+}
+
+#toolbar select,
+#toolbar input[type="number"],
+#toolbar input[type="color"] {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+#toolbar select {
+    max-width: 120px;
+}
+
 .comparison-differences {
     border-top: 1px solid var(--border);
     margin-top: 8px;

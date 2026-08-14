@@ -107,6 +107,16 @@ The verified Milestone C unperturbed baseline found:
 - `results/` - local/generated experiment outputs, kept lightweight by default
 - `logs/` - local run logs
 
+## Interactive Digital Fly Laboratory
+
+The Web Viewer can visualize imported FlyGym rollouts as an interactive Digital
+Fly. It provides Canvas-based perspective/orthographic camera presets, orbit
+and pan controls, body-part selection, mesh/skeleton/COM/trajectory overlays,
+timeline playback, synchronized rollout comparison, and PNG/SVG view export.
+These are presentation tools over imported computational data; they do not run
+simulations or add biological interpretation. The Vietnamese guides are in
+`docs/vi/51_3D_Viewer.md` through `docs/vi/56_Huong_Dan_3D.md`.
+
 ## Workflow
 
 1. Develop code, tests, and documentation locally with Codex.

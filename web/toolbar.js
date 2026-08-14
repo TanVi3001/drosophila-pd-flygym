@@ -28,6 +28,14 @@ export class Toolbar {
         onExportCSV = null,
         onExportSVG = null,
         onRecordToggle = null,
+        onCameraType = null,
+        onCameraPreset = null,
+        onFocusSelected = null,
+        onOverlay = null,
+        onBodyPartVisibility = null,
+        onMeshOpacity = null,
+        onExportPNG = null,
+        onExportViewSVG = null,
     } = {}) {
         this.container = null;
         this.onLoadJSON = onLoadJSON;
@@ -58,6 +66,14 @@ export class Toolbar {
         this.onExportCSV = onExportCSV;
         this.onExportSVG = onExportSVG;
         this.onRecordToggle = onRecordToggle;
+        this.onCameraType = onCameraType;
+        this.onCameraPreset = onCameraPreset;
+        this.onFocusSelected = onFocusSelected;
+        this.onOverlay = onOverlay;
+        this.onBodyPartVisibility = onBodyPartVisibility;
+        this.onMeshOpacity = onMeshOpacity;
+        this.onExportPNG = onExportPNG;
+        this.onExportViewSVG = onExportViewSVG;
     }
 
     init(container) {
@@ -73,6 +89,24 @@ export class Toolbar {
                 <button id="load-json-button" type="button">Load JSON</button>
                 <input id="load-json-input" type="file" accept=".json,application/json" hidden>
                 <button id="reset-view-button" type="button">Reset View</button>
+                <label>Camera <select id="camera-type-input"><option value="perspective">Perspective</option><option value="orthographic">Orthographic</option></select></label>
+                <label>Preset <select id="camera-preset-input"><option>Front</option><option>Back</option><option>Left</option><option>Right</option><option>Top</option><option>Bottom</option><option selected>Isometric</option></select></label>
+                <button id="focus-selected-button" type="button">Focus Selected</button>
+                <label>Mesh <input id="mesh-overlay-input" type="checkbox" checked></label>
+                <label>Skeleton <input id="skeleton-overlay-input" type="checkbox" checked></label>
+                <label>Axes <input id="axes-overlay-input" type="checkbox" checked></label>
+                <label>COM <input id="com-overlay-input" type="checkbox" checked></label>
+                <label>Labels <input id="labels-overlay-input" type="checkbox"></label>
+                <label>Velocity <input id="velocity-overlay-input" type="checkbox"></label>
+                <label>Angular <input id="angular-overlay-input" type="checkbox"></label>
+                <label>Acceleration <input id="acceleration-overlay-input" type="checkbox"></label>
+                <label>Angular acceleration <input id="angular-acceleration-overlay-input" type="checkbox"></label>
+                <label>Contacts <input id="contacts-overlay-input" type="checkbox" checked></label>
+                <label>Heatmap <input id="heatmap-overlay-input" type="checkbox"></label>
+                <label>Parts <select id="body-part-input"><option value="all">All parts</option><option value="head">Head</option><option value="thorax">Thorax</option><option value="abdomen">Abdomen</option><option value="legs">Legs</option><option value="wings">Wings</option><option value="eyes">Eyes</option><option value="antenna">Antenna</option></select></label>
+                <label>Opacity <input id="mesh-opacity-input" type="range" min="0" max="1" step="0.05" value="0.78"></label>
+                <button id="export-view-png-button" type="button">PNG</button>
+                <button id="export-view-svg-button" type="button">SVG</button>
                 <button id="undo-button" type="button">Undo</button>
                 <button id="redo-button" type="button">Redo</button>
                 <button id="insert-keyframe-button" type="button">Insert Keyframe</button>
@@ -106,6 +140,13 @@ export class Toolbar {
         const loadButton = this.container.querySelector('#load-json-button');
         const fileInput = this.container.querySelector('#load-json-input');
         const resetViewButton = this.container.querySelector('#reset-view-button');
+        const cameraTypeInput = this.container.querySelector('#camera-type-input');
+        const cameraPresetInput = this.container.querySelector('#camera-preset-input');
+        const focusSelectedButton = this.container.querySelector('#focus-selected-button');
+        const bodyPartInput = this.container.querySelector('#body-part-input');
+        const meshOpacityInput = this.container.querySelector('#mesh-opacity-input');
+        const exportViewPNGButton = this.container.querySelector('#export-view-png-button');
+        const exportViewSVGButton = this.container.querySelector('#export-view-svg-button');
         const undoButton = this.container.querySelector('#undo-button');
         const redoButton = this.container.querySelector('#redo-button');
         const insertButton = this.container.querySelector('#insert-keyframe-button');
@@ -132,6 +173,21 @@ export class Toolbar {
         const exportCSVButton = this.container.querySelector('#export-rollout-csv-button');
         const exportSVGButton = this.container.querySelector('#export-rollout-svg-button');
         const recordSessionInput = this.container.querySelector('#record-session-input');
+        cameraTypeInput.addEventListener('change', () => { if (this.onCameraType) this.onCameraType(cameraTypeInput.value); });
+        cameraPresetInput.addEventListener('change', () => { if (this.onCameraPreset) this.onCameraPreset(cameraPresetInput.value); });
+        focusSelectedButton.addEventListener('click', () => { if (this.onFocusSelected) this.onFocusSelected(); });
+        bodyPartInput.addEventListener('change', () => {
+            if (!this.onBodyPartVisibility) return;
+            const parts = ['head', 'thorax', 'abdomen', 'legs', 'wings', 'eyes', 'antenna'];
+            parts.forEach((part) => this.onBodyPartVisibility(part, bodyPartInput.value === 'all' || bodyPartInput.value === part));
+        });
+        ['mesh', 'skeleton', 'axes', 'com', 'labels', 'velocity', 'angular', 'acceleration', 'angular-acceleration', 'contacts', 'heatmap'].forEach((name) => {
+            const input = this.container.querySelector(`#${name}-overlay-input`);
+            input.addEventListener('change', () => { if (this.onOverlay) this.onOverlay(name, input.checked); });
+        });
+        meshOpacityInput.addEventListener('input', () => { if (this.onMeshOpacity) this.onMeshOpacity(meshOpacityInput.value); });
+        exportViewPNGButton.addEventListener('click', () => { if (this.onExportPNG) this.onExportPNG(); });
+        exportViewSVGButton.addEventListener('click', () => { if (this.onExportViewSVG) this.onExportViewSVG(); });
         loadButton.addEventListener('click', () => fileInput.click());
         resetViewButton.addEventListener('click', () => {
             if (this.onResetView) this.onResetView();

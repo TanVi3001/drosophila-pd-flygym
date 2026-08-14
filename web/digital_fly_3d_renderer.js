@@ -19,6 +19,22 @@ export class DigitalFly3DRenderer {
         this.showTrajectory = true;
         this.showSkeleton = true;
         this.showBodySegments = true;
+        this.showVelocity = false;
+        this.showAcceleration = false;
+        this.showAngularVelocity = false;
+        this.showAngularAcceleration = false;
+        this.showLabels = false;
+        this.showContacts = true;
+        this.showHeatmap = false;
+        this.bodyPartVisibility = {
+            head: true, thorax: true, abdomen: true, legs: true,
+            wings: true, eyes: true, antenna: true,
+        };
+        this.bodyPartColors = {
+            head: '#d6a06d', thorax: '#d8915f', abdomen: '#b86d4c',
+            legs: '#58c4dd', wings: '#b6d7e5', eyes: '#f7f7f7', antenna: '#f0b429',
+        };
+        this.opacity = 0.78;
     }
 
     resetCamera() {
@@ -41,10 +57,101 @@ export class DigitalFly3DRenderer {
         if (this.showGround) this.drawGround(context, width, height, projection);
         if (this.showAxes) this.drawAxes(context, width, height, projection);
         if (this.showTrajectory) this.drawTrajectory(context, width, height, projection, model);
+        if (this.showBodySegments) this.drawBodyMesh(context, projection, model, camera.selectedNode);
         if (this.showSkeleton) this.drawSkeleton(context, projection, model, camera.selectedNode);
         if (this.showCOM) this.drawCOM(context, projection, model);
+        if (this.showVelocity || this.showAcceleration || this.showAngularVelocity || this.showAngularAcceleration) this.drawMotionVectors(context, projection, model, camera.frame);
+        if (this.showContacts) this.drawContacts(context, projection, model, camera.frame);
+        if (this.showHeatmap) this.drawHeatmap(context, projection, model, camera.frame);
+        if (this.showLabels) this.drawBodyLabels(context, projection, model, camera.selectedNode);
         this.drawLabel(context, width, model, camera.frame);
         context.restore();
+    }
+
+    setOverlay(name, enabled) {
+        const aliases = { trajectory: 'showTrajectory', skeleton: 'showSkeleton', mesh: 'showBodySegments', axes: 'showAxes', com: 'showCOM', jointAxes: 'showJointAxes', velocity: 'showVelocity', acceleration: 'showAcceleration', angular: 'showAngularVelocity', angularVelocity: 'showAngularVelocity', angularAcceleration: 'showAngularAcceleration', 'angular-acceleration': 'showAngularAcceleration', labels: 'showLabels', contacts: 'showContacts', heatmap: 'showHeatmap' };
+        const key = aliases[name] ?? name;
+        if (key in this) this[key] = Boolean(enabled);
+        return this[key];
+    }
+
+    setBodyPartVisibility(part, visible) {
+        if (part in this.bodyPartVisibility) this.bodyPartVisibility[part] = Boolean(visible);
+        return this.bodyPartVisibility[part];
+    }
+
+    setBodyPartColor(part, color) {
+        if (part in this.bodyPartColors && typeof color === 'string') this.bodyPartColors[part] = color;
+        return this.bodyPartColors[part];
+    }
+
+    drawBodyMesh(context, projection, model, selectedNode) {
+        const bones = model.skeleton;
+        const selectedId = selectedNode?.id?.replace(/^flygym-/, '') ?? selectedNode?.name;
+        const drawPart = (part, boneId, radius, shape = 'ellipse') => {
+            if (!this.bodyPartVisibility[part]) return;
+            const bone = bones.bones.get(boneId);
+            const point = bone && projection(bone.worldTransform.translation);
+            if (!point) return;
+            const selected = boneId === selectedId;
+            context.save();
+            context.globalAlpha = selected ? 1 : this.opacity;
+            context.fillStyle = this.bodyPartColors[part];
+            context.strokeStyle = selected ? SELECTED : this.bodyPartColors[part];
+            context.lineWidth = selected ? 2.5 : 1;
+            if (shape === 'wing') {
+                const side = boneId.endsWith('_L') ? -1 : 1;
+                context.beginPath();
+                context.moveTo(point.x, point.y);
+                context.lineTo(point.x + side * radius * 2.2, point.y - radius * 0.75);
+                context.lineTo(point.x + side * radius * 2.8, point.y + radius * 0.35);
+                context.closePath();
+                context.fill();
+                context.stroke();
+            } else {
+                context.beginPath();
+                context.ellipse(point.x, point.y, radius * (shape === 'head' ? 0.85 : 1.2), radius, 0, 0, Math.PI * 2);
+                context.fill();
+                context.stroke();
+            }
+            context.restore();
+        };
+        drawPart('thorax', 'thorax', 15);
+        drawPart('abdomen', 'abdomen', 12);
+        drawPart('head', 'head', 11, 'head');
+        drawPart('wings', 'wing_L', 14, 'wing');
+        drawPart('wings', 'wing_R', 14, 'wing');
+        if (this.bodyPartVisibility.eyes) {
+            ['left', 'right'].forEach((side, index) => this.drawSmallMarker(context, projection, bones.bones.get('head'), side, index));
+        }
+        if (this.bodyPartVisibility.antenna) this.drawAntenna(context, projection, bones.bones.get('head'));
+        if (this.bodyPartVisibility.legs) {
+            ['leg_FL', 'leg_ML', 'leg_HL', 'leg_FR', 'leg_MR', 'leg_HR'].forEach((id) => {
+                const bone = bones.bones.get(id);
+                const parent = bone && bones.bones.get(bone.parentId);
+                if (bone && parent) drawProjectedLine(context, projection, [parent.worldTransform.translation, bone.worldTransform.translation], this.bodyPartColors.legs, 4);
+            });
+        }
+    }
+
+    drawSmallMarker(context, projection, bone, side, index) {
+        if (!bone) return;
+        const position = bone.worldTransform.translation.map((value, axis) => value + (axis === 0 ? (index ? 0.08 : -0.08) : axis === 2 ? 0.08 : 0));
+        const point = projection(position);
+        if (!point) return;
+        context.beginPath();
+        context.arc(point.x, point.y, 3, 0, Math.PI * 2);
+        context.fillStyle = this.bodyPartColors.eyes;
+        context.fill();
+        void side;
+    }
+
+    drawAntenna(context, projection, bone) {
+        if (!bone) return;
+        const start = bone.worldTransform.translation;
+        [[-0.18, 0.15, 0.12], [0.18, 0.15, 0.12]].forEach((offset) => {
+            drawProjectedLine(context, projection, [start, add(start, offset)], this.bodyPartColors.antenna, 1.5);
+        });
     }
 
     drawGround(context, width, height, projection) {
@@ -84,6 +191,82 @@ export class DigitalFly3DRenderer {
             context.stroke();
             context.restore();
         });
+    }
+
+    drawMotionVectors(context, projection, model, frame) {
+        const record = model.fly.trajectories.list().find((item) => item.metadata?.channel === 'thorax' || item.metadata?.channel === 'com');
+        if (!record || frame < 1) return;
+        const current = sampleVector(record.data, frame);
+        const previous = sampleVector(record.data, frame - 1);
+        if (!current || !previous) return;
+        const velocity = scale(subtract(current, previous), 4);
+        if (this.showVelocity) drawArrow(context, projection, current, add(current, scale(velocity, 0.35)), '#f0b429', 2);
+        if (this.showAcceleration && frame > 1) {
+            const before = sampleVector(record.data, frame - 2);
+            if (before) drawArrow(context, projection, current, add(current, scale(subtract(velocity, subtract(previous, before)), 0.2)), '#78c091', 2);
+        }
+        if (this.showAngularVelocity) {
+            const root = model.skeleton.bones.get('fly');
+            if (root) drawArrow(context, projection, root.worldTransform.translation, add(root.worldTransform.translation, [0, 0.35, 0]), '#d26a6a', 2);
+        }
+    }
+
+    drawHeatmap(context, projection, model, frame) {
+        const record = model.fly.trajectories.list().find((item) => ['heatmap', 'joint_error'].includes(item.metadata?.channel));
+        if (!record) return;
+        const value = sampleScalar(record.data, frame);
+        const thorax = model.skeleton.bones.get('thorax');
+        const point = thorax && projection(thorax.worldTransform.translation);
+        if (!point || !Number.isFinite(value)) return;
+        context.save();
+        context.globalAlpha = 0.35;
+        context.fillStyle = `hsl(${Math.max(0, 120 - Math.min(120, Math.abs(value) * 120))} 80% 55%)`;
+        context.beginPath();
+        context.arc(point.x, point.y, 24, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+    }
+
+    drawContacts(context, projection, model, frame) {
+        const records = model.fly.trajectories.list().filter((item) => item.metadata?.channel === 'contact' || item.metadata?.channel === 'ground_contact');
+        records.forEach((record) => {
+            const value = sampleScalar(record.data, frame);
+            if (!Number.isFinite(value) || value <= 0) return;
+            const bone = model.skeleton.bonesInOrder().find((item) => item.name.toLowerCase().includes(String(record.metadata?.name ?? '').toLowerCase()));
+            const point = bone && projection(bone.worldTransform.translation);
+            if (!point) return;
+            context.beginPath();
+            context.arc(point.x, point.y, 5, 0, Math.PI * 2);
+            context.strokeStyle = '#78c091';
+            context.lineWidth = 2;
+            context.stroke();
+        });
+    }
+
+    drawBodyLabels(context, projection, model, selectedNode) {
+        const selectedId = selectedNode?.id?.replace(/^flygym-/, '') ?? selectedNode?.name;
+        model.skeleton.bonesInOrder().forEach((bone) => {
+            const point = projection(bone.worldTransform.translation);
+            if (!point) return;
+            context.fillStyle = bone.id === selectedId ? SELECTED : TEXT;
+            context.font = '11px sans-serif';
+            context.fillText(bone.name, point.x + 7, point.y - 7);
+        });
+    }
+
+    hitTest(width, height, model, camera, x, y, radius = 14) {
+        if (!model?.skeleton) return null;
+        const projection = (point) => projectPoint(point, width, height, camera, this.target, this.distance);
+        let best = null;
+        model.skeleton.bonesInOrder().forEach((bone) => {
+            const point = projection(bone.worldTransform.translation);
+            if (!point) return;
+            const distance = Math.hypot(point.x - x, point.y - y);
+            if (distance <= radius && (!best || distance < best.distance)) {
+                best = { distance, node: { id: `flygym-${bone.id}`, name: bone.name, type: 'flygym-body-part', metadata: { source: 'imported rollout', component: bone.id } } };
+            }
+        });
+        return best?.node ?? null;
     }
 
     drawSkeleton(context, projection, model, selectedNode) {
@@ -147,7 +330,9 @@ function projectPoint(point, width, height, camera, target, distance) {
     const y = cosPitch * dy - sinPitch * zYaw;
     const depth = distance + sinPitch * dy + cosPitch * zYaw;
     if (depth <= 0.05) return null;
-    const scaleFactor = Math.min(width, height) * 0.42 * Number(camera.zoom ?? 1) / depth;
+    const scaleFactor = camera.cameraType === 'orthographic'
+        ? Math.min(width, height) * 0.22 * Number(camera.zoom ?? 1)
+        : Math.min(width, height) * 0.42 * Number(camera.zoom ?? 1) / depth;
     return {
         x: width / 2 + Number(camera.offsetX ?? 0) + x * scaleFactor,
         y: height / 2 + Number(camera.offsetY ?? 0) - y * scaleFactor,
@@ -184,3 +369,32 @@ function rotateVector(quaternion, vector) { const [x, y, z, w] = quaternion; con
 function multiply(left, right) { const [x1, y1, z1, w1] = left; const [x2, y2, z2, w2] = right; return [w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2, w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2, w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2, w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2]; }
 function add(left, right) { return left.map((value, index) => value + right[index]); }
 function scale(value, factor) { return value.map((item) => item * factor); }
+function subtract(left, right) { return left.map((value, index) => value - right[index]); }
+function sampleScalar(data, frame) {
+    const values = Array.isArray(data) ? data : Array.isArray(data?.points) ? data.points : [];
+    const item = values[Math.min(values.length - 1, Math.max(0, frame))];
+    if (Number.isFinite(Number(item))) return Number(item);
+    if (item && typeof item === 'object') return Number(item.value ?? item.contact ?? item.active);
+    return Number.NaN;
+}
+function drawArrow(context, projection, start, end, color, width) {
+    const first = projection(start);
+    const second = projection(end);
+    if (!first || !second) return;
+    context.save();
+    context.strokeStyle = color;
+    context.fillStyle = color;
+    context.lineWidth = width;
+    context.beginPath();
+    context.moveTo(first.x, first.y);
+    context.lineTo(second.x, second.y);
+    context.stroke();
+    const angle = Math.atan2(second.y - first.y, second.x - first.x);
+    context.beginPath();
+    context.moveTo(second.x, second.y);
+    context.lineTo(second.x - 7 * Math.cos(angle - 0.45), second.y - 7 * Math.sin(angle - 0.45));
+    context.lineTo(second.x - 7 * Math.cos(angle + 0.45), second.y - 7 * Math.sin(angle + 0.45));
+    context.closePath();
+    context.fill();
+    context.restore();
+}
