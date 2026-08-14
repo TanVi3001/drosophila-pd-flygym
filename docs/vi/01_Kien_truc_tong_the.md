@@ -14,6 +14,9 @@ FlyGym / Scene JSON
       Digital Fly
  (body, skeleton, trajectory)
         ↓
+ Digital Fly 3D Motion Engine
+       (FK / pose / viewer)
+        ↓
    Analysis + Statistics
         ↓
  Visualization + Reports
@@ -47,3 +50,11 @@ là API additive cho manifest-based plugin; hai API không bị trộn trạng t
 Lớp release engineering nằm ngoài pipeline khoa học và cung cấp health scan,
 module index, dependency graph, debug trace và release report. Các utility
 này chỉ đọc source/configuration hoặc chạy operation do developer truyền vào.
+
+Lớp `drosophila_pd.parkinson` nằm sau rollout và measurement: nó đọc
+`RolloutData`, tính motor features, behavior timeline, computational index và
+report. Lớp này không sở hữu FlyGym/MuJoCo state.
+
+Lớp `drosophila_pd.scientific_validation` nằm sau analysis và đọc observed/
+reference arrays. Nó tạo agreement metrics, reproducibility checks, benchmark,
+figures và report mà không chạy lại simulation.

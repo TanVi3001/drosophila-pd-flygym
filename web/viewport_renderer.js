@@ -4,6 +4,8 @@ const NODE_COLOR = '#49a6d8';
 const SELECTED_COLOR = '#ffcc66';
 const TEXT_COLOR = '#d8dee5';
 
+import { DigitalFly3DRenderer } from './digital_fly_3d_renderer.js';
+
 export class ViewportRenderer {
     constructor(workspace) {
         this.workspace = workspace;
@@ -21,6 +23,11 @@ export class ViewportRenderer {
         this.isPanning = false;
         this.spacePressed = false;
         this.spaceUsedForPan = false;
+        this.orbiting = false;
+        this.orbitYaw = 0.55;
+        this.orbitPitch = -0.35;
+        this.digitalFly3D = null;
+        this.renderer3D = new DigitalFly3DRenderer();
         this.trajectoryCache = null;
         this.lastPointerX = 0;
         this.lastPointerY = 0;
@@ -41,6 +48,7 @@ export class ViewportRenderer {
         this.canvas.addEventListener('pointerup', (event) => this.handlePointerUp(event));
         this.canvas.addEventListener('pointercancel', (event) => this.handlePointerUp(event));
         this.canvas.addEventListener('dblclick', () => this.focusSelectedNode());
+        this.canvas.addEventListener('contextmenu', (event) => event.preventDefault());
         window.addEventListener('keydown', this.keyDownHandler);
         window.addEventListener('keyup', this.keyUpHandler);
 
@@ -67,10 +75,25 @@ export class ViewportRenderer {
         this.cameraOffsetX = 0;
         this.cameraOffsetY = 0;
         this.zoom = 1;
+        this.orbitYaw = 0.55;
+        this.orbitPitch = -0.35;
+        this.renderer3D.resetCamera();
+        this.render();
+    }
+
+    setDigitalFly3D(model) {
+        this.digitalFly3D = model ?? null;
         this.render();
     }
 
     focusSelectedNode() {
+        if (this.digitalFly3D) {
+            this.renderer3D.focusSelectedNode(this.digitalFly3D, this.workspace.selectedNode);
+            this.cameraOffsetX = 0;
+            this.cameraOffsetY = 0;
+            this.render();
+            return;
+        }
         const selectedNode = this.workspace.selectedNode;
         const nodes = Array.isArray(this.workspace.data?.nodes)
             ? this.workspace.data.nodes
@@ -127,6 +150,19 @@ export class ViewportRenderer {
             ? this.workspace.currentFrame
             : 0;
         const animationFrame = this.workspace.animation?.frames?.[currentFrame] ?? null;
+        if (this.digitalFly3D) {
+            this.digitalFly3D.updateFrame(currentFrame);
+            this.renderer3D.render(this.context, this.width, this.height, this.digitalFly3D, {
+                offsetX: this.cameraOffsetX,
+                offsetY: this.cameraOffsetY,
+                zoom: this.zoom,
+                orbitYaw: this.orbitYaw,
+                orbitPitch: this.orbitPitch,
+                selectedNode: this.workspace.selectedNode,
+                frame: currentFrame,
+            });
+            return;
+        }
         if (nodes.length === 0) {
             this.drawMessage('No Scene Loaded');
             return;
@@ -177,10 +213,12 @@ export class ViewportRenderer {
     handlePointerDown(event) {
         const middleButton = event.button === 1;
         const spaceDrag = event.button === 0 && this.spacePressed;
-        if (!middleButton && !spaceDrag) return;
+        const orbitDrag = event.button === 2 || (event.button === 1 && event.shiftKey);
+        if (!middleButton && !spaceDrag && !orbitDrag) return;
 
         event.preventDefault();
         this.isPanning = true;
+        this.orbiting = orbitDrag;
         this.spaceUsedForPan = this.spaceUsedForPan || spaceDrag;
         this.lastPointerX = event.clientX;
         this.lastPointerY = event.clientY;
@@ -190,6 +228,14 @@ export class ViewportRenderer {
     handlePointerMove(event) {
         if (!this.isPanning) return;
         event.preventDefault();
+        if (this.orbiting && this.digitalFly3D) {
+            this.orbitYaw += (event.clientX - this.lastPointerX) * 0.01;
+            this.orbitPitch = clamp(this.orbitPitch + (event.clientY - this.lastPointerY) * 0.01, -1.45, 1.45);
+            this.lastPointerX = event.clientX;
+            this.lastPointerY = event.clientY;
+            this.render();
+            return;
+        }
         this.cameraOffsetX += event.clientX - this.lastPointerX;
         this.cameraOffsetY += event.clientY - this.lastPointerY;
         this.lastPointerX = event.clientX;
@@ -200,6 +246,7 @@ export class ViewportRenderer {
     handlePointerUp(event) {
         if (!this.isPanning) return;
         this.isPanning = false;
+        this.orbiting = false;
         if (this.canvas.hasPointerCapture(event.pointerId)) {
             this.canvas.releasePointerCapture(event.pointerId);
         }

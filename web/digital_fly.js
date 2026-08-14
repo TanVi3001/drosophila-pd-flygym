@@ -172,6 +172,20 @@ export class DigitalFly {
     }
 }
 
+export class ComponentModel {
+    constructor(type, name = type) { this.id = makeId(type); this.type = type; this.name = name; this.metadata = {}; this.trajectoryRefs = []; }
+    addTrajectory(name) { if (!this.trajectoryRefs.includes(name)) this.trajectoryRefs.push(name); return this; }
+    toJSON() { return { id: this.id, type: this.type, name: this.name, metadata: clone(this.metadata), trajectoryRefs: [...this.trajectoryRefs] }; }
+    restore(data = {}) { this.id = data.id ?? this.id; this.type = data.type ?? this.type; this.name = data.name ?? this.name; this.metadata = clone(data.metadata ?? {}); this.trajectoryRefs = [...(data.trajectoryRefs ?? [])]; return this; }
+}
+
+export class ComponentCollection {
+    constructor(type) { this.type = type; this.parts = new Map(); }
+    add(node = {}) { const item = new ComponentModel(this.type, node.name ?? node.id ?? this.type); Object.assign(item, { id: node.id ?? makeId(this.type), metadata: clone(node.metadata ?? {}) }); this.parts.set(item.id, item); return item; }
+    toJSON() { return { type: this.type, parts: [...this.parts.values()].map((part) => part.toJSON()) }; }
+    restore(data = {}) { this.parts = new Map((data.parts ?? []).map((part) => { const item = new ComponentModel(data.type ?? this.type, part.name); Object.assign(item, part); return [item.id, item]; })); return this; }
+}
+
 export class BodyModel {
     constructor() { this.type = 'body'; this.segments = new HierarchyModel('body-segment'); }
     addSegment(node) { return this.segments.add(node); }
@@ -213,20 +227,6 @@ export class ParkinsonStateModel {
     setState(state, parameters = {}, provenance = null) { this.state = String(state); this.parameters = clone(parameters); this.provenance = clone(provenance); return this; }
     toJSON() { return { type: this.type, state: this.state, parameters: clone(this.parameters), provenance: clone(this.provenance), scope: 'Computational state metadata only; no biological interpretation.' }; }
     restore(data = {}) { return this.setState(data.state ?? 'unassigned', data.parameters ?? {}, data.provenance ?? null); }
-}
-
-export class ComponentModel {
-    constructor(type, name = type) { this.id = makeId(type); this.type = type; this.name = name; this.metadata = {}; this.trajectoryRefs = []; }
-    addTrajectory(name) { if (!this.trajectoryRefs.includes(name)) this.trajectoryRefs.push(name); return this; }
-    toJSON() { return { id: this.id, type: this.type, name: this.name, metadata: clone(this.metadata), trajectoryRefs: [...this.trajectoryRefs] }; }
-    restore(data = {}) { this.id = data.id ?? this.id; this.type = data.type ?? this.type; this.name = data.name ?? this.name; this.metadata = clone(data.metadata ?? {}); this.trajectoryRefs = [...(data.trajectoryRefs ?? [])]; return this; }
-}
-
-export class ComponentCollection {
-    constructor(type) { this.type = type; this.parts = new Map(); }
-    add(node = {}) { const item = new ComponentModel(this.type, node.name ?? node.id ?? this.type); Object.assign(item, { id: node.id ?? makeId(this.type), metadata: clone(node.metadata ?? {}) }); this.parts.set(item.id, item); return item; }
-    toJSON() { return { type: this.type, parts: [...this.parts.values()].map((part) => part.toJSON()) }; }
-    restore(data = {}) { this.parts = new Map((data.parts ?? []).map((part) => { const item = new ComponentModel(data.type ?? this.type, part.name); Object.assign(item, part); return [item.id, item]; })); return this; }
 }
 
 export class HierarchyModel {

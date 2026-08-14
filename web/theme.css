@@ -141,6 +141,92 @@ body {
     padding: 8px 10px;
 }
 
+.laboratory-dashboard-heading {
+    margin-bottom: 6px;
+}
+
+.laboratory-dashboard-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.laboratory-dashboard-tabs button {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 7px;
+}
+
+.laboratory-dashboard-tabs button.is-active {
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.laboratory-dashboard-content {
+    min-height: 96px;
+}
+
+.laboratory-summary-grid,
+.laboratory-metric-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 5px 0 8px;
+}
+
+.laboratory-metric {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    display: grid;
+    gap: 2px;
+    min-width: 82px;
+    padding: 5px;
+}
+
+.laboratory-metric span {
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.laboratory-section-heading {
+    display: grid;
+    gap: 2px;
+    margin: 4px 0;
+}
+
+.laboratory-section-heading h3 {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.laboratory-section-heading small,
+.laboratory-list-row small,
+.laboratory-status-bar {
+    color: var(--text-secondary);
+}
+
+.laboratory-list-row {
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.laboratory-note {
+    margin: 6px 0;
+}
+
+.laboratory-status-bar {
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    margin-top: 8px;
+    padding-top: 5px;
+}
+
 .analytics-grid {
     display: flex;
     flex-wrap: wrap;
