@@ -90,6 +90,20 @@ The verified Milestone C unperturbed baseline found:
 - yaw change: 0.2342730946151257 rad
 - finite observations and derived metrics
 
+## Project A - Healthy Baseline Study Preparation
+
+Project A adds a planning-only contract and asset package for the first 100
+Healthy baseline experiments (`Healthy_001` through `Healthy_100`, seeds 0-99).
+The canonical materials are under `research/campaigns/healthy_baseline/` and
+`docs/v10/`. They define the future dataset manifest, metadata, checksums,
+metrics catalog, Figures 1-8, Tables 1-6, publication skeleton, and reviewer
+gates.
+
+No Healthy rollout, result, figure, table, or scientific conclusion is created
+by Project A. When an approved real dataset is supplied under
+`datasets/healthy/`, the existing V7-V9 gates and downstream pipeline remain
+the execution path. A ready/integrity result is not biological validation.
+
 ## Repository Layout
 
 - `src/drosophila_pd/anatomy/` - anatomy and FlyGym mapping audit helpers

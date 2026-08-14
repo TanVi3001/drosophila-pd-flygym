@@ -927,3 +927,21 @@ Computational PD, Validation, and Publication services are recorded as
 unavailable bindings until their existing public APIs are explicitly connected.
 V9 adds no scientific algorithm, simulation, rollout, biological interpretation,
 or new evidence.
+
+## Project A - Healthy Baseline Scientific Study Preparation
+
+Project A is a planning-only preparation package for 100 future Healthy
+baseline experiments, `Healthy_001` through `Healthy_100`, with deterministic
+seeds 0 through 99. The existing V5 campaign matrix remains the authoritative
+experiment specification. Project A adds a Healthy dataset contract, metrics
+catalog, Figure 1-8 and Table 1-6 specifications, a publication skeleton, and
+reviewer/reproducibility inventories under `research/campaigns/healthy_baseline/`,
+`paper/healthy_baseline/`, and `docs/v10/`.
+
+No rollout, dataset, result, figure, table, or scientific conclusion is created
+by Project A. When approved real data is placed under `datasets/healthy/`, the
+existing V7 dataset adapter, V8 runtime, and V9 kernel remain the integration
+path. Their integrity checks and `WAITING_DATASET` gate do not establish
+biological validation. Project A does not modify scientific modules, FlyGym,
+simulation code, frozen evidence, notebooks, manuscript content, or release
+artifacts.
