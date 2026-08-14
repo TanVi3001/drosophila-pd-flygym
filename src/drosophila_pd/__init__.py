@@ -42,6 +42,13 @@ from .research_campaign import (  # noqa: E402
     CampaignState as ResearchCampaignState,
     ExperimentSpec as ResearchExperimentSpec,
 )
+from .research_pipeline import (  # noqa: E402
+    DatasetInput as StudyDatasetInput,
+    StudyOrchestrator,
+    StudyRequest,
+    StudyResult,
+    run_study,
+)
 
 __all__ = [
     "__version__",
@@ -73,4 +80,9 @@ __all__ = [
     "ResearchCampaignManifest",
     "ResearchCampaignState",
     "ResearchExperimentSpec",
+    "StudyDatasetInput",
+    "StudyOrchestrator",
+    "StudyRequest",
+    "StudyResult",
+    "run_study",
 ]

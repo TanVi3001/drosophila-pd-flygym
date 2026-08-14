@@ -174,6 +174,22 @@ python scripts/research_campaign_cli.py --help
 The Vietnamese guides are in `docs/vi/83_Research_Campaign.md` through
 `docs/vi/90_Kien_Truc_Campaign.md`.
 
+## Research Phase I Unified Study Pipeline
+
+`StudyOrchestrator` composes the existing dataset catalog, research campaign,
+Digital Twin, analysis, statistics, computational-PD, scientific-validation,
+publication, and provenance APIs. It creates `study.json` and
+`research_package.zip` from supplied artifacts without running simulations or
+introducing scientific results.
+
+```bash
+python scripts/run_study.py --study-id example --name "Example Study" \
+  --dataset input=/path/to/existing_dataset.json
+```
+
+The Vietnamese guides are in `docs/vi/91_Pipeline_Nghien_Cuu.md` through
+`docs/vi/95_Kiem_Dinh_Pipeline.md`.
+
 ## Workflow
 
 1. Develop code, tests, and documentation locally with Codex.
