@@ -1,4 +1,5 @@
 import { ExperimentWorkspace } from './experiment_workspace.js';
+import { DigitalFly } from './digital_fly.js';
 
 export const LABORATORY_ENTITY_TYPES = Object.freeze([
     'project',
@@ -25,6 +26,7 @@ export class DigitalLaboratory {
         this.reports = new EntityStore('report');
         this.exports = new EntityStore('export');
         this.notebooks = new EntityStore('notebook');
+        this.flies = new Map();
         this.recent = [];
     }
 
@@ -177,6 +179,30 @@ export class DigitalLaboratory {
         return this.collaboration;
     }
 
+    registerFly(fly, { projectId = null, trialId = null } = {}) {
+        if (!(fly instanceof DigitalFly)) throw new Error('A DigitalFly instance is required.');
+        if (projectId) this.projects.require(projectId);
+        if (trialId) {
+            const trial = this.trials.require(trialId);
+            if (projectId && trial.projectId !== projectId) throw new Error('Trial does not belong to project.');
+        }
+        this.flies.set(fly.id, fly);
+        if (projectId) {
+            const project = this.projects.require(projectId);
+            project.flyIds = uniqueStrings([...(project.flyIds ?? []), fly.id]);
+            this.touch(project);
+        }
+        if (trialId) {
+            const trial = this.trials.require(trialId);
+            trial.flyIds = uniqueStrings([...(trial.flyIds ?? []), fly.id]);
+            this.touch(trial);
+        }
+        return fly;
+    }
+
+    getFly(id) { return this.flies.get(id) ?? null; }
+    listFlies() { return [...this.flies.values()]; }
+
     dashboard() {
         return {
             projects: this.projects.size(),
@@ -186,6 +212,7 @@ export class DigitalLaboratory {
             analyses: this.analysisSessions.size(),
             reports: this.reports.size(),
             exports: this.exports.size(),
+            flies: this.flies.size,
             plugins: this.pluginPlatform?.list?.().length ?? 0,
             notebooks: this.notebooks.size(),
         };
@@ -251,6 +278,7 @@ export class DigitalLaboratory {
             reports: this.reports.toJSON(),
             exports: this.exports.toJSON(),
             notebooks: this.notebooks.toJSON(),
+            digitalFlies: this.listFlies().map((fly) => fly.toJSON()),
             experimentWorkspace: this.experimentWorkspace.toJSON(),
         };
     }
@@ -259,6 +287,10 @@ export class DigitalLaboratory {
         this.metadata = clone(data.metadata ?? {});
         this.collaboration = clone(data.collaboration ?? {});
         this.recent = [...(data.recent ?? [])];
+        this.flies = new Map((data.digitalFlies ?? []).map((item) => {
+            const fly = DigitalFly.fromJSON(item);
+            return [fly.id, fly];
+        }));
         for (const type of LABORATORY_ENTITY_TYPES) this.storeFor(type).restore(data[type === 'analysisSession' ? 'analysisSessions' : `${type}s`] ?? []);
         if (data.experimentWorkspace) this.experimentWorkspace.restore(data.experimentWorkspace);
         return this;

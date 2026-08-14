@@ -9,6 +9,8 @@
 | `experiment_workspace.js` | Quản lý experiment, dataset và snapshot | rollout/metadata | workspace state |
 | `plugin_platform.js` | Lifecycle, manifest, hook và capability | plugin definition | plugin result/hook result |
 | `verification_suite.js` | Kiểm chứng workflow và benchmark | rollout thật | verification report |
+| `digital_fly.js` | Mô hình thực thể Fly và trajectory ownership | rollout đã chuẩn hóa | Digital Fly model |
+| `digital_laboratory.js` | Đăng ký Digital Fly cùng project/trial metadata | Digital Fly + metadata | laboratory state |
 | `parkinson_export.js` | Export phân tích | analysis data | JSON/CSV/Markdown/HTML/SVG |
 | `release_engineering.py` | Manifest, version, compatibility, migration và notes | repository | release metadata |
 | `project_health.py` | Health scan tĩnh | repository | health checks |

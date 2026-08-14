@@ -11,6 +11,9 @@ FlyGym / Scene JSON
         ↓
    Workspace / Experiment Workspace
         ↓
+      Digital Fly
+ (body, skeleton, trajectory)
+        ↓
    Analysis + Statistics
         ↓
  Visualization + Reports

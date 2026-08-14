@@ -20,12 +20,14 @@ import { AnalyticsDashboard } from './experiment_analytics.js';
 import { ExperimentReportGenerator } from './experiment_reports.js';
 import { ExperimentComparisonModel } from './experiment_comparison.js';
 import { DigitalLaboratory } from './digital_laboratory.js';
+import { DigitalFly } from './digital_fly.js';
 
 export class App {
     constructor() {
         this.workspace = new Workspace();
         this.experimentWorkspace = new ExperimentWorkspace();
         this.laboratory = new DigitalLaboratory({ experimentWorkspace: this.experimentWorkspace });
+        this.digitalFly = null;
         this.layout = new Layout();
         this.viewportRenderer = new ViewportRenderer(this.workspace);
         this.timeline = new Timeline(this.workspace, () => this.handleTimelineChange());
@@ -102,6 +104,8 @@ export class App {
                 rollout.statistics = computeRolloutStatistics(rollout);
                 this.workspace.loadRollout(rollout);
                 this.workspace.rolloutStatistics = rollout.statistics;
+                this.digitalFly = DigitalFly.fromRollout(rollout, { name: file.name });
+                this.laboratory.registerFly(this.digitalFly);
                 this.experimentWorkspace.importRollout(rollout, {
                     name: file.name.replace(/\.json$/i, ''),
                     kind: experimentOptions.kind ?? 'Control',
@@ -119,6 +123,7 @@ export class App {
 
                 // Commit the new state only after parsing and validation succeed.
                 this.workspace.load(data);
+                this.digitalFly = null;
                 this.persistence.addRecentFile({ name: file.name, type: 'scene' });
                 document.getElementById('rollout-charts')?.replaceChildren();
                 console.info('Loaded scene', file.name);
