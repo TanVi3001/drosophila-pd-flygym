@@ -107,6 +107,18 @@ The verified Milestone C unperturbed baseline found:
 - `results/` - local/generated experiment outputs, kept lightweight by default
 - `logs/` - local run logs
 
+## Research Repository Migration (V3 Preparation)
+
+The repository is also organized as an open research repository without
+changing the frozen scientific chain. Use the [documentation hub](docs/README.md),
+[architecture snapshot](docs/repository_architecture.md),
+[public API reference](docs/public_api.md), and
+[reproducibility records](reproducibility/README.md) for orientation.
+Research-area anchors under `research/` and reusable documents under
+`templates/` are organizational only; they do not create rollout data or new
+scientific evidence. The migration roadmap is
+[docs/vi/100_V3_Roadmap.md](docs/vi/100_V3_Roadmap.md).
+
 ## Interactive Digital Fly Laboratory
 
 The Web Viewer can visualize imported FlyGym rollouts as an interactive Digital

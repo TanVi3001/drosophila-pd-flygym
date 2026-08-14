@@ -806,3 +806,17 @@ The planned high-level stages are:
 
 No disease-specific modeling should be introduced until the locomotor simulation
 infrastructure is stable and the project owner authorizes that stage.
+
+## Research Repository Migration (V3 Preparation)
+
+The repository migration is a documentation and developer-experience program.
+It does not add a scientific algorithm, simulation, rollout, perturbation,
+dashboard, manager, or validation claim. The additive migration records the
+current architecture in `docs/repository_architecture.md`, the intended reuse
+surface in `docs/public_api.md`, repository health in `docs/project_health.md`,
+and reproducibility policies under `reproducibility/`.
+
+Research directory anchors under `research/` and reusable document templates
+under `templates/` are organizational only. Existing scientific files are not
+moved for compatibility. The frozen evidence chain, manuscript, report
+artifacts, notebooks, and release metadata remain authoritative.
