@@ -14,10 +14,16 @@ import { RolloutChartRenderer } from './rollout_charts.js';
 import { RolloutExporter } from './rollout_export.js';
 import { SessionRecorder } from './session_recorder.js';
 import { WorkspacePersistence } from './workspace_persistence.js';
+import { ExperimentWorkspace } from './experiment_workspace.js';
+import { ExperimentWorkspacePanel } from './experiment_workspace_panel.js';
+import { AnalyticsDashboard } from './experiment_analytics.js';
+import { ExperimentReportGenerator } from './experiment_reports.js';
+import { ExperimentComparisonModel } from './experiment_comparison.js';
 
 export class App {
     constructor() {
         this.workspace = new Workspace();
+        this.experimentWorkspace = new ExperimentWorkspace();
         this.layout = new Layout();
         this.viewportRenderer = new ViewportRenderer(this.workspace);
         this.timeline = new Timeline(this.workspace, () => this.handleTimelineChange());
@@ -26,8 +32,16 @@ export class App {
         this.playbackController = new PlaybackController(this.workspace);
         this.behaviorTimeline = new BehaviorTimeline(this.workspace);
         this.chartRenderer = new RolloutChartRenderer();
-        this.persistence = new WorkspacePersistence(this.workspace);
+        this.persistence = new WorkspacePersistence(this.workspace, globalThis.localStorage, this.experimentWorkspace);
         this.sessionRecorder = new SessionRecorder(this.workspace);
+        this.analyticsDashboard = new AnalyticsDashboard(this.experimentWorkspace);
+        this.reportGenerator = new ExperimentReportGenerator(this.experimentWorkspace, this.analyticsDashboard);
+        this.comparisonModel = new ExperimentComparisonModel(this.experimentWorkspace);
+        this.experimentPanel = new ExperimentWorkspacePanel(this.experimentWorkspace, {
+            onImport: (file, options) => this.loadSceneFile(file, options),
+            onChange: () => this.renderExperimentWorkspace(),
+            onReport: (format) => this.exportExperimentReport(format),
+        });
         this.toolbar = new Toolbar({
             onLoadJSON: (file) => this.loadSceneFile(file),
             onResetView: () => this.viewportRenderer.resetView(),
@@ -67,6 +81,7 @@ export class App {
         this.viewportRenderer.init(document.getElementById('viewer'));
         this.timeline.init(document.getElementById('timeline'));
         this.behaviorTimeline.init(document.getElementById('behavior-timeline'));
+        this.experimentPanel.init(document.getElementById('experiment-manager'));
         this.sidebar.init(document.getElementById('sidebar'));
         this.inspector.init(document.getElementById('inspector'));
         this.toolbar.init(document.getElementById('toolbar'));
@@ -77,7 +92,7 @@ export class App {
 
     }
 
-    async loadSceneFile(file) {
+    async loadSceneFile(file, experimentOptions = {}) {
         try {
             const rawData = await JSONLoader.parseRawFile(file);
             if (FlyGymRolloutLoader.canLoad(rawData)) {
@@ -85,6 +100,11 @@ export class App {
                 rollout.statistics = computeRolloutStatistics(rollout);
                 this.workspace.loadRollout(rollout);
                 this.workspace.rolloutStatistics = rollout.statistics;
+                this.experimentWorkspace.importRollout(rollout, {
+                    name: file.name.replace(/\.json$/i, ''),
+                    kind: experimentOptions.kind ?? 'Control',
+                    metadata: { sourceName: file.name, format: rollout.source.format },
+                });
                 this.persistence.addRecentFile({ name: file.name, type: 'flygym-rollout' });
                 this.renderRolloutViews();
                 console.info('Loaded FlyGym rollout', file.name);
@@ -109,6 +129,7 @@ export class App {
             this.inspector.render();
             this.viewportRenderer.render();
             this.behaviorTimeline.render();
+            this.renderExperimentWorkspace();
         } catch (error) {
             console.error('Failed to load scene JSON:', error);
             window.alert(`Unable to load scene JSON: ${error.message}`);
@@ -198,7 +219,32 @@ export class App {
         this.chartRenderer.renderAll(targets, this.workspace.rollout);
     }
 
+    renderExperimentWorkspace() {
+        this.experimentPanel.render();
+        const dashboardRoot = document.getElementById('experiment-dashboard');
+        this.analyticsDashboard.render(dashboardRoot);
+    }
+
+    exportExperimentReport(format) {
+        if (format === 'pdf') {
+            this.reportGenerator.printPDF();
+            return;
+        }
+        this.reportGenerator.download(format);
+    }
+
     saveWorkspace() {
+        this.experimentWorkspace.saveSnapshot('manual-save', {
+            camera: {
+                offsetX: this.viewportRenderer.cameraOffsetX,
+                offsetY: this.viewportRenderer.cameraOffsetY,
+                zoom: this.viewportRenderer.zoom,
+            },
+            timeline: { currentFrame: this.workspace.currentFrame, totalFrames: this.workspace.totalFrames },
+            selection: { node: this.workspace.selectedNode, keyframe: this.workspace.selectedKeyframe },
+            workspace: { currentFrame: this.workspace.currentFrame, currentTime: this.workspace.currentTime },
+            statistics: this.workspace.rolloutStatistics,
+        });
         this.persistence.save('manual-save');
         console.info('Workspace saved.');
     }
@@ -207,9 +253,16 @@ export class App {
         try {
             const snapshot = this.persistence.restore('manual-save');
             if (snapshot) {
+                const experimentSnapshot = this.experimentWorkspace.snapshots.list()[0]?.state;
+                if (experimentSnapshot?.camera) {
+                    this.viewportRenderer.cameraOffsetX = Number(experimentSnapshot.camera.offsetX) || 0;
+                    this.viewportRenderer.cameraOffsetY = Number(experimentSnapshot.camera.offsetY) || 0;
+                    this.viewportRenderer.zoom = Number(experimentSnapshot.camera.zoom) || 1;
+                }
                 if (this.workspace.rollout) this.renderRolloutViews();
                 this.refreshEditor();
                 this.behaviorTimeline.render();
+                this.renderExperimentWorkspace();
             }
         } catch (error) {
             console.error('Failed to restore workspace:', error);

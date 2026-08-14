@@ -51,6 +51,117 @@ body {
     overflow-y: auto;
 }
 
+#experiment-manager {
+    width: 250px;
+    flex: 0 0 250px;
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#experiment-manager h2,
+#experiment-dashboard h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.panel-heading,
+.experiment-controls,
+.experiment-actions {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+}
+
+.panel-heading {
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.experiment-controls input {
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+    color: var(--text-primary);
+    padding: 5px;
+    width: 100%;
+}
+
+.experiment-record {
+    border-bottom: 1px solid var(--border);
+    padding: 9px 0;
+}
+
+.experiment-record.is-active {
+    border-left: 3px solid var(--accent);
+    padding-left: 6px;
+}
+
+.experiment-record-title {
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0;
+    text-align: left;
+    width: 100%;
+}
+
+.experiment-record small,
+.experiment-tags,
+.panel-status,
+.analytics-metric small,
+.muted {
+    color: var(--text-secondary);
+}
+
+.experiment-record small,
+.experiment-tags {
+    display: block;
+    margin-top: 4px;
+}
+
+.experiment-actions {
+    margin-top: 7px;
+}
+
+.experiment-actions button,
+.panel-heading button {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+}
+
+#experiment-dashboard {
+    border-top: 1px solid var(--border);
+    box-sizing: border-box;
+    min-height: 125px;
+    overflow-x: auto;
+    padding: 8px 10px;
+}
+
+.analytics-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.analytics-metric {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    display: grid;
+    gap: 2px;
+    min-width: 104px;
+    padding: 6px;
+}
+
+.analytics-metric span {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+}
+
 #inspector {
     width: 280px;
     background-color: var(--bg-surface);
