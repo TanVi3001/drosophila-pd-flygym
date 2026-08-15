@@ -110,6 +110,13 @@ from .flygym_adapter import (  # noqa: E402
     WorldBuilder,
     export_rollout,
 )
+from .viewer_export import (  # noqa: E402
+    PoseExportResult,
+    PoseValidationError,
+    ValidationReport,
+    export_viewer_pose,
+    validate_pose_document,
+)
 
 __all__ = [
     "__version__",
@@ -197,4 +204,9 @@ __all__ = [
     "SimulationBuilder",
     "WorldBuilder",
     "export_rollout",
+    "PoseExportResult",
+    "PoseValidationError",
+    "ValidationReport",
+    "export_viewer_pose",
+    "validate_pose_document",
 ]

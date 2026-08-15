@@ -49,16 +49,21 @@ def test_viewer_files_exist_and_use_the_declared_rendering_layer() -> None:
 def test_pose_schema_is_explicit_and_data_free() -> None:
     schema_path = ROOT / "docs" / "api" / "viewer_pose.schema.json"
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
-    assert schema["required"] == ["metadata", "fps", "frame_count", "frames"]
+    assert schema["required"] == ["metadata", "fps", "frame_count", "joint_names", "frames"]
     frame_required = schema["properties"]["frames"]["items"]["required"]
     assert frame_required == [
+        "frame_index",
+        "time",
         "thorax",
+        "position",
         "orientation",
         "COM",
         "joint_angles",
-        "joint_velocities",
+        "joint_velocity",
+        "joint_acceleration",
         "contacts",
         "trajectory",
+        "visibility",
     ]
     assert "example" not in schema
 
