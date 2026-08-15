@@ -24,6 +24,10 @@ def build_parser() -> argparse.ArgumentParser:
         command.add_argument("--root", type=Path, default=None, help=argparse.SUPPRESS)
         command.add_argument("--campaign", default="experimental_campaign_01_healthy_baseline")
         command.add_argument("--output", type=Path, default=None)
+        if name == "execute":
+            command.add_argument("--limit", type=int, default=None, help="Run only the first N discovered rollouts.")
+            command.add_argument("--no-resume", action="store_true", help="Reprocess completed rollout outputs.")
+            command.add_argument("--no-retry-failed", action="store_true", help="Do not retry a previously failed rollout.")
     return parser
 
 
@@ -41,7 +45,11 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "prepare":
         payload = runtime.prepare().as_dict()
     elif args.command == "execute":
-        payload = runtime.execute().as_dict()
+        payload = runtime.execute(
+            limit=args.limit,
+            resume=not args.no_resume,
+            retry_failed=not args.no_retry_failed,
+        ).as_dict()
     elif args.command == "status":
         payload = runtime.status()
     elif args.command == "report":

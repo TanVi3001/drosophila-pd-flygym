@@ -9,6 +9,7 @@ class ExecutionState(str, Enum):
     """Lifecycle state of one execution request."""
 
     WAITING_DATASET = "WAITING_DATASET"
+    INVALID_DATASET = "INVALID_DATASET"
     READY = "READY"
     RUNNING = "RUNNING"
     VALIDATING = "VALIDATING"
@@ -19,7 +20,8 @@ class ExecutionState(str, Enum):
 
 
 ALLOWED_TRANSITIONS = {
-    ExecutionState.WAITING_DATASET: {ExecutionState.READY, ExecutionState.CANCELLED},
+    ExecutionState.WAITING_DATASET: {ExecutionState.INVALID_DATASET, ExecutionState.READY, ExecutionState.CANCELLED},
+    ExecutionState.INVALID_DATASET: {ExecutionState.WAITING_DATASET, ExecutionState.READY, ExecutionState.CANCELLED},
     ExecutionState.READY: {ExecutionState.RUNNING, ExecutionState.CANCELLED},
     ExecutionState.RUNNING: {ExecutionState.VALIDATING, ExecutionState.FAILED, ExecutionState.CANCELLED},
     ExecutionState.VALIDATING: {ExecutionState.EXPORTING, ExecutionState.FAILED, ExecutionState.CANCELLED},

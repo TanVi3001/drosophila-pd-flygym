@@ -288,8 +288,7 @@ python -m venv .venv
 # Windows PowerShell: .venv\Scripts\Activate.ps1
 # Linux/macOS: source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e .
-python -m pip install pytest
+python -m pip install -e ".[test]"
 python -m drosophila_pd
 pytest -q -rs -p no:cacheprovider
 ```
@@ -746,3 +745,26 @@ python scripts/kernel.py shutdown
 
 With no approved rollout dataset present, the kernel stops at
 `WAITING_DATASET`. See [`docs/v9/138_V9_Architecture.md`](docs/v9/138_V9_Architecture.md).
+
+## Project Z Healthy Dataset Execution
+
+Project Z completes the execution path for manifest-backed real Healthy
+rollouts under `datasets/healthy/`. It uses the existing execution runtime and
+study pipeline per declared rollout, writing `analysis/`, `statistics/`,
+`validation/`, `reports/`, `figures/`, and `publication/` beneath the
+operational output directory. It does not run simulation or create rollout
+data.
+
+```bash
+python scripts/run_campaign.py discover
+python scripts/run_campaign.py execute --limit 1
+python scripts/run_campaign.py execute --limit 10
+python scripts/run_campaign.py execute
+```
+
+Completed rollout outputs are resumed from their persisted status; failed
+rollouts are retried by default. Use `--no-resume` or `--no-retry-failed` for
+explicit control. Missing datasets return `WAITING_DATASET`; malformed or
+unsupported manifests return `INVALID_DATASET`. Scientific validation is
+reported as unavailable when no reference rollout is declared, rather than
+being inferred or fabricated.

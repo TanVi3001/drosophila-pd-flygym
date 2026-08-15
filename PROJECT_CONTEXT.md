@@ -991,3 +991,25 @@ scientific algorithms, or introduce a Parkinson interpretation. Dataset
 absence remains `WAITING_DATASET`; planning `READY` is not scientific or
 biological validation. Existing `research_campaign` and execution packages are
 unchanged for backward compatibility.
+
+## Project Z - Healthy Dataset Execution
+
+Project Z extends the existing `research_execution` runtime and
+`scripts/run_campaign.py` for real manifest-backed Healthy rollout execution.
+The runtime filters the Healthy dataset path, validates declared payload paths,
+checks available checksums, loads canonical JSON/NPZ/trajectory CSV rollouts,
+and calls the existing `StudyOrchestrator` once per rollout. The request carries
+the imported rollout into the existing analysis, statistics, computational-PD,
+scientific-validation, Digital Twin, report, figure, and publication APIs.
+
+Batch execution is sequential and supports `--limit`, persisted per-rollout
+resume, and retry control. Each completed rollout is written beneath the
+operational output root with the existing analysis/statistics/validation/
+reports/figures/publication layout, plus `summary.csv`, `summary.json`, and
+`summary.md`. No FlyGym/MuJoCo simulation is started and no rollout is created.
+
+Dataset discovery returns `WAITING_DATASET` when no executable manifest or
+payload is available and `INVALID_DATASET` for malformed, unsafe, unsupported,
+or checksum-mismatched manifest entries. A completed execution with no
+declared reference rollout records scientific validation as `NOT_AVAILABLE`;
+it never upgrades that condition to a validation pass or biological claim.
