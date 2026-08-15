@@ -27,6 +27,7 @@ import { RolloutComparisonViewer } from './comparison_viewer.js';
 import { ResearchWorkbench } from './research_workbench.js';
 import { ResearchWorkbenchPanel } from './research_workbench_panel.js';
 import { Viewer } from './viewer/viewer.js';
+import { DigitalLaboratoryIntegration } from './dashboard/integration.js';
 
 export class App {
     constructor() {
@@ -110,6 +111,18 @@ export class App {
             onExportPNG: () => this.viewportRenderer.exportPNG('fly-studio-view.png'),
             onExportViewSVG: () => this.viewportRenderer.exportSVG('fly-studio-view.svg'),
         });
+        this.integration = new DigitalLaboratoryIntegration({
+            workspace: this.workspace,
+            laboratory: this.laboratory,
+            experimentWorkspace: this.experimentWorkspace,
+            laboratoryDashboard: this.laboratoryDashboard,
+            chartRenderer: this.chartRenderer,
+            behaviorTimeline: this.behaviorTimeline,
+            threeViewer: this.threeViewer,
+            viewportRenderer: this.viewportRenderer,
+            reportGenerator: this.reportGenerator,
+            onLoadDataset: (file) => this.loadSceneFile(file, { kind: 'Control' }),
+        });
         this.keyDownHandler = (event) => this.handleKeyDown(event);
     }
 
@@ -123,6 +136,7 @@ export class App {
         this.behaviorTimeline.init(document.getElementById('behavior-timeline'));
         this.experimentPanel.init(document.getElementById('experiment-manager'));
         this.researchWorkbenchPanel.init(document.getElementById('research-workbench'));
+        this.integration.init(document.getElementById('experiment-dashboard'));
         this.sidebar.init(document.getElementById('sidebar'));
         this.inspector.init(document.getElementById('inspector'));
         this.toolbar.init(document.getElementById('toolbar'));
@@ -138,6 +152,14 @@ export class App {
             const rawData = await JSONLoader.parseRawFile(file);
             if (isViewerPoseDocument(rawData)) {
                 await this.threeViewer.loadPose(rawData);
+                this.workspace.load({
+                    ...rawData,
+                    animation: {
+                        frames: rawData.frames,
+                        duration: rawData.frame_count > 1 ? (rawData.frame_count - 1) / rawData.fps : 0,
+                    },
+                });
+                this.workspace.fps = rawData.fps;
                 this.digitalFly = null;
                 this.digitalFly3D = null;
                 this.viewportRenderer.setDigitalFly3D(null);
@@ -206,6 +228,7 @@ export class App {
             || (node?.name && candidate?.name === node.name)
         )) ?? node;
         this.workspace.selectNode(canonicalNode);
+        this.integration?.selection.syncFromWorkspace();
         this.sidebar.render(this.workspace.data, this.workspace.selectedNode);
         this.inspector.render();
         this.viewportRenderer.render();
@@ -303,7 +326,8 @@ export class App {
     renderExperimentWorkspace() {
         this.experimentPanel.render();
         const dashboardRoot = document.getElementById('experiment-dashboard');
-        this.laboratoryDashboard.render(dashboardRoot);
+        if (this.integration) this.integration.render();
+        else this.laboratoryDashboard.render(dashboardRoot);
         const comparisonRoot = document.getElementById('comparison-viewer');
         if (comparisonRoot) this.comparisonViewer.render(comparisonRoot, this.comparisonModel.report());
         this.researchWorkbenchPanel.render();
