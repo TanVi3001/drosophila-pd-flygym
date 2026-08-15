@@ -18,9 +18,19 @@ from drosophila_pd.automation import (
     ResearchAutomationPlatform,
 )
 from drosophila_pd.experiment import ExperimentJob, STAGE_NAMES
+from drosophila_pd.research_execution import (
+    ExecutionContext,
+    ExecutionJob,
+    ExecutionQueue,
+    ResearchAutomation,
+    load_campaign_plan,
+)
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "scripts"))
 from research_automation_cli import main  # noqa: E402
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _handlers():
@@ -99,3 +109,81 @@ def test_health_toolkit_platform_and_cli_are_non_simulation(tmp_path):
     output = platform.write_manifest()
     assert json.loads(output.read_text(encoding="utf-8"))["scientific_scope"]
     assert main(["--root", str(root), "health-check"]) == 0
+
+
+def test_campaign_plan_reads_all_existing_healthy_rows():
+    plan = load_campaign_plan(ExecutionContext(REPOSITORY_ROOT))
+    assert plan.experiment_count == 100
+    assert plan.rows[0]["experiment_id"] == "Healthy_001"
+    assert plan.rows[-1]["experiment_id"] == "Healthy_100"
+    assert plan.rows[0]["seed"] == 0
+    assert plan.rows[-1]["seed"] == 99
+
+
+def test_campaign_pattern_is_expanded_without_hardcoded_condition(tmp_path):
+    campaign_root = tmp_path / "campaigns" / "candidate"
+    campaign_root.mkdir(parents=True)
+    (campaign_root / "campaign.yaml").write_text(
+        """
+campaign_id: candidate_campaign
+experiment_id_pattern: Candidate_[007-009]
+seed_policy:
+  values: 10-12
+""",
+        encoding="utf-8",
+    )
+    plan = load_campaign_plan(ExecutionContext(tmp_path, campaign_id="candidate", campaign_root=tmp_path / "campaigns"))
+    assert [row["experiment_id"] for row in plan.rows] == ["Candidate_007", "Candidate_008", "Candidate_009"]
+    assert [row["seed"] for row in plan.rows] == [10, 11, 12]
+
+
+def test_missing_campaign_does_not_fallback_to_healthy(tmp_path):
+    plan = load_campaign_plan(ExecutionContext(tmp_path, campaign_id="candidate", campaign_root=tmp_path / "campaigns"))
+    assert plan.rows == ()
+
+
+def test_execution_queue_round_trips_required_job_fields(tmp_path):
+    queue = ExecutionQueue(tmp_path / "progress")
+    queue.enqueue(ExecutionJob(id="Healthy_001", dataset="Healthy_001", seed=0, status="READY", retry_count=2))
+    queue.save()
+    restored = ExecutionQueue.load(tmp_path / "progress" / "jobs.json")
+    job = restored.get("Healthy_001")
+    assert job.dataset == "Healthy_001"
+    assert job.seed == 0
+    assert job.status == "READY"
+    assert job.retry_count == 2
+    assert restored.counts()["READY"] == 1
+
+
+def test_automation_waits_for_real_datasets_and_writes_progress(tmp_path):
+    context = ExecutionContext(
+        REPOSITORY_ROOT,
+        dataset_root=tmp_path / "datasets",
+        output_root=tmp_path / "execution",
+    )
+    progress_root = tmp_path / "progress"
+    automation = ResearchAutomation(context, progress_root=progress_root)
+    payload = automation.execute()
+    assert payload["total"] == 100
+    assert payload["completed"] == 0
+    assert payload["waiting"] == 100
+    assert payload["failed"] == 0
+    assert (progress_root / "progress.json").is_file()
+    assert (progress_root / "progress.csv").is_file()
+    assert (progress_root / "progress.md").is_file()
+    assert (progress_root / "research_summary.md").is_file()
+    persisted = json.loads((progress_root / "jobs.json").read_text(encoding="utf-8"))
+    assert len(persisted["jobs"]) == 100
+
+
+def test_resume_does_not_reset_completed_jobs(tmp_path):
+    context = ExecutionContext(REPOSITORY_ROOT, dataset_root=tmp_path / "datasets", output_root=tmp_path / "execution")
+    automation = ResearchAutomation(context, progress_root=tmp_path / "progress")
+    automation.plan()
+    job = automation.queue.get("Healthy_001")
+    job.status = "COMPLETED"
+    job.duration = 1.0
+    automation.queue.save()
+    payload = automation.execute()
+    assert payload["completed"] == 1
+    assert payload["waiting"] == 99

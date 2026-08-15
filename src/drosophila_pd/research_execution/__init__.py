@@ -11,6 +11,14 @@ from .execution_history import ExecutionEvent, ExecutionHistory
 from .execution_result import ExecutionResult
 from .execution_runtime import DatasetDiscovery, DatasetRecord, DiscoveryReport, ExecutionRuntime
 from .execution_state import ExecutionState, coerce_state
+from .automation import (
+    AutomationRunner,
+    CampaignPlan,
+    ExecutionJob,
+    ExecutionQueue,
+    ResearchAutomation,
+    load_campaign_plan,
+)
 
 __all__ = [
     "ARTIFACT_CATEGORIES",
@@ -25,5 +33,11 @@ __all__ = [
     "ExecutionResult",
     "ExecutionRuntime",
     "ExecutionState",
+    "AutomationRunner",
+    "CampaignPlan",
+    "ExecutionJob",
+    "ExecutionQueue",
+    "ResearchAutomation",
     "coerce_state",
+    "load_campaign_plan",
 ]
