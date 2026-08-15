@@ -1,0 +1,161 @@
+from __future__ import annotations
+
+from pathlib import Path
+from types import SimpleNamespace
+
+import numpy as np
+import pytest
+
+from drosophila_pd.flygym_adapter import (
+    FlyBuilder,
+    FlyGymAdapter,
+    FlyGymConfig,
+    FlyGymRuntime,
+    FlyGymUnavailableError,
+    RolloutRecorder,
+    RuntimeState,
+    WorldBuilder,
+    export_rollout,
+)
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+class _SimulationStub:
+    """API-shaped stub for software contract tests, not scientific data."""
+
+    def __init__(self) -> None:
+        self.mj_data = SimpleNamespace(time=0.0)
+        self.mj_model = SimpleNamespace(opt=SimpleNamespace(timestep=0.1))
+        self.steps = 0
+
+    def step(self) -> None:
+        self.steps += 1
+        self.mj_data.time = self.steps * 0.1
+
+    def reset(self) -> None:
+        self.steps = 0
+        self.mj_data.time = 0.0
+
+    def get_body_positions(self, _name: str) -> np.ndarray:
+        return np.asarray([[float(self.steps), 0.0, 0.5], [0.0, 0.0, 0.0]])
+
+    def get_body_rotations(self, _name: str) -> np.ndarray:
+        return np.asarray([[1.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]])
+
+    def get_joint_angles(self, _name: str) -> np.ndarray:
+        return np.asarray([float(self.steps)])
+
+    def get_joint_velocities(self, _name: str) -> np.ndarray:
+        return np.asarray([float(self.steps)])
+
+    def get_ground_contact_info(self, _name: str):
+        return (
+            np.asarray([1.0]),
+            np.asarray([[0.0, 0.0, 1.0]]),
+            np.asarray([[0.0, 0.0, 0.0]]),
+            np.asarray([[0.0, 0.0, 0.0]]),
+            np.asarray([[0.0, 0.0, 1.0]]),
+            np.asarray([[1.0, 0.0, 0.0]]),
+        )
+
+
+def test_configuration_and_yaml_contract() -> None:
+    assert FlyGymConfig.from_mapping({}).simulation.timestep == 0.0001
+    config = FlyGymConfig.from_yaml(REPO_ROOT / "configs/v2/flygym/default.yaml")
+
+    assert config.fly.factory == "canonical_locomotion"
+    assert config.world.kind == "flat"
+    assert config.simulation.timestep == 0.0001
+    assert config.metadata["flygym_version"] == "2.1.0"
+
+
+def test_builders_are_fluent_and_do_not_import_flygym_until_build() -> None:
+    fly_builder = (
+        FlyBuilder()
+        .healthy()
+        .position([1.0, 2.0, 0.5])
+        .orientation([1.0, 0.0, 0.0, 0.0])
+        .pose({"position": [1.0, 2.0, 0.5]})
+    )
+    assert fly_builder.spawn_position == (1.0, 2.0, 0.5)
+    assert WorldBuilder().blocks(rand_seed=3)._config.kind == "blocks"
+
+    with pytest.raises(FlyGymUnavailableError):
+        fly_builder.build()
+
+
+def test_adapter_facade_delegates_renderer_creation() -> None:
+    simulation = SimpleNamespace(
+        set_renderer=lambda cameras, **kwargs: {"cameras": cameras, "kwargs": kwargs}
+    )
+
+    renderer = FlyGymAdapter().create_renderer(simulation, cameras="track")
+
+    assert renderer["cameras"] == "track"
+    assert renderer["kwargs"]["output_fps"] == 25
+
+
+def test_runtime_state_machine_is_synchronous_and_bounded() -> None:
+    simulation = _SimulationStub()
+    recorder = RolloutRecorder(
+        simulation,
+        "fly",
+        timestep=0.1,
+        com_provider=lambda _simulation, _fly: [0.0, 0.0, 0.5],
+    )
+    runtime = FlyGymRuntime(simulation, recorder=recorder, max_steps=2)
+
+    assert runtime.state is RuntimeState.STOPPED
+    runtime.run()
+
+    assert runtime.state is RuntimeState.STOPPED
+    assert not runtime.is_running
+    assert runtime.current_step == 2
+    assert runtime.current_time == 0.2
+    assert recorder.rollout.frame_count == 3
+    assert recorder.rollout.frames[-1].joint_acceleration is not None
+
+    runtime.reset()
+    assert runtime.current_step == 0
+    assert recorder.rollout.frame_count == 1
+
+
+def test_runtime_pause_and_resume() -> None:
+    simulation = _SimulationStub()
+    runtime = FlyGymRuntime(simulation)
+    runtime.step()
+    runtime.pause()
+    assert runtime.state is RuntimeState.PAUSED
+    with pytest.raises(RuntimeError, match="paused"):
+        runtime.step()
+    runtime.resume()
+    runtime.step()
+    runtime.stop()
+    assert runtime.state is RuntimeState.STOPPED
+    assert simulation.steps == 2
+
+
+def test_rollout_export_writes_all_canonical_formats(tmp_path: Path) -> None:
+    simulation = _SimulationStub()
+    recorder = RolloutRecorder(
+        simulation,
+        "fly",
+        timestep=0.1,
+        camera_metadata={"cameras": ["track"]},
+        simulation_metadata={"timestep_s": 0.1},
+        com_provider=lambda _simulation, _fly: [0.0, 0.0, 0.5],
+    )
+    recorder.record()
+    simulation.step()
+    recorder.record()
+
+    exported = export_rollout(recorder.rollout, tmp_path / "Healthy_001")
+
+    assert set(exported.files) == {"rollout_json", "rollout_csv", "rollout_npz", "metadata", "manifest"}
+    for path in exported.files.values():
+        assert Path(path).is_file()
+        assert Path(path).stat().st_size > 0
+    assert exported.manifest["frame_count"] == 2
+    assert exported.manifest["files"]["rollout_npz"]["sha256"]

@@ -95,6 +95,21 @@ from .research_kernel import (  # noqa: E402
     TaskScheduler,
     TaskSpec,
 )
+from .flygym_adapter import (  # noqa: E402
+    FlyBuilder,
+    FlyConfig,
+    FlyGymAdapter,
+    FlyGymConfig,
+    FlyGymRuntime,
+    FlyGymUnavailableError,
+    ObservationFrame,
+    RolloutData,
+    RolloutRecorder,
+    RuntimeState,
+    SimulationBuilder,
+    WorldBuilder,
+    export_rollout,
+)
 
 __all__ = [
     "__version__",
@@ -169,4 +184,17 @@ __all__ = [
     "TaskResult",
     "TaskScheduler",
     "TaskSpec",
+    "FlyBuilder",
+    "FlyConfig",
+    "FlyGymAdapter",
+    "FlyGymConfig",
+    "FlyGymRuntime",
+    "FlyGymUnavailableError",
+    "ObservationFrame",
+    "RolloutData",
+    "RolloutRecorder",
+    "RuntimeState",
+    "SimulationBuilder",
+    "WorldBuilder",
+    "export_rollout",
 ]
