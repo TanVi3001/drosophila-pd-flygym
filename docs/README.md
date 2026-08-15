@@ -35,6 +35,10 @@ platform guides and research workflow materials.
 - [Final audit package](final_audit/repository_certification.md)
 - [Archive package](archive/archive_readme.md)
 - [Submission package](submission/supplementary_index.md)
+- [Repository rationalization audit](architecture/repository_audit.md)
+- [REST API preparation](api/README.md)
+- [Web viewer pose schema](api/viewer_pose.schema.json)
+- [Rationalization archive index](../archive/README.md)
 
 The canonical manuscript is [docs/report/final_report.md](report/final_report.md).
 Frozen final artifacts are listed in [the publication package](publication/publication_package.md).

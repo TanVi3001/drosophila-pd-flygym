@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TanVi3001/drosophila-pd-flygym/blob/main/docs/api/viewer_pose.schema.json",
+  "title": "Fly Studio viewer pose document",
+  "description": "Schema only. This file does not contain rollout or synthetic pose data.",
+  "type": "object",
+  "required": ["metadata", "fps", "frame_count", "frames"],
+  "properties": {
+    "metadata": {"type": "object"},
+    "fps": {"type": "number", "exclusiveMinimum": 0},
+    "frame_count": {"type": "integer", "minimum": 0},
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "thorax",
+          "orientation",
+          "COM",
+          "joint_angles",
+          "joint_velocities",
+          "contacts",
+          "trajectory"
+        ],
+        "properties": {
+          "thorax": {},
+          "orientation": {},
+          "COM": {},
+          "joint_angles": {},
+          "joint_velocities": {},
+          "contacts": {},
+          "trajectory": {}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

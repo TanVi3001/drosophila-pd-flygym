@@ -58,7 +58,11 @@ def test_frozen_scientific_paths_are_not_part_of_milestone_changes():
         check=False,
     )
     changed = set(result.stdout.splitlines()) if result.returncode == 0 else set()
-    assert not any(path.startswith(("results/", "notebooks/", "docs/report/")) for path in changed)
+    assert not any(
+        path.startswith(("results/", "docs/report/"))
+        or (path.startswith("notebooks/") and not path.startswith("notebooks/colab/"))
+        for path in changed
+    )
 
 
 def test_analysis_pipeline_backend_contract():

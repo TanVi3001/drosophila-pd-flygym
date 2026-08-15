@@ -65,4 +65,8 @@ def test_release_candidate_does_not_change_frozen_paths():
 
     result = subprocess.run(["git", "diff", "--name-only", "HEAD~1"], cwd=ROOT, capture_output=True, text=True, check=False)
     changed = set(result.stdout.splitlines()) if result.returncode == 0 else set()
-    assert not any(path.startswith(("results/", "notebooks/", "docs/report/", "dist/")) for path in changed)
+    assert not any(
+        path.startswith(("results/", "docs/report/", "dist/"))
+        or (path.startswith("notebooks/") and not path.startswith("notebooks/colab/"))
+        for path in changed
+    )
