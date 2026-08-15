@@ -16,15 +16,34 @@ VIEWER_FILES = (
     "scene_builder.js",
     "trajectory_renderer.js",
     "digital_fly_viewer.js",
+    "digital_fly_scene.js",
+    "digital_fly_mesh.js",
+    "skeleton_renderer.js",
+    "joint_animator.js",
+    "lighting.js",
+    "timeline_controller.js",
+    "viewer.js",
 )
 
+THREE_VIEWER_FILES = {
+    "camera_controller.js",
+    "trajectory_renderer.js",
+    "digital_fly_scene.js",
+    "digital_fly_mesh.js",
+    "skeleton_renderer.js",
+    "joint_animator.js",
+    "lighting.js",
+    "viewer.js",
+}
 
-def test_viewer_skeleton_files_exist_without_new_rendering_framework() -> None:
+
+def test_viewer_files_exist_and_use_the_declared_rendering_layer() -> None:
     for filename in VIEWER_FILES:
         text = (VIEWER / filename).read_text(encoding="utf-8")
         assert "export" in text
-        assert "three" not in text.lower()
         assert "babylon" not in text.lower()
+        if filename in THREE_VIEWER_FILES:
+            assert "three" in text.lower()
 
 
 def test_pose_schema_is_explicit_and_data_free() -> None:
@@ -58,6 +77,17 @@ def test_rest_preparation_is_documentation_only() -> None:
     ):
         assert endpoint in text
     assert "no server implementation" in text.lower()
+
+
+def test_three_viewer_is_integrated_without_replacing_canvas_scene_support() -> None:
+    index = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+    app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+    assert '"three": "https://cdn.jsdelivr.net/npm/three@0.180.0/' in index
+    assert '"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/' in index
+    assert "new Viewer" in app
+    assert "this.threeViewer.loadPose(rawData)" in app
+    assert "this.threeViewer.setDigitalFly3D(this.digitalFly3D)" in app
+    assert "this.viewportRenderer.canvas?.classList.add('hidden')" in app
 
 
 def test_vietnamese_transition_documents_exist() -> None:

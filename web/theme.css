@@ -408,6 +408,8 @@ body {
 
 #viewer {
     height: 100%;
+    overflow: hidden;
+    position: relative;
     width: 100%;
 }
 
@@ -421,6 +423,76 @@ body {
 
 .viewport-canvas:active {
     cursor: grabbing;
+}
+
+.three-viewer-shell {
+    background: #0b0f14;
+    inset: 0;
+    position: absolute;
+    z-index: 3;
+}
+
+.three-viewer-viewport {
+    inset: 0;
+    position: absolute;
+}
+
+.three-viewer-canvas {
+    cursor: grab;
+    display: block;
+    height: 100%;
+    touch-action: none;
+    width: 100%;
+}
+
+.three-viewer-canvas:active {
+    cursor: grabbing;
+}
+
+.three-viewer-timeline {
+    background: rgba(30, 30, 30, 0.92);
+    border: 1px solid var(--border);
+    bottom: 8px;
+    box-sizing: border-box;
+    left: 8px;
+    padding: 7px 9px;
+    position: absolute;
+    right: 8px;
+    z-index: 4;
+}
+
+.three-viewer-controls {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 6px;
+}
+
+.three-viewer-controls button,
+.three-viewer-controls select {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 3px 6px;
+}
+
+.three-viewer-controls label,
+.three-viewer-controls span {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.three-viewer-timeline input[type="range"] {
+    accent-color: var(--accent);
+    display: block;
+    width: 100%;
+}
+
+.three-viewer-error {
+    color: var(--text-primary);
+    margin: 20px;
 }
 
 #timeline-container {

@@ -26,6 +26,7 @@ import { LaboratoryDashboard } from './laboratory_dashboard.js';
 import { RolloutComparisonViewer } from './comparison_viewer.js';
 import { ResearchWorkbench } from './research_workbench.js';
 import { ResearchWorkbenchPanel } from './research_workbench_panel.js';
+import { Viewer } from './viewer/viewer.js';
 
 export class App {
     constructor() {
@@ -42,6 +43,9 @@ export class App {
         this.sidebar = new Sidebar({ onSelectNode: (node) => this.selectNode(node) });
         this.inspector = new Inspector(this.workspace, () => this.handleInspectorChange());
         this.playbackController = new PlaybackController(this.workspace);
+        this.threeViewer = new Viewer({
+            onFrameChange: (frame) => this.playbackController.setFrame(frame),
+        });
         this.behaviorTimeline = new BehaviorTimeline(this.workspace);
         this.chartRenderer = new RolloutChartRenderer();
         this.persistence = new WorkspacePersistence(this.workspace, globalThis.localStorage, this.experimentWorkspace);
@@ -70,7 +74,7 @@ export class App {
         });
         this.toolbar = new Toolbar({
             onLoadJSON: (file) => this.loadSceneFile(file),
-            onResetView: () => this.viewportRenderer.resetView(),
+            onResetView: () => this.activeViewer().resetView(),
             onUndo: () => this.undo(),
             onRedo: () => this.redo(),
             onInsert: () => this.insertKeyframe(),
@@ -97,9 +101,9 @@ export class App {
             onExportCSV: () => this.exportRollout('csv'),
             onExportSVG: () => this.exportRollout('svg'),
             onRecordToggle: (recording) => this.toggleRecording(recording),
-            onCameraType: (type) => this.viewportRenderer.setCameraType(type),
-            onCameraPreset: (preset) => this.viewportRenderer.setCameraPreset(preset),
-            onFocusSelected: () => this.viewportRenderer.focusBodyPart(),
+            onCameraType: (type) => this.activeViewer().setCameraType(type),
+            onCameraPreset: (preset) => this.activeViewer().setCameraPreset(preset),
+            onFocusSelected: () => this.activeViewer().focusBodyPart(),
             onOverlay: (name, enabled) => this.viewportRenderer.setOverlay(name, enabled),
             onBodyPartVisibility: (part, visible) => this.viewportRenderer.setBodyPartVisibility(part, visible),
             onMeshOpacity: (opacity) => this.viewportRenderer.setMeshOpacity(opacity),
@@ -112,7 +116,9 @@ export class App {
     init() {
         console.log("Fly Studio Web Platform initializing...");
         this.workspace.load();
-        this.viewportRenderer.init(document.getElementById('viewer'));
+        const viewerRoot = document.getElementById('viewer');
+        this.viewportRenderer.init(viewerRoot);
+        this.threeViewer.init(viewerRoot);
         this.timeline.init(document.getElementById('timeline'));
         this.behaviorTimeline.init(document.getElementById('behavior-timeline'));
         this.experimentPanel.init(document.getElementById('experiment-manager'));
@@ -130,7 +136,17 @@ export class App {
     async loadSceneFile(file, experimentOptions = {}) {
         try {
             const rawData = await JSONLoader.parseRawFile(file);
-            if (FlyGymRolloutLoader.canLoad(rawData)) {
+            if (isViewerPoseDocument(rawData)) {
+                await this.threeViewer.loadPose(rawData);
+                this.digitalFly = null;
+                this.digitalFly3D = null;
+                this.viewportRenderer.setDigitalFly3D(null);
+                this.viewportRenderer.canvas?.classList.add('hidden');
+                document.getElementById('rollout-charts')?.replaceChildren();
+                console.info('Loaded viewer pose', file.name);
+                console.info('Frame count:', rawData.frame_count);
+                console.info('Playback FPS:', rawData.fps);
+            } else if (FlyGymRolloutLoader.canLoad(rawData)) {
                 const rollout = FlyGymRolloutLoader.parseData(rawData, { sourceName: file.name });
                 rollout.statistics = computeRolloutStatistics(rollout);
                 this.workspace.loadRollout(rollout);
@@ -138,6 +154,8 @@ export class App {
                 this.digitalFly = DigitalFly.fromRollout(rollout, { name: file.name });
                 this.digitalFly3D = DigitalFly3D.fromDigitalFly(this.digitalFly, { metadata: { source: 'FlyGym rollout' } });
                 this.viewportRenderer.setDigitalFly3D(this.digitalFly3D);
+                this.threeViewer.setDigitalFly3D(this.digitalFly3D);
+                this.viewportRenderer.canvas?.classList.add('hidden');
                 this.laboratory.registerFly(this.digitalFly);
                 this.experimentWorkspace.importRollout(rollout, {
                     name: file.name.replace(/\.json$/i, ''),
@@ -159,6 +177,8 @@ export class App {
                 this.digitalFly = null;
                 this.digitalFly3D = null;
                 this.viewportRenderer.setDigitalFly3D(null);
+                this.threeViewer.clear();
+                this.viewportRenderer.canvas?.classList.remove('hidden');
                 this.persistence.addRecentFile({ name: file.name, type: 'scene' });
                 document.getElementById('rollout-charts')?.replaceChildren();
                 console.info('Loaded scene', file.name);
@@ -194,12 +214,14 @@ export class App {
 
     handleTimelineChange() {
         this.inspector.render();
+        if (this.threeViewer.digitalFly3D) this.threeViewer.setFrame(this.workspace.currentFrame);
         this.viewportRenderer.render();
     }
 
     handleInspectorChange() {
         this.timeline.render();
         this.inspector.render();
+        if (this.threeViewer.digitalFly3D) this.threeViewer.setFrame(this.workspace.currentFrame);
         this.viewportRenderer.render();
     }
 
@@ -245,6 +267,7 @@ export class App {
         this.timeline.updatePlaybackDisplay();
         this.behaviorTimeline.updateFrame();
         this.viewportRenderer.render();
+        if (this.threeViewer.digitalFly3D) this.threeViewer.setFrame(this.workspace.currentFrame);
         this.toolbar.updatePlaybackState(this.workspace);
         const comparison = this.experimentWorkspace.comparison;
         if (comparison.syncTimeline) {
@@ -252,6 +275,10 @@ export class App {
             this.comparisonViewer.setFrame(this.workspace.currentFrame);
         }
         this.researchWorkbenchPanel.updateLive();
+    }
+
+    activeViewer() {
+        return this.threeViewer.digitalFly3D ? this.threeViewer : this.viewportRenderer;
     }
 
     setTrajectoryOption(name, value) {
@@ -403,4 +430,15 @@ export class App {
         }
     }
 
+}
+
+function isViewerPoseDocument(data) {
+    return Boolean(
+        data
+        && typeof data === 'object'
+        && data.metadata
+        && Number.isFinite(data.fps)
+        && Number.isInteger(data.frame_count)
+        && Array.isArray(data.frames),
+    );
 }
