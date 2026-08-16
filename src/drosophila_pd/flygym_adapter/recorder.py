@@ -29,6 +29,7 @@ class RolloutRecorder:
         simulation_metadata: dict[str, Any] | None = None,
         com_provider: Callable[[Any, Any | None], Any] | None = None,
     ) -> None:
+        self._previous_orientation = None
         self.simulation = simulation
         self.fly_name = fly_name
         self.fly = fly
