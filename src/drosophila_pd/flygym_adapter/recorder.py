@@ -74,7 +74,21 @@ class RolloutRecorder:
             step=len(self.rollout.frames),
             thorax=self._thorax(body_positions),
             com=self._com(),
-            orientation=self._thorax_orientation(body_orientations),
+            orientation = self._thorax_orientation(body_orientations)
+
+            if orientation is not None:
+                orientation = np.asarray(orientation, dtype=float)
+
+                if (
+                    not np.isfinite(orientation).all()
+                    or np.linalg.norm(orientation) == 0
+                ):
+                    if self._previous_orientation is not None:
+                        orientation = self._previous_orientation.copy()
+                    else:
+                        orientation = np.array([1.0, 0.0, 0.0, 0.0])
+
+                self._previous_orientation = orientation.copy(),
             body_positions=body_positions,
             body_orientations=body_orientations,
             joint_positions=joint_positions,
