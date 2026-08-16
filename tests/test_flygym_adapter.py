@@ -65,9 +65,13 @@ class _SimulationStub:
 class _InvalidFirstOrientationSimulationStub(_SimulationStub):
     """Stub that exposes an invalid first quaternion for recorder regression."""
 
+    def __init__(self, first_orientation: list[float]) -> None:
+        super().__init__()
+        self.first_orientation = first_orientation
+
     def get_body_rotations(self, _name: str) -> np.ndarray:
         if self.steps == 0:
-            return np.asarray([[0.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]])
+            return np.asarray([self.first_orientation, [1.0, 0.0, 0.0, 0.0]])
         return np.asarray([[0.5, 0.5, 0.5, 0.5], [1.0, 0.0, 0.0, 0.0]])
 
 
@@ -180,8 +184,15 @@ def test_rollout_export_writes_all_canonical_formats(tmp_path: Path) -> None:
     assert exported.manifest["files"]["rollout_npz"]["sha256"]
 
 
-def test_recorder_initializes_invalid_first_quaternion_and_viewer_export_succeeds(tmp_path: Path) -> None:
-    simulation = _InvalidFirstOrientationSimulationStub()
+@pytest.mark.parametrize(
+    "first_orientation",
+    ([0.0, 0.0, 0.0, 0.0], [float("nan"), 0.0, 0.0, 0.0]),
+)
+def test_recorder_initializes_invalid_first_quaternion_and_viewer_export_succeeds(
+    tmp_path: Path,
+    first_orientation: list[float],
+) -> None:
+    simulation = _InvalidFirstOrientationSimulationStub(first_orientation)
     recorder = RolloutRecorder(
         simulation,
         "fly",

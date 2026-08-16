@@ -75,7 +75,9 @@ class RolloutRecorder:
             step=len(self.rollout.frames),
             thorax=self._thorax(body_positions),
             com=self._com(),
-            orientation=self._safe_thorax_orientation(body_orientations),
+            orientation=self._sanitize_orientation(
+                self._thorax_orientation(body_orientations)
+            ),
             body_positions=body_positions,
             body_orientations=body_orientations,
             joint_positions=joint_positions,
@@ -112,8 +114,7 @@ class RolloutRecorder:
         index = self._body_index("c_thorax")
         return orientations[index if index is not None else 0].copy()
 
-    def _safe_thorax_orientation(self, orientations: np.ndarray | None) -> np.ndarray | None:
-        orientation = self._thorax_orientation(orientations)
+    def _sanitize_orientation(self, orientation: np.ndarray | None) -> np.ndarray | None:
         if orientation is None:
             return None
 
