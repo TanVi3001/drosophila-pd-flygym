@@ -26,7 +26,7 @@ export class TrajectoryRenderer {
         this._addLine('com', frames.map((frame) => pointFrom(frame?.COM)).filter(Boolean));
         const jointSeries = new Map();
         frames.forEach((frame) => {
-            const joints = frame?.joint_positions ?? frame?.joints ?? {};
+            const joints = frame?.joint_positions ?? frame?.joints ?? frame?.trajectory?.joints ?? {};
             Object.entries(joints).forEach(([name, value]) => {
                 const point = pointFrom(value);
                 if (point) jointSeries.set(name, [...(jointSeries.get(name) ?? []), point]);

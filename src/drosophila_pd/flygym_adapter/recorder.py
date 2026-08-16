@@ -44,6 +44,7 @@ class RolloutRecorder:
                 "camera": self.camera_metadata,
                 "simulation": self.simulation_metadata,
                 "quaternion_order": "wxyz",
+                "body_segment_names": self._body_segment_names(),
             }
         )
         self._previous_joint_velocity: np.ndarray | None = None
@@ -147,6 +148,14 @@ class RolloutRecorder:
             if getattr(segment, "name", str(segment)) == name or str(segment) == name:
                 return index
         return None
+
+    def _body_segment_names(self) -> list[str]:
+        if self.fly is None or not hasattr(self.fly, "get_bodysegs_order"):
+            return []
+        return [
+            str(getattr(segment, "name", str(segment)))
+            for segment in self.fly.get_bodysegs_order()
+        ]
 
     def _com(self) -> np.ndarray | None:
         if self.com_provider is not None:

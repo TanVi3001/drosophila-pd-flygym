@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 export const CAMERA_PRESETS = Object.freeze([
-    'front', 'back', 'left', 'right', 'top', 'bottom', 'isometric',
+    'demo', 'front', 'back', 'left', 'right', 'top', 'bottom', 'isometric',
 ]);
 
 /** Three.js camera wrapper. Pose data is never changed by camera operations. */
@@ -25,7 +25,8 @@ export class CameraController {
         this.camera = this.type === 'orthographic'
             ? new THREE.OrthographicCamera(-aspect * 3, aspect * 3, 3, -3, 0.01, 1000)
             : new THREE.PerspectiveCamera(45, aspect, 0.01, 1000);
-        this.camera.position.set(4, 3, 5);
+        this.camera.up.set(0, 0, 1);
+        this.camera.position.set(4, -5, 3);
         this.camera.lookAt(this.target);
         this._createControls();
     }
@@ -57,9 +58,14 @@ export class CameraController {
     setPreset(preset) {
         if (!CAMERA_PRESETS.includes(preset)) throw new RangeError(`Unknown camera preset: ${preset}`);
         const directions = {
-            front: [0, 0.25, 1], back: [0, 0.25, -1], left: [-1, 0.25, 0],
-            right: [1, 0.25, 0], top: [0, 1, 0.001], bottom: [0, -1, 0.001],
-            isometric: [1, 0.75, 1],
+            demo: [1.35, -1.7, 0.9],
+            front: [1, 0, 0.18],
+            back: [-1, 0, 0.18],
+            left: [0, 1, 0.18],
+            right: [0, -1, 0.18],
+            top: [0.001, 0, 1],
+            bottom: [0.001, 0, -1],
+            isometric: [1, -1, 0.75],
         };
         const direction = new THREE.Vector3(...directions[preset]).normalize();
         this.camera.position.copy(this.target).addScaledVector(direction, this.distance);
@@ -72,7 +78,7 @@ export class CameraController {
     reset() {
         this.target.set(0, 0, 0);
         this.distance = 6;
-        this.setPreset('isometric');
+        this.setPreset('demo');
         return this;
     }
 
@@ -84,6 +90,29 @@ export class CameraController {
         this.controls.target.copy(this.target);
         this.controls.update();
         this.onChange?.();
+    }
+
+    fitToPoints(points = [], { preset = 'demo', padding = 1.65 } = {}) {
+        const vectors = points
+            .map((point) => (point?.isVector3 ? point : new THREE.Vector3(...point)))
+            .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y) && Number.isFinite(point.z));
+        if (!vectors.length) return this.reset();
+        const box = new THREE.Box3().setFromPoints(vectors);
+        const sphere = box.getBoundingSphere(new THREE.Sphere());
+        this.target.copy(sphere.center);
+        const fov = this.camera.isPerspectiveCamera ? THREE.MathUtils.degToRad(this.camera.fov) : Math.PI / 4;
+        this.distance = Math.max(2.2, (sphere.radius * padding) / Math.sin(fov / 2));
+        if (this.camera.isOrthographicCamera) {
+            const size = Math.max(2, sphere.radius * padding);
+            const aspect = Math.max(1, (this.domElement?.clientWidth ?? 1)) / Math.max(1, (this.domElement?.clientHeight ?? 1));
+            this.camera.left = -size * aspect;
+            this.camera.right = size * aspect;
+            this.camera.top = size;
+            this.camera.bottom = -size;
+            this.camera.updateProjectionMatrix();
+        }
+        this.setPreset(preset);
+        return this;
     }
 
     resize() {

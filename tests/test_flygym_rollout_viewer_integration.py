@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
+import importlib.util
 from pathlib import Path
+import zipfile
 
 import numpy as np
 import pytest
@@ -16,6 +19,12 @@ from drosophila_pd.viewer_export import export_viewer_pose, validate_pose_docume
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+_BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_viewer_bundle.py"
+_BUILD_SPEC = importlib.util.spec_from_file_location("build_viewer_bundle", _BUILD_SCRIPT)
+assert _BUILD_SPEC is not None and _BUILD_SPEC.loader is not None
+_BUILD_MODULE = importlib.util.module_from_spec(_BUILD_SPEC)
+_BUILD_SPEC.loader.exec_module(_BUILD_MODULE)
+build_bundle = _BUILD_MODULE.build_bundle
 
 
 def test_real_flygym_rollout_exports_valid_viewer_pose_if_available(tmp_path: Path) -> None:
@@ -96,6 +105,22 @@ def test_real_flygym_rollout_exports_valid_viewer_pose_if_available(tmp_path: Pa
     )
     assert np.linalg.norm(orientations[0]) > 0.0
     assert np.allclose(np.linalg.norm(orientations, axis=1), 1.0, atol=1e-6)
+
+    bundle_dir, bundle_archive, manifest = build_bundle(
+        result.output_path,
+        output=tmp_path / "dist" / "viewer_bundle.zip",
+    )
+    assert bundle_archive.is_file()
+    assert (bundle_dir / "index.html").is_file()
+    assert (bundle_dir / "viewer_pose.json").is_file()
+    assert (bundle_dir / "viewer" / "viewer.js").is_file()
+    assert manifest["entrypoint"] == "index.html"
+    with zipfile.ZipFile(bundle_archive) as archive:
+        names = set(archive.namelist())
+        assert "viewer_bundle/index.html" in names
+        assert "viewer_bundle/viewer_pose.json" in names
+        extracted_pose = json.loads(archive.read("viewer_bundle/viewer_pose.json"))
+    assert validate_pose_document(extracted_pose, expected_frame_count=100).overall_pass
 
 
 def _skip_unless_flygym_runtime_available() -> None:

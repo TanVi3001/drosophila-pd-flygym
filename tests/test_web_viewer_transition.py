@@ -49,7 +49,9 @@ def test_viewer_files_exist_and_use_the_declared_rendering_layer() -> None:
 def test_pose_schema_is_explicit_and_data_free() -> None:
     schema_path = ROOT / "docs" / "api" / "viewer_pose.schema.json"
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
-    assert schema["required"] == ["metadata", "fps", "frame_count", "joint_names", "frames"]
+    assert schema["required"] == ["metadata", "fps", "frame_count", "joint_names", "mesh", "frames"]
+    mesh = schema["properties"]["mesh"]
+    assert mesh["required"] == ["renderer", "render_mode", "scientific_mesh", "visibility"]
     frame_required = schema["properties"]["frames"]["items"]["required"]
     assert frame_required == [
         "frame_index",
@@ -93,6 +95,24 @@ def test_three_viewer_is_integrated_without_replacing_canvas_scene_support() -> 
     assert "this.threeViewer.loadPose(rawData)" in app
     assert "this.threeViewer.setDigitalFly3D(this.digitalFly3D)" in app
     assert "this.viewportRenderer.canvas?.classList.add('hidden')" in app
+
+
+def test_three_viewer_has_production_visual_controls_and_mesh_fallback_boundary() -> None:
+    mesh = (VIEWER / "digital_fly_mesh.js").read_text(encoding="utf-8")
+    scene = (VIEWER / "digital_fly_scene.js").read_text(encoding="utf-8")
+    timeline = (VIEWER / "timeline_controller.js").read_text(encoding="utf-8")
+    camera = (VIEWER / "camera_controller.js").read_text(encoding="utf-8")
+
+    assert "GLTFLoader" in mesh
+    assert "presentation fallback" in mesh
+    assert "MeshStandardMaterial" in mesh
+    assert "castShadow" in mesh
+    assert "shadowMap.enabled = true" in (VIEWER / "viewer.js").read_text(encoding="utf-8")
+    assert "setShadowEnabled" in scene
+    assert "fitToPoints" in camera
+    assert "demo" in camera
+    for control in ("FPS", "Time", "Camera", "Axes", "Grid", "Floor", "Shadow"):
+        assert control in timeline
 
 
 def test_vietnamese_transition_documents_exist() -> None:

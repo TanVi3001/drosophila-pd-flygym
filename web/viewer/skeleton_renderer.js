@@ -23,12 +23,13 @@ export class SkeletonRenderer {
 
     updateFromPoseFrame(frame) {
         this.clear();
-        const source = frame?.skeleton?.bones ?? frame?.joint_positions ?? frame?.joints ?? null;
-        if (!source) return;
+        const source = frame?.skeleton?.bones ?? frame?.joint_positions ?? frame?.joints ?? frame?.trajectory?.joints ?? null;
         const positions = new Map();
         if (Array.isArray(source)) source.forEach((item) => { const p = vectorFromValue(item?.position ?? item); if (p && item?.id) positions.set(item.id, { position: p, parentId: item.parentId }); });
-        else Object.entries(source).forEach(([id, value]) => { const p = vectorFromValue(value?.position ?? value); if (p) positions.set(id, { position: p, parentId: value?.parentId }); });
-        this._drawPositions(positions);
+        else if (source) Object.entries(source).forEach(([id, value]) => { const p = vectorFromValue(value?.position ?? value); if (p) positions.set(id, { position: p, parentId: value?.parentId }); });
+        if (positions.size) this._drawPositions(positions);
+        const com = vectorFromValue(frame?.COM);
+        if (com) this._drawMarker(com, 0x7ee787, 'COM');
     }
 
     updateFromSnapshot(snapshot) {

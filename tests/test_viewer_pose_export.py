@@ -28,7 +28,15 @@ def test_pose_export_converts_adapter_rollout_to_viewer_schema(tmp_path: Path) -
     assert document["frame_count"] == 3
     assert document["joint_names"] == ["joint_a"]
     assert document["metadata"]["quaternion_order"] == "xyzw"
+    assert document["metadata"]["body_segment_names"] == ["thorax", "head"]
+    assert document["mesh"]["render_mode"] == "procedural_fallback"
+    assert document["mesh"]["scientific_mesh"] is False
+    assert document["mesh"]["asset"] is None
+    assert document["mesh"]["body_segment_names"] == ["thorax", "head"]
+    assert document["mesh"]["mesh_instances"]
     assert document["frames"][0]["orientation"] == [0.0, 0.0, 0.0, 1.0]
+    assert document["frames"][0]["skeleton"]["source"] == "rollout.body_positions"
+    assert document["frames"][0]["skeleton"]["bones"][0]["id"] == "thorax"
     assert document["frames"][1]["trajectory"]["thorax"] == [1.0, 0.0, 1.0]
     assert document["frames"][0]["joint_velocity"]["joint_a"] == 2.0
     assert document["frames"][0]["visibility"]["COM"] is True
@@ -213,13 +221,26 @@ def _write_fixture(
     (dataset / "rollout.json").write_text(
         json.dumps({
             "schema_version": "flygym-rollout-1",
-            "metadata": {"dataset_id": "Healthy_001", "timestep_s": 0.5, "joint_names": ["joint_a"]},
+            "metadata": {
+                "dataset_id": "Healthy_001",
+                "timestep_s": 0.5,
+                "joint_names": ["joint_a"],
+                "body_segment_names": ["thorax", "head"],
+            },
             "frames": frames,
         }),
         encoding="utf-8",
     )
     arrays = {
         "thorax_positions": np.asarray([frame["thorax"] for frame in frames], dtype=float),
+        "body_positions": np.asarray(
+            [
+                [[0.0, 0.0, 1.0], [0.25, 0.0, 1.1]],
+                [[1.0, 0.0, 1.0], [1.25, 0.0, 1.1]],
+                [[2.0, 0.5, 1.0], [2.25, 0.5, 1.1]],
+            ],
+            dtype=float,
+        ),
         quaternion_key: (
             np.asarray([frame["orientation"] for frame in frames], dtype=float)
             if quaternions is None
@@ -240,6 +261,12 @@ def _pose_document() -> dict:
         "fps": 2.0,
         "frame_count": 2,
         "joint_names": [],
+        "mesh": {
+            "renderer": "web/viewer/digital_fly_mesh.js",
+            "render_mode": "procedural_fallback",
+            "scientific_mesh": False,
+            "visibility": {"mesh": True},
+        },
         "frames": [
             {
                 "frame_index": 0,

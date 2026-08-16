@@ -450,14 +450,17 @@ body {
 }
 
 .three-viewer-timeline {
-    background: rgba(30, 30, 30, 0.92);
-    border: 1px solid var(--border);
-    bottom: 8px;
+    backdrop-filter: blur(12px);
+    background: rgba(13, 18, 24, 0.82);
+    border: 1px solid rgba(143, 180, 255, 0.2);
+    border-radius: 8px;
+    bottom: 12px;
     box-sizing: border-box;
-    left: 8px;
-    padding: 7px 9px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.28);
+    left: 12px;
+    padding: 9px 11px;
     position: absolute;
-    right: 8px;
+    right: 12px;
     z-index: 4;
 }
 
@@ -471,16 +474,22 @@ body {
 
 .three-viewer-controls button,
 .three-viewer-controls select {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
+    background: rgba(37, 45, 54, 0.92);
+    border: 1px solid rgba(143, 180, 255, 0.22);
+    border-radius: 5px;
     color: var(--text-primary);
     cursor: pointer;
-    padding: 3px 6px;
+    padding: 4px 7px;
+}
+
+.three-viewer-controls button:hover,
+.three-viewer-controls select:hover {
+    border-color: rgba(143, 180, 255, 0.55);
 }
 
 .three-viewer-controls label,
 .three-viewer-controls span {
-    color: var(--text-secondary);
+    color: #a9b5c2;
     font-size: 0.78rem;
 }
 

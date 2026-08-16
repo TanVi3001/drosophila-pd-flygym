@@ -74,6 +74,12 @@ def validate_pose_document(
         "pass": all(isinstance(frame, Mapping) and all(field in frame for field in REQUIRED_FRAME) for frame in frames),
         "missing": _missing_frame_fields(frames),
     }
+    mesh = document.get("mesh") if is_mapping else None
+    mesh_failures = _mesh_failures(mesh)
+    checks["mesh_metadata"] = {
+        "pass": not mesh_failures,
+        "failures": mesh_failures,
+    }
     indices = [frame.get("frame_index") for frame in frames if isinstance(frame, Mapping)]
     checks["frame_indices"] = {
         "pass": indices == list(range(observed_count)),
@@ -118,6 +124,26 @@ def validate_pose_document(
     if raise_on_error and not report.overall_pass:
         raise PoseValidationError(report)
     return report
+
+
+def _mesh_failures(mesh: Any) -> list[str]:
+    failures = []
+    if not isinstance(mesh, Mapping):
+        return ["mesh must be an object"]
+    for field in ("renderer", "render_mode", "scientific_mesh", "visibility"):
+        if field not in mesh:
+            failures.append(f"missing {field}")
+    if "renderer" in mesh and not isinstance(mesh["renderer"], str):
+        failures.append("renderer must be a string")
+    if "render_mode" in mesh and not isinstance(mesh["render_mode"], str):
+        failures.append("render_mode must be a string")
+    if "scientific_mesh" in mesh and not isinstance(mesh["scientific_mesh"], bool):
+        failures.append("scientific_mesh must be a boolean")
+    if not isinstance(mesh.get("visibility"), Mapping):
+        failures.append("visibility must be an object")
+    if mesh.get("render_mode") == "procedural_fallback" and mesh.get("scientific_mesh") is True:
+        failures.append("procedural fallback must not claim scientific_mesh")
+    return failures
 
 
 def _missing_frame_fields(frames: Sequence[Any]) -> list[dict[str, Any]]:

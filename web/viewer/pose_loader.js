@@ -28,6 +28,12 @@ export function validatePoseDocument(document) {
     if (!document.metadata || typeof document.metadata !== 'object') errors.push('metadata');
     if (!Number.isFinite(document.fps) || document.fps <= 0) errors.push('fps');
     if (!Number.isInteger(document.frame_count) || document.frame_count < 0) errors.push('frame_count');
+    if (!document.mesh || typeof document.mesh !== 'object') errors.push('mesh');
+    else {
+        ['renderer', 'render_mode', 'scientific_mesh', 'visibility'].forEach((field) => {
+            if (!(field in document.mesh)) errors.push(`mesh.${field}`);
+        });
+    }
     if (!Array.isArray(document.frames)) errors.push('frames');
     if (Array.isArray(document.frames) && document.frames.length !== document.frame_count) {
         errors.push('frames.length must equal frame_count');

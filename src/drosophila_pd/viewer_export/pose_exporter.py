@@ -28,6 +28,8 @@ class RolloutInputs:
     time_s: np.ndarray
     timestep_s: float
     com_positions: np.ndarray | None
+    body_positions: np.ndarray | None
+    body_segment_names: list[str]
     joint_positions: dict[str, np.ndarray]
     joint_velocity: dict[str, np.ndarray]
     joint_acceleration: dict[str, np.ndarray]
@@ -127,6 +129,8 @@ def load_rollout_inputs(dataset_dir: str | Path) -> RolloutInputs:
     if not joint_acceleration and joint_velocity:
         joint_acceleration = _differentiate(joint_velocity, timestep_s)
     com = _com_values(data, arrays, frames, positions.shape[0])
+    body_positions = _body_position_values(data, arrays, frames, positions.shape[0])
+    body_segment_names = _body_segment_names(data, metadata, body_positions)
     contacts = _contact_series(data, arrays, frames, positions.shape[0])
     metadata.update({
         "dataset_id": metadata.get("dataset_id", root.name),
@@ -147,6 +151,8 @@ def load_rollout_inputs(dataset_dir: str | Path) -> RolloutInputs:
         time_s=time_s,
         timestep_s=timestep_s,
         com_positions=com,
+        body_positions=body_positions,
+        body_segment_names=body_segment_names,
         joint_positions=joint_positions,
         joint_velocity=joint_velocity,
         joint_acceleration=joint_acceleration,
@@ -176,6 +182,7 @@ def build_viewer_pose(inputs: RolloutInputs) -> dict[str, Any]:
         velocity = _frame_joint_values(inputs.joint_velocity, index)
         acceleration = _frame_joint_values(inputs.joint_acceleration, index)
         contact = _frame_contact_values(inputs.contacts, index)
+        skeleton = _frame_skeleton_values(inputs, index)
         frames.append({
             "frame_index": index,
             "time": float(inputs.time_s[index]),
@@ -189,12 +196,14 @@ def build_viewer_pose(inputs: RolloutInputs) -> dict[str, Any]:
             "joint_acceleration": acceleration,
             "contacts": contact,
             "trajectory": trajectories[index],
+            "skeleton": skeleton,
             "visibility": dict(visibility),
         })
     metadata = {
         **inputs.metadata,
         "schema_version": "viewer-pose-1.0",
         "quaternion_order": "xyzw",
+        "body_segment_names": list(inputs.body_segment_names),
         "scientific_scope": (
             "Computational visualization interchange generated from imported rollout arrays; "
             "not biological validation."
@@ -205,7 +214,11 @@ def build_viewer_pose(inputs: RolloutInputs) -> dict[str, Any]:
         "fps": float(1.0 / inputs.timestep_s),
         "frame_count": inputs.frame_count,
         "joint_names": joint_names,
-        "mesh": build_mesh_metadata(joint_names=joint_names, visibility=visibility),
+        "mesh": build_mesh_metadata(
+            joint_names=joint_names,
+            visibility=visibility,
+            body_segment_names=inputs.body_segment_names,
+        ),
         "frames": frames,
     }
 
@@ -358,6 +371,45 @@ def _com_values(data: Mapping[str, Any], arrays: Mapping[str, np.ndarray], frame
     return _matrix("com_positions", value, 3, expected_count=count)
 
 
+def _body_position_values(
+    data: Mapping[str, Any],
+    arrays: Mapping[str, np.ndarray],
+    frames: Sequence[Any],
+    count: int,
+) -> np.ndarray | None:
+    value = _first_array(arrays, ("body_positions", "body_positions_mm"))
+    if value is None:
+        value = _first_value(data, ("body_positions", "body_positions_mm"))
+    if value is None and frames:
+        values = [frame.get("body_positions") if isinstance(frame, Mapping) else None for frame in frames]
+        if any(item is not None for item in values):
+            value = values
+    if value is None:
+        return None
+    array = np.asarray(value, dtype=float)
+    if array.ndim != 3 or array.shape[0] != count or array.shape[2] != 3:
+        raise ValueError("body_positions must have shape (n_samples, n_bodies, 3)")
+    return array
+
+
+def _body_segment_names(
+    data: Mapping[str, Any],
+    metadata: Mapping[str, Any],
+    body_positions: np.ndarray | None,
+) -> list[str]:
+    for source in (
+        metadata.get("body_segment_names"),
+        metadata.get("body_segments"),
+        data.get("body_segment_names"),
+        data.get("body_segments"),
+    ):
+        if isinstance(source, Sequence) and not isinstance(source, (str, bytes)):
+            return [str(item) for item in source]
+    if body_positions is None:
+        return []
+    return [f"body_{index}" for index in range(int(body_positions.shape[1]))]
+
+
 def _joint_names(data: Mapping[str, Any], metadata: Mapping[str, Any]) -> list[str]:
     for source in (data.get("joint_names"), metadata.get("joint_names")):
         if isinstance(source, Sequence) and not isinstance(source, (str, bytes)):
@@ -445,6 +497,26 @@ def _frame_joint_values(series: Mapping[str, np.ndarray], index: int) -> dict[st
 
 def _frame_contact_values(series: Mapping[str, np.ndarray], index: int) -> dict[str, Any]:
     return {name: _json_safe(value[index]) for name, value in sorted(series.items())}
+
+
+def _frame_skeleton_values(inputs: RolloutInputs, index: int) -> dict[str, Any] | None:
+    if inputs.body_positions is None:
+        return None
+    names = inputs.body_segment_names or [
+        f"body_{body_index}" for body_index in range(int(inputs.body_positions.shape[1]))
+    ]
+    bones = []
+    for body_index, position in enumerate(inputs.body_positions[index]):
+        name = names[body_index] if body_index < len(names) else f"body_{body_index}"
+        bones.append({
+            "id": str(name),
+            "position": _json_safe(position),
+            "source_index": body_index,
+        })
+    return {
+        "source": "rollout.body_positions",
+        "bones": bones,
+    }
 
 
 def _first_array(values: Mapping[str, np.ndarray], names: Sequence[str]) -> np.ndarray | None:

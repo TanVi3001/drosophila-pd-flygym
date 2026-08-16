@@ -31,6 +31,7 @@ export class Viewer {
         this.currentFrame = 0;
         this.speed = 1;
         this.loop = false;
+        this.shadows = true;
         this.playing = false;
         this.animationFrameId = null;
         this.lastTimestamp = null;
@@ -54,6 +55,11 @@ export class Viewer {
             this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
             this.renderer.setPixelRatio(Math.min(2, globalThis.devicePixelRatio || 1));
             this.renderer.setClearColor(0x0b0f14, 1);
+            this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+            this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            this.renderer.toneMappingExposure = 1.05;
+            this.renderer.shadowMap.enabled = true;
+            this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             this.renderer.domElement.className = 'three-viewer-canvas';
             this.renderer.domElement.setAttribute('aria-label', '3D Digital Fly viewport');
             this.viewport.append(this.renderer.domElement);
@@ -76,6 +82,11 @@ export class Viewer {
                 onSpeed: (speed) => { this.speed = speed; },
                 onLoop: (enabled) => { this.loop = enabled; },
                 onReset: () => this.resetView(),
+                onCameraPreset: (preset) => this.setCameraPreset(preset),
+                onAxes: (enabled) => { this.sceneModel.setAxesVisible(enabled); this.render(); },
+                onGrid: (enabled) => { this.sceneModel.setGridVisible(enabled); this.render(); },
+                onFloor: (enabled) => { this.sceneModel.setGroundVisible(enabled); this.render(); },
+                onShadow: (enabled) => this.setShadows(enabled),
             });
             this.timeline.init(this.timelineRoot);
             this.resizeObserver = typeof ResizeObserver === 'function'
@@ -98,9 +109,11 @@ export class Viewer {
         this.animator.setFrames(documentData.frames);
         this.fps = documentData.fps;
         this.frameCount = documentData.frame_count;
+        await this.mesh.loadMetadata(documentData.mesh);
         this.trajectory.updateFromPose(documentData);
         this.timeline.setRange(this.frameCount);
         this.show();
+        this.fitPoseToCamera(documentData);
         this.setFrame(0);
         return documentData;
     }
@@ -111,10 +124,12 @@ export class Viewer {
         this.animator.setFrames([]);
         this.frameCount = inferFrameCount(model);
         this.fps = Number(model?.fly?.metadata?.fps ?? 60) || 60;
+        this.mesh.useFallback();
         this.trajectory.updateFromDigitalFly3D(model);
         this.timeline?.setRange(this.frameCount);
         if (model) {
             this.show();
+            this.fitDigitalFlyToCamera(model);
             this.setFrame(0);
         } else {
             this.clear();
@@ -138,7 +153,11 @@ export class Viewer {
     setFrame(frame, { notify = false } = {}) {
         const maximum = Math.max(0, this.frameCount - 1);
         this.currentFrame = Math.min(maximum, Math.max(0, Math.round(Number(frame) || 0)));
-        this.timeline?.setFrame(this.currentFrame, this.frameCount);
+        this.timeline?.setFrame(this.currentFrame, this.frameCount, {
+            fps: this.fps,
+            speed: this.speed,
+            time: this.currentTime(),
+        });
         this.render();
         if (notify) this.onFrameChange?.(this.currentFrame);
         return this.currentFrame;
@@ -190,11 +209,24 @@ export class Viewer {
         this.schedule();
     }
 
-    setSpeed(speed) { this.speed = Math.max(0.05, Number(speed) || 1); return this.speed; }
+    setSpeed(speed) {
+        this.speed = Math.max(0.05, Number(speed) || 1);
+        this.timeline?.setFrame(this.currentFrame, this.frameCount, {
+            fps: this.fps,
+            speed: this.speed,
+            time: this.currentTime(),
+        });
+        return this.speed;
+    }
     setLoop(loop) { this.loop = Boolean(loop); return this.loop; }
     setCameraPreset(preset) { return this.cameraController?.setPreset(String(preset).toLowerCase()); }
     setCameraType(type) { return this.cameraController?.setType(type); }
-    resetView() { this.cameraController?.reset(); this.render(); }
+    resetView() {
+        if (this.poseDocument) this.fitPoseToCamera(this.poseDocument);
+        else if (this.digitalFly3D) this.fitDigitalFlyToCamera(this.digitalFly3D);
+        else this.cameraController?.reset();
+        this.render();
+    }
     focusBodyPart() { this.focus(); }
 
     focus(target = null) {
@@ -207,6 +239,36 @@ export class Viewer {
     setVisible(name, visible) {
         const target = { mesh: this.mesh?.group, skeleton: this.skeleton?.group, trajectory: this.trajectory?.group }[name];
         if (target) target.visible = Boolean(visible);
+    }
+
+    setShadows(enabled) {
+        this.shadows = Boolean(enabled);
+        if (this.renderer) this.renderer.shadowMap.enabled = this.shadows;
+        this.sceneModel?.setShadowEnabled(this.shadows);
+        this.mesh?.setShadows(this.shadows);
+        this.render();
+    }
+
+    currentTime() {
+        const frame = this.poseDocument?.frames?.[this.currentFrame];
+        if (Number.isFinite(frame?.time)) return Number(frame.time);
+        return this.fps > 0 ? this.currentFrame / this.fps : 0;
+    }
+
+    fitPoseToCamera(poseDocument) {
+        const points = [];
+        for (const frame of poseDocument?.frames ?? []) {
+            if (Array.isArray(frame?.thorax)) points.push(frame.thorax);
+            if (Array.isArray(frame?.COM)) points.push(frame.COM);
+        }
+        this.cameraController?.fitToPoints(points, { preset: 'demo' });
+    }
+
+    fitDigitalFlyToCamera(model) {
+        const points = [];
+        const records = model?.fly?.trajectories?.list?.() ?? [];
+        records.forEach((record) => points.push(...flattenPoints(record.data)));
+        this.cameraController?.fitToPoints(points, { preset: 'demo' });
     }
 
     resize() {
@@ -276,4 +338,17 @@ function seriesLength(value) {
         if (Array.isArray(value.points)) return value.points.length;
     }
     return 0;
+}
+
+function flattenPoints(value) {
+    if (Array.isArray(value)) {
+        if (value.length >= 3 && value.slice(0, 3).every((item) => Number.isFinite(Number(item)))) {
+            return [value.slice(0, 3).map(Number)];
+        }
+        return value.flatMap((item) => flattenPoints(item));
+    }
+    if (value && typeof value === 'object') {
+        return Object.values(value).flatMap((item) => flattenPoints(item));
+    }
+    return [];
 }
