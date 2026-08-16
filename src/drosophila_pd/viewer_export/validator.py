@@ -79,6 +79,11 @@ def validate_pose_document(
         "pass": indices == list(range(observed_count)),
         "observed": indices,
     }
+    frame_time_failures = _frame_time_failures(frames)
+    checks["frame_times_increasing"] = {
+        "pass": observed_count > 0 and not frame_time_failures,
+        "failures": frame_time_failures,
+    }
     finite, nan_paths, inf_paths = _finite_paths(document)
     checks["finite_values"] = {"pass": finite, "invalid_paths": sorted(set(nan_paths + inf_paths))}
     checks["no_nan"] = {"pass": not nan_paths, "paths": sorted(nan_paths)}
@@ -125,6 +130,23 @@ def _missing_frame_fields(frames: Sequence[Any]) -> list[dict[str, Any]]:
         if fields:
             missing.append({"frame": index, "fields": fields})
     return missing
+
+
+def _frame_time_failures(frames: Sequence[Any]) -> list[dict[str, Any]]:
+    failures = []
+    previous: float | None = None
+    for index, frame in enumerate(frames):
+        try:
+            value = float(frame.get("time") if isinstance(frame, Mapping) else None)
+        except (TypeError, ValueError):
+            failures.append({"frame": index, "time": None, "reason": "not numeric"})
+            continue
+        if not math.isfinite(value) or value < 0:
+            failures.append({"frame": index, "time": value, "reason": "not finite non-negative"})
+        elif previous is not None and value <= previous:
+            failures.append({"frame": index, "time": value, "reason": "not strictly increasing"})
+        previous = value
+    return failures
 
 
 def _finite_paths(value: Any, path: str = "$") -> tuple[bool, list[str], list[str]]:

@@ -43,6 +43,7 @@ class RolloutRecorder:
                 "timestep_s": self.timestep,
                 "camera": self.camera_metadata,
                 "simulation": self.simulation_metadata,
+                "quaternion_order": "wxyz",
             }
         )
         self._previous_joint_velocity: np.ndarray | None = None

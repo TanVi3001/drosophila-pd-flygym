@@ -35,6 +35,27 @@ def test_pose_export_converts_adapter_rollout_to_viewer_schema(tmp_path: Path) -
     assert all(path.is_file() for path in result.source_files)
 
 
+def test_pose_export_accepts_adapter_rollout_npz_name(tmp_path: Path) -> None:
+    dataset = _write_fixture(tmp_path, npz_name="rollout.npz")
+    output = tmp_path / "viewer_pose.json"
+
+    result = export_viewer_pose(dataset, output)
+
+    assert result.validation.overall_pass is True
+    assert result.source_files[1].name == "rollout.npz"
+    assert validate_pose_document(result.document).overall_pass is True
+
+
+def test_pose_export_resolves_dataset_id_from_search_root(tmp_path: Path) -> None:
+    dataset = _write_fixture(tmp_path / "datasets" / "healthy")
+    output = tmp_path / "viewer_pose.json"
+
+    result = export_viewer_pose("Healthy_001", output, search_roots=[tmp_path / "datasets"])
+
+    assert result.validation.overall_pass is True
+    assert result.source_files[0].parent == dataset.resolve()
+
+
 def test_pose_export_passes_json_schema_validation(tmp_path: Path) -> None:
     jsonschema = pytest.importorskip("jsonschema")
     dataset = _write_fixture(tmp_path)
@@ -75,6 +96,65 @@ def test_loader_rejects_mismatched_input_frame_counts(tmp_path: Path) -> None:
         load_rollout_inputs(dataset)
 
 
+def test_pose_export_reconstructs_duplicated_timestamps_from_metadata(tmp_path: Path) -> None:
+    dataset = _write_fixture(tmp_path, time_s=np.asarray([0.0, 0.0, 0.0], dtype=float))
+    output = tmp_path / "viewer_pose.json"
+
+    result = export_viewer_pose(dataset, output)
+    times = [frame["time"] for frame in result.document["frames"]]
+
+    assert result.validation.overall_pass is True
+    assert times == [0.0, 0.5, 1.0]
+    assert result.document["metadata"]["timestamps_reconstructed"] is True
+
+
+def test_pose_export_normalizes_and_repairs_wxyz_quaternions(tmp_path: Path) -> None:
+    dataset = _write_fixture(
+        tmp_path,
+        quaternions=np.asarray(
+            [
+                [2.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+            ],
+            dtype=float,
+        ),
+    )
+    output = tmp_path / "viewer_pose.json"
+
+    result = export_viewer_pose(dataset, output)
+    orientations = [frame["orientation"] for frame in result.document["frames"]]
+
+    assert result.validation.overall_pass is True
+    assert orientations == [
+        [0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0],
+        [1.0, 0.0, 0.0, 0.0],
+    ]
+
+
+def test_pose_export_supports_xyzw_quaternions(tmp_path: Path) -> None:
+    dataset = _write_fixture(
+        tmp_path,
+        quaternion_key="thorax_quaternions_xyzw",
+        quaternions=np.asarray(
+            [
+                [0.0, 0.0, 0.0, 2.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+            ],
+            dtype=float,
+        ),
+    )
+    output = tmp_path / "viewer_pose.json"
+
+    result = export_viewer_pose(dataset, output)
+
+    assert result.validation.overall_pass is True
+    assert result.document["metadata"]["input_quaternion_order"] == "xyzw"
+    assert result.document["frames"][0]["orientation"] == [0.0, 0.0, 0.0, 1.0]
+
+
 def test_cli_exports_pose_from_explicit_dataset_path(tmp_path: Path) -> None:
     dataset = _write_fixture(tmp_path)
     output = tmp_path / "cli" / "viewer_pose.json"
@@ -91,9 +171,16 @@ def test_cli_exports_pose_from_explicit_dataset_path(tmp_path: Path) -> None:
     assert output.is_file()
 
 
-def _write_fixture(tmp_path: Path) -> Path:
+def _write_fixture(
+    tmp_path: Path,
+    *,
+    npz_name: str = "rollout_arrays.npz",
+    time_s: np.ndarray | None = None,
+    quaternion_key: str = "thorax_quaternions",
+    quaternions: np.ndarray | None = None,
+) -> Path:
     dataset = tmp_path / "Healthy_001"
-    dataset.mkdir()
+    dataset.mkdir(parents=True)
     frames = [
         {
             "timestamp_s": 0.0,
@@ -131,15 +218,19 @@ def _write_fixture(tmp_path: Path) -> Path:
         }),
         encoding="utf-8",
     )
-    np.savez_compressed(
-        dataset / "rollout_arrays.npz",
-        thorax_positions=np.asarray([frame["thorax"] for frame in frames], dtype=float),
-        thorax_quaternions=np.asarray([frame["orientation"] for frame in frames], dtype=float),
-        com_positions=np.asarray([frame["com"] for frame in frames], dtype=float),
-        joint_positions=np.asarray([[0.0], [1.0], [2.0]], dtype=float),
-        time_s=np.asarray([0.0, 0.5, 1.0], dtype=float),
-        adhesion__LF=np.asarray([1, 0, 1], dtype=float),
-    )
+    arrays = {
+        "thorax_positions": np.asarray([frame["thorax"] for frame in frames], dtype=float),
+        quaternion_key: (
+            np.asarray([frame["orientation"] for frame in frames], dtype=float)
+            if quaternions is None
+            else np.asarray(quaternions, dtype=float)
+        ),
+        "com_positions": np.asarray([frame["com"] for frame in frames], dtype=float),
+        "joint_positions": np.asarray([[0.0], [1.0], [2.0]], dtype=float),
+        "time_s": np.asarray([0.0, 0.5, 1.0], dtype=float) if time_s is None else np.asarray(time_s, dtype=float),
+        "adhesion__LF": np.asarray([1, 0, 1], dtype=float),
+    }
+    np.savez_compressed(dataset / npz_name, **arrays)
     return dataset
 
 

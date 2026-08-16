@@ -62,7 +62,7 @@ def export_viewer_pose(
     *,
     search_roots: Sequence[str | Path] | None = None,
 ) -> PoseExportResult:
-    """Export ``rollout.json`` and ``rollout_arrays.npz`` as ``viewer_pose.json``."""
+    """Export ``rollout.json`` and rollout NPZ artifacts as ``viewer_pose.json``."""
 
     dataset_dir = resolve_dataset(dataset, search_roots=search_roots)
     inputs = load_rollout_inputs(dataset_dir)
@@ -113,7 +113,7 @@ def load_rollout_inputs(dataset_dir: str | Path) -> RolloutInputs:
     if positions.shape[0] != quaternions.shape[0]:
         raise ValueError("thorax and orientation frame counts do not match")
     time_s = _time_values(data, arrays, frames, metadata, positions.shape[0])
-    timestep_s = _positive_timestep(
+    time_s, timestep_s, timestamps_reconstructed = _resolve_timestamps(
         time_s,
         fallback=_explicit_timestep(data, arrays, metadata),
     )
@@ -134,6 +134,7 @@ def load_rollout_inputs(dataset_dir: str | Path) -> RolloutInputs:
         "source_arrays_npz": npz_path.name,
         "quaternion_order": "xyzw",
         "input_quaternion_order": quaternion_order,
+        "timestamps_reconstructed": timestamps_reconstructed,
     })
     return RolloutInputs(
         dataset_dir=root,
@@ -279,10 +280,14 @@ def _time_values(
         if timestep is None:
             timestep = metadata.get("timestep_s", metadata.get("timestep"))
         if timestep is None:
-            raise ValueError("rollout requires time_s or a positive timestep_s")
+            value = np.arange(count, dtype=float)
+            result = np.asarray(value, dtype=float).reshape(-1)
+            if result.shape[0] != count:
+                raise ValueError("time and trajectory frame counts do not match")
+            return result
         step = float(np.asarray(timestep, dtype=float).ravel()[0])
         if not np.isfinite(step) or step <= 0:
-            raise ValueError("timestep_s must be positive and finite")
+            step = 1.0
         value = np.arange(count, dtype=float) * step
     result = np.asarray(value, dtype=float).reshape(-1)
     if result.shape[0] != count:
@@ -317,6 +322,27 @@ def _positive_timestep(time_s: np.ndarray, *, fallback: float | None = None) -> 
     if not np.isfinite(value) or value <= 0:
         raise ValueError("timestep_s must be positive and finite")
     return value
+
+
+def _resolve_timestamps(time_s: np.ndarray, *, fallback: float | None = None) -> tuple[np.ndarray, float, bool]:
+    try:
+        return time_s, _positive_timestep(time_s, fallback=fallback), False
+    except ValueError:
+        step = _reconstruction_timestep(time_s, fallback=fallback)
+        if time_s.size == 0:
+            raise ValueError("rollout requires at least one timestamp sample") from None
+        return np.arange(time_s.size, dtype=float) * step, step, True
+
+
+def _reconstruction_timestep(time_s: np.ndarray, *, fallback: float | None = None) -> float:
+    if fallback is not None and np.isfinite(fallback) and fallback > 0:
+        return float(fallback)
+    if time_s.size >= 2:
+        deltas = np.diff(np.asarray(time_s, dtype=float))
+        positive = deltas[np.isfinite(deltas) & (deltas > 0)]
+        if positive.size:
+            return float(np.median(positive))
+    return 1.0
 
 
 def _com_values(data: Mapping[str, Any], arrays: Mapping[str, np.ndarray], frames: Sequence[Any], count: int) -> np.ndarray | None:
@@ -451,12 +477,24 @@ def _series_array(value: Any, count: int, name: str) -> np.ndarray:
 
 def _to_xyzw(value: np.ndarray, order: str) -> np.ndarray:
     array = np.asarray(value, dtype=float)
+    if array.ndim != 2 or array.shape[1] != 4:
+        raise ValueError("quaternions must have shape (n_samples, 4)")
     if order == "wxyz":
         array = array[:, [1, 2, 3, 0]]
-    norms = np.linalg.norm(array, axis=1)
-    if not np.isfinite(norms).all() or np.any(norms <= 0):
-        raise ValueError("quaternions must be finite and non-zero")
-    return array / norms[:, None]
+    elif order != "xyzw":
+        raise ValueError(f"Unsupported quaternion order: {order}")
+
+    identity = np.array([0.0, 0.0, 0.0, 1.0], dtype=float)
+    previous = identity.copy()
+    normalized = np.empty_like(array, dtype=float)
+    for index, quaternion in enumerate(array):
+        norm = float(np.linalg.norm(quaternion))
+        if not np.isfinite(quaternion).all() or not np.isfinite(norm) or norm <= 0.0:
+            normalized[index] = previous
+            continue
+        normalized[index] = quaternion / norm
+        previous = normalized[index].copy()
+    return normalized
 
 
 def _json_safe(value: Any) -> Any:

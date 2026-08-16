@@ -19,6 +19,7 @@ from drosophila_pd.flygym_adapter import (
     export_rollout,
 )
 from drosophila_pd.viewer_export import export_viewer_pose
+from drosophila_pd.viewer_export import validate_pose_document
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -213,6 +214,32 @@ def test_recorder_initializes_zero_first_quaternion_and_viewer_export_succeeds(t
     viewer_result = export_viewer_pose(tmp_path / "Healthy_001", tmp_path / "viewer_pose.json")
     assert viewer_result.validation.overall_pass is True
     assert viewer_result.document["frames"][0]["orientation"] == [0.0, 0.0, 0.0, 1.0]
+
+
+def test_rollout_to_viewer_pipeline_uses_adapter_npz_without_manual_renaming(tmp_path: Path) -> None:
+    simulation = _InvalidFirstOrientationSimulationStub([0.0, 0.0, 0.0, 0.0])
+    recorder = RolloutRecorder(
+        simulation,
+        "fly",
+        timestep=0.1,
+        com_provider=lambda _simulation, _fly: [0.0, 0.0, 0.5],
+    )
+    recorder.record()
+    simulation.step()
+    recorder.record()
+
+    dataset = tmp_path / "datasets" / "healthy" / "Healthy_001"
+    exported = export_rollout(recorder.rollout, dataset)
+    assert Path(exported.files["rollout_npz"]).name == "rollout.npz"
+    assert not (dataset / "rollout_arrays.npz").exists()
+
+    result = export_viewer_pose("Healthy_001", tmp_path / "viewer_pose.json", search_roots=[tmp_path / "datasets"])
+
+    assert result.source_files[1].name == "rollout.npz"
+    assert result.validation.overall_pass is True
+    assert validate_pose_document(result.document).overall_pass is True
+    orientations = np.asarray([frame["orientation"] for frame in result.document["frames"]], dtype=float)
+    assert np.allclose(np.linalg.norm(orientations, axis=1), 1.0)
 
 
 def test_recorder_reuses_previous_valid_quaternion_for_later_invalid_orientation() -> None:

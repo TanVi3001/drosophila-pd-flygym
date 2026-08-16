@@ -104,6 +104,12 @@ def _npz_arrays(rollout: RolloutData) -> dict[str, np.ndarray]:
         values = [getattr(frame, name) for frame in rollout.frames]
         if values and all(value is not None for value in values):
             arrays[name] = np.stack(values)
+    if "timestamp_s" in arrays:
+        arrays["time_s"] = arrays["timestamp_s"].copy()
+    if "thorax" in arrays:
+        arrays["thorax_positions"] = arrays["thorax"].copy()
+    if "orientation" in arrays:
+        arrays["thorax_quaternions"] = arrays["orientation"].copy()
     for key in ("found", "forces", "torques", "positions", "normals", "tangents"):
         values = [frame.contact.get(key) if frame.contact is not None else None for frame in rollout.frames]
         if values and all(value is not None for value in values):
