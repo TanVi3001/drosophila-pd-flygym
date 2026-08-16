@@ -29,7 +29,7 @@ class RolloutRecorder:
         simulation_metadata: dict[str, Any] | None = None,
         com_provider: Callable[[Any, Any | None], Any] | None = None,
     ) -> None:
-        self._previous_orientation = None
+        self._previous_orientation: np.ndarray | None = None
         self.simulation = simulation
         self.fly_name = fly_name
         self.fly = fly
@@ -53,6 +53,7 @@ class RolloutRecorder:
     def reset(self) -> None:
         self.rollout.frames.clear()
         self._previous_joint_velocity = None
+        self._previous_orientation = None
 
     def record(self) -> ObservationFrame:
         """Capture one frame from the current simulation state."""
@@ -74,21 +75,7 @@ class RolloutRecorder:
             step=len(self.rollout.frames),
             thorax=self._thorax(body_positions),
             com=self._com(),
-            orientation = self._thorax_orientation(body_orientations)
-
-            if orientation is not None:
-                orientation = np.asarray(orientation, dtype=float)
-
-                if (
-                    not np.isfinite(orientation).all()
-                    or np.linalg.norm(orientation) == 0
-                ):
-                    if self._previous_orientation is not None:
-                        orientation = self._previous_orientation.copy()
-                    else:
-                        orientation = np.array([1.0, 0.0, 0.0, 0.0])
-
-                self._previous_orientation = orientation.copy(),
+            orientation=self._safe_thorax_orientation(body_orientations),
             body_positions=body_positions,
             body_orientations=body_orientations,
             joint_positions=joint_positions,
@@ -124,6 +111,29 @@ class RolloutRecorder:
             return None
         index = self._body_index("c_thorax")
         return orientations[index if index is not None else 0].copy()
+
+    def _safe_thorax_orientation(self, orientations: np.ndarray | None) -> np.ndarray | None:
+        orientation = self._thorax_orientation(orientations)
+        if orientation is None:
+            return None
+
+        candidate = np.asarray(orientation, dtype=float)
+        valid = (
+            candidate.shape == (4,)
+            and np.isfinite(candidate).all()
+            and np.linalg.norm(candidate) > 0
+        )
+        if not valid:
+            candidate = (
+                self._previous_orientation.copy()
+                if self._previous_orientation is not None
+                else np.array([1.0, 0.0, 0.0, 0.0], dtype=float)
+            )
+        else:
+            candidate = candidate.copy()
+
+        self._previous_orientation = candidate.copy()
+        return candidate
 
     def _body_index(self, name: str) -> int | None:
         if self.fly is None or not hasattr(self.fly, "get_bodysegs_order"):

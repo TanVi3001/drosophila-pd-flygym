@@ -210,7 +210,13 @@ def build_viewer_pose(inputs: RolloutInputs) -> dict[str, Any]:
 
 
 def _find_input(root: Path, name: str) -> Path:
-    candidates = (root / name, root / "rollouts" / name)
+    fallback_names = ("rollout.npz",) if name == "rollout_arrays.npz" else ()
+    candidates = (
+        root / name,
+        root / "rollouts" / name,
+        *(root / fallback for fallback in fallback_names),
+        *(root / "rollouts" / fallback for fallback in fallback_names),
+    )
     for candidate in candidates:
         if candidate.is_file():
             return candidate

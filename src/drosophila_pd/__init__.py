@@ -117,6 +117,10 @@ from .viewer_export import (  # noqa: E402
     export_viewer_pose,
     validate_pose_document,
 )
+from .research_assistant import (  # noqa: E402
+    AssistantReport,
+    ResearchAssistant,
+)
 
 __all__ = [
     "__version__",
@@ -209,4 +213,6 @@ __all__ = [
     "ValidationReport",
     "export_viewer_pose",
     "validate_pose_document",
+    "AssistantReport",
+    "ResearchAssistant",
 ]

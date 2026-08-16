@@ -18,6 +18,7 @@ def test_dashboard_integration_modules_exist() -> None:
         "viewer_bridge.js",
         "analysis_bridge.js",
         "report_bridge.js",
+        "assistant_bridge.js",
     ):
         text = (DASHBOARD / filename).read_text(encoding="utf-8")
         assert "export" in text
@@ -28,7 +29,7 @@ def test_dashboard_uses_existing_workspace_and_viewer_apis() -> None:
     viewer_bridge = (DASHBOARD / "viewer_bridge.js").read_text(encoding="utf-8")
     app = (WEB / "app.js").read_text(encoding="utf-8")
 
-    for tab in ("Home", "Datasets", "Viewer", "Analysis", "Validation", "Reports", "Publication", "Plugins"):
+    for tab in ("Home", "Datasets", "Viewer", "Analysis", "Validation", "Reports", "Publication", "Plugins", "Assistant"):
         assert tab in integration
     assert "new WorkspaceSync" in integration
     assert "new ViewerBridge" in integration

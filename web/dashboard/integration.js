@@ -1,4 +1,5 @@
 import { AnalysisBridge } from './analysis_bridge.js';
+import { AssistantBridge } from './assistant_bridge.js';
 import { DASHBOARD_TABS, DashboardState } from './state.js';
 import { EventBus } from './event_bus.js';
 import { ReportBridge } from './report_bridge.js';
@@ -35,6 +36,7 @@ export class DigitalLaboratoryIntegration {
         this.viewer = new ViewerBridge({ workspace, threeViewer, viewportRenderer });
         this.analysis = new AnalysisBridge({ workspace, chartRenderer, behaviorTimeline });
         this.reports = new ReportBridge({ laboratory, reportGenerator });
+        this.assistant = new AssistantBridge({ workspace, experimentWorkspace, laboratory });
         this.container = null;
         this.unsubscribers = [];
         this.bindEvents();
@@ -121,6 +123,7 @@ export class DigitalLaboratoryIntegration {
             reports: () => this.reports.renderReports(content),
             publication: () => this.reports.renderPublication(content),
             plugins: () => this.laboratoryDashboard?.renderPlugins?.(content),
+            assistant: () => this.assistant.render(content),
         };
         (renderers[this.state.activeTab] ?? renderers.home)();
         if (!content.children.length) content.append(this.note('No data is loaded in this section.'));

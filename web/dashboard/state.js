@@ -8,6 +8,7 @@ export const DASHBOARD_TABS = Object.freeze([
     ['reports', 'Reports'],
     ['publication', 'Publication'],
     ['plugins', 'Plugins'],
+    ['assistant', 'Assistant'],
 ]);
 
 export class DashboardState {

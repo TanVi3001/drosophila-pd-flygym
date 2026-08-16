@@ -17,6 +17,7 @@ from drosophila_pd.flygym_adapter import (
     WorldBuilder,
     export_rollout,
 )
+from drosophila_pd.viewer_export import export_viewer_pose
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +60,24 @@ class _SimulationStub:
             np.asarray([[0.0, 0.0, 1.0]]),
             np.asarray([[1.0, 0.0, 0.0]]),
         )
+
+
+class _InvalidFirstOrientationSimulationStub(_SimulationStub):
+    """Stub that exposes an invalid first quaternion for recorder regression."""
+
+    def get_body_rotations(self, _name: str) -> np.ndarray:
+        if self.steps == 0:
+            return np.asarray([[0.0, 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]])
+        return np.asarray([[0.5, 0.5, 0.5, 0.5], [1.0, 0.0, 0.0, 0.0]])
+
+
+class _InvalidLaterOrientationSimulationStub(_SimulationStub):
+    """Stub that exposes a valid first quaternion followed by invalid samples."""
+
+    def get_body_rotations(self, _name: str) -> np.ndarray:
+        if self.steps == 0:
+            return np.asarray([[0.5, 0.5, 0.5, 0.5], [1.0, 0.0, 0.0, 0.0]])
+        return np.asarray([[float("nan"), 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]])
 
 
 def test_configuration_and_yaml_contract() -> None:
@@ -159,3 +178,41 @@ def test_rollout_export_writes_all_canonical_formats(tmp_path: Path) -> None:
         assert Path(path).stat().st_size > 0
     assert exported.manifest["frame_count"] == 2
     assert exported.manifest["files"]["rollout_npz"]["sha256"]
+
+
+def test_recorder_initializes_invalid_first_quaternion_and_viewer_export_succeeds(tmp_path: Path) -> None:
+    simulation = _InvalidFirstOrientationSimulationStub()
+    recorder = RolloutRecorder(
+        simulation,
+        "fly",
+        timestep=0.1,
+        com_provider=lambda _simulation, _fly: [0.0, 0.0, 0.5],
+    )
+    recorder.record()
+    simulation.step()
+    recorder.record()
+
+    exported = export_rollout(recorder.rollout, tmp_path / "Healthy_001")
+    first_orientation = np.asarray(recorder.rollout.frames[0].orientation, dtype=float)
+
+    assert np.linalg.norm(first_orientation) > 0
+    assert np.allclose(first_orientation, [1.0, 0.0, 0.0, 0.0])
+
+    arrays = np.load(exported.files["rollout_npz"])
+    assert np.linalg.norm(arrays["orientation"][0]) > 0
+
+    viewer_result = export_viewer_pose(tmp_path / "Healthy_001", tmp_path / "viewer_pose.json")
+    assert viewer_result.validation.overall_pass is True
+    assert viewer_result.document["frames"][0]["orientation"] == [0.0, 0.0, 0.0, 1.0]
+
+
+def test_recorder_reuses_previous_valid_quaternion_for_later_invalid_orientation() -> None:
+    simulation = _InvalidLaterOrientationSimulationStub()
+    recorder = RolloutRecorder(simulation, "fly", timestep=0.1)
+
+    first = recorder.record()
+    simulation.step()
+    second = recorder.record()
+
+    assert np.allclose(first.orientation, [0.5, 0.5, 0.5, 0.5])
+    assert np.allclose(second.orientation, first.orientation)
