@@ -12,6 +12,7 @@ from .pose_exporter import (
 from .schema import FRAME_SCHEMA, VIEWER_POSE_SCHEMA, schema
 from .trajectory_exporter import build_trajectory_frames, trajectory_for_frame
 from .validator import PoseValidationError, ValidationReport, validate_pose_document
+from .discovery import find_latest_bundle, find_latest_rollout, find_latest_viewer_pose
 
 __all__ = [
     "DEFAULT_VIEWER_BODY_PARTS",
@@ -26,6 +27,9 @@ __all__ = [
     "build_viewer_pose",
     "build_visibility",
     "export_viewer_pose",
+    "find_latest_bundle",
+    "find_latest_rollout",
+    "find_latest_viewer_pose",
     "load_rollout_inputs",
     "resolve_dataset",
     "schema",

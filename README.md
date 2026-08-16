@@ -197,6 +197,27 @@ These are presentation tools over imported computational data; they do not run
 simulations or add biological interpretation. The Vietnamese guides are in
 `docs/vi/51_3D_Viewer.md` through `docs/vi/56_Huong_Dan_3D.md`.
 
+### End-to-end viewer bundle
+
+In the documented Python 3.12 environment, one command runs the real FlyGym
+rollout pipeline and creates a deployable static bundle under `dist/`:
+
+```bash
+python scripts/run_demo.py
+```
+
+The command creates or reuses `datasets/healthy/Healthy_001/`, exports
+`rollout.json`, `rollout.npz`, `viewer_pose.json`, `manifest.json`, and builds
+`dist/viewer_bundle.zip`. It never fabricates rollout data. If the simulator
+stack is unavailable, it stops with an actionable environment error. To serve
+the newest discovered pose locally after a successful run:
+
+```bash
+python scripts/run_viewer.py
+```
+
+The static ZIP can be uploaded to GitHub Pages or any static web host.
+
 ## Parkinson Research Workbench
 
 The V2 Web Platform also provides a research workbench for imported rollouts.

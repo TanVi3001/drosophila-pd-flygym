@@ -14,6 +14,7 @@ from urllib.parse import unquote, urlsplit
 import webbrowser
 
 from build_viewer_bundle import _copy_web_runtime, _write_entrypoint
+from drosophila_pd.viewer_export.discovery import find_latest_viewer_pose
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -29,21 +30,10 @@ def find_viewer_pose(path: str | Path | None = None, *, repo_root: Path = REPOSI
             raise FileNotFoundError(f"viewer_pose.json was not found: {candidate}")
         return candidate
 
-    candidates = []
-    for root in (Path.cwd(), repo_root):
-        exact = root / "viewer_pose.json"
-        if exact.is_file():
-            candidates.append(exact)
-    for root in (repo_root / "datasets", repo_root / "results", repo_root / "research"):
-        if root.is_dir():
-            candidates.extend(root.rglob("viewer_pose.json"))
-    candidates = sorted({path.resolve() for path in candidates if path.is_file()})
-    if not candidates:
+    pose = find_latest_viewer_pose(repo_root)
+    if pose is None:
         raise FileNotFoundError("No viewer_pose.json found. Pass --pose PATH.")
-    if len(candidates) > 1:
-        paths = "\n".join(f"  - {path}" for path in candidates)
-        raise RuntimeError("Multiple viewer_pose.json files found; pass --pose explicitly:\n" + paths)
-    return candidates[0]
+    return pose
 
 
 def resolve_web_root(path: str | Path | None = None) -> Path:

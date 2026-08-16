@@ -74,3 +74,22 @@ def test_colab_notebooks_are_portable() -> None:
         source = "\n".join("".join(cell["source"]) for cell in notebook["cells"])
         assert not LOCAL_PATH.search(source), f"{name} contains a local absolute path"
         assert not FORBIDDEN_MAGIC.search(source), f"{name} contains unsupported notebook magic"
+
+
+def test_end_to_end_bundle_step_is_cwd_independent() -> None:
+    notebook = _load_notebook("10_End_to_End.ipynb")
+    source = "\n".join(
+        "".join(cell["source"])
+        for cell in notebook["cells"]
+        if cell["cell_type"] == "code"
+    )
+    assert "str(repo / \"scripts\" / \"build_viewer_bundle.py\")" in source
+    assert "cwd=str(repo)" in source
+    assert "str(repo / \"web\")" in source
+    assert "capture_output=True" in source
+    assert "start = Path.cwd().resolve()" in source
+    assert "start.parents" in source
+    assert "def is_repo_root(path):" in source
+    assert "def _bundle_repo_candidates(seed):" in source
+    assert "globals().get(\"viewer_pose_path\")" in source
+    assert "bundle_repo = None" in source

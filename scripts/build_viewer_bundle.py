@@ -14,6 +14,12 @@ import zipfile
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_ROOT = REPOSITORY_ROOT / "src"
+if str(SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(SOURCE_ROOT))
+
+from drosophila_pd.viewer_export.discovery import find_latest_viewer_pose  # noqa: E402
+
 DEFAULT_WEB_ROOT = REPOSITORY_ROOT / "web"
 DEFAULT_OUTPUT = REPOSITORY_ROOT / "dist" / "viewer_bundle.zip"
 
@@ -30,21 +36,6 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _candidate_pose_paths(repo_root: Path) -> list[Path]:
-    candidates: list[Path] = []
-    for root in (Path.cwd(), repo_root):
-        exact = root / "viewer_pose.json"
-        if exact.is_file():
-            candidates.append(exact)
-    roots = [repo_root / "datasets", repo_root / "results", repo_root / "research"]
-    for root in roots:
-        if not root.exists():
-            continue
-        if root.is_dir():
-            candidates.extend(path for path in root.rglob("viewer_pose.json") if path.is_file())
-    return sorted({path.resolve() for path in candidates})
-
-
 def find_viewer_pose(path: str | Path | None = None, *, repo_root: Path = REPOSITORY_ROOT) -> Path:
     """Resolve an explicit pose or the only discovered pose artifact."""
 
@@ -54,17 +45,12 @@ def find_viewer_pose(path: str | Path | None = None, *, repo_root: Path = REPOSI
             raise ViewerBundleError(f"viewer_pose.json was not found: {pose}")
         return pose
 
-    candidates = _candidate_pose_paths(repo_root)
-    if not candidates:
+    pose = find_latest_viewer_pose(repo_root)
+    if pose is None:
         raise ViewerBundleError(
             "No viewer_pose.json was found. Pass --pose PATH after exporting the viewer pose."
         )
-    if len(candidates) > 1:
-        formatted = "\n".join(f"  - {candidate}" for candidate in candidates)
-        raise ViewerBundleError(
-            "Multiple viewer_pose.json files were found; pass --pose explicitly:\n" + formatted
-        )
-    return candidates[0]
+    return pose
 
 
 def _load_pose(path: Path) -> dict[str, Any]:
