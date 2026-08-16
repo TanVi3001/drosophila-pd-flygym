@@ -70,14 +70,15 @@ class RolloutRecorder:
                 joint_acceleration = np.zeros_like(joint_velocity)
             self._previous_joint_velocity = joint_velocity.copy()
 
+        orientation = self._thorax_orientation(body_orientations)
+        orientation = self._sanitize_orientation(orientation)
+
         frame = ObservationFrame(
             timestamp_s=self._timestamp(),
             step=len(self.rollout.frames),
             thorax=self._thorax(body_positions),
             com=self._com(),
-            orientation=self._sanitize_orientation(
-                self._thorax_orientation(body_orientations)
-            ),
+            orientation=orientation,
             body_positions=body_positions,
             body_orientations=body_orientations,
             joint_positions=joint_positions,
@@ -119,10 +120,12 @@ class RolloutRecorder:
             return None
 
         candidate = np.asarray(orientation, dtype=float)
+        norm = float(np.linalg.norm(candidate)) if candidate.shape == (4,) else 0.0
         valid = (
             candidate.shape == (4,)
             and np.isfinite(candidate).all()
-            and np.linalg.norm(candidate) > 0
+            and np.isfinite(norm)
+            and norm > 0.0
         )
         if not valid:
             candidate = (
@@ -131,7 +134,7 @@ class RolloutRecorder:
                 else np.array([1.0, 0.0, 0.0, 0.0], dtype=float)
             )
         else:
-            candidate = candidate.copy()
+            candidate = candidate / norm
 
         self._previous_orientation = candidate.copy()
         return candidate

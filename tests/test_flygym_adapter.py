@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -184,15 +185,8 @@ def test_rollout_export_writes_all_canonical_formats(tmp_path: Path) -> None:
     assert exported.manifest["files"]["rollout_npz"]["sha256"]
 
 
-@pytest.mark.parametrize(
-    "first_orientation",
-    ([0.0, 0.0, 0.0, 0.0], [float("nan"), 0.0, 0.0, 0.0]),
-)
-def test_recorder_initializes_invalid_first_quaternion_and_viewer_export_succeeds(
-    tmp_path: Path,
-    first_orientation: list[float],
-) -> None:
-    simulation = _InvalidFirstOrientationSimulationStub(first_orientation)
+def test_recorder_initializes_zero_first_quaternion_and_viewer_export_succeeds(tmp_path: Path) -> None:
+    simulation = _InvalidFirstOrientationSimulationStub([0.0, 0.0, 0.0, 0.0])
     recorder = RolloutRecorder(
         simulation,
         "fly",
@@ -211,6 +205,10 @@ def test_recorder_initializes_invalid_first_quaternion_and_viewer_export_succeed
 
     arrays = np.load(exported.files["rollout_npz"])
     assert np.linalg.norm(arrays["orientation"][0]) > 0
+    rollout_json = json.loads(Path(exported.files["rollout_json"]).read_text(encoding="utf-8"))
+    json_orientation = np.asarray(rollout_json["frames"][0]["orientation"], dtype=float)
+    assert np.linalg.norm(json_orientation) > 0
+    assert np.allclose(json_orientation, [1.0, 0.0, 0.0, 0.0])
 
     viewer_result = export_viewer_pose(tmp_path / "Healthy_001", tmp_path / "viewer_pose.json")
     assert viewer_result.validation.overall_pass is True
@@ -227,3 +225,20 @@ def test_recorder_reuses_previous_valid_quaternion_for_later_invalid_orientation
 
     assert np.allclose(first.orientation, [0.5, 0.5, 0.5, 0.5])
     assert np.allclose(second.orientation, first.orientation)
+
+
+def test_recorder_sanitizes_non_finite_first_quaternion_to_identity() -> None:
+    recorder = RolloutRecorder(_SimulationStub(), "fly", timestep=0.1)
+
+    orientation = recorder._sanitize_orientation(np.asarray([float("nan"), 0.0, 0.0, 0.0]))
+
+    assert np.allclose(orientation, [1.0, 0.0, 0.0, 0.0])
+    assert np.allclose(recorder._previous_orientation, [1.0, 0.0, 0.0, 0.0])
+
+
+def test_recorder_normalizes_valid_quaternion_samples() -> None:
+    recorder = RolloutRecorder(_SimulationStub(), "fly", timestep=0.1)
+
+    orientation = recorder._sanitize_orientation(np.asarray([2.0, 0.0, 0.0, 0.0]))
+
+    assert np.allclose(orientation, [1.0, 0.0, 0.0, 0.0])
