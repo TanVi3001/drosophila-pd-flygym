@@ -94,3 +94,19 @@ release artifacts, notebooks, or experimental results.
       archive deposit.
 - [ ] Preserve notebooks as historical research records without executing or
       rewriting them.
+
+## Current Repository Audit Addendum
+
+- [x] `LICENSE` exists and is MIT; the README badge is consistent.
+- [x] `CITATION.cff` exists with repository, version, author, and license data.
+- [x] Final report PDF, DOCX, and manifest are present.
+- [x] Frozen E6 figures and tables are present.
+- [x] Python 3.12 CI, compileall, pytest, and Markdown validation are defined.
+- [x] Scientific scope and reproducibility guides are present.
+- [ ] A real rollout dataset is present under `datasets/`.
+- [ ] The exact publication dataset has been rerun in its target environment.
+- [ ] A DOI or archival identifier exists; none is declared by this repository.
+- [ ] LICENSE contains an explicit SPDX identifier line.
+
+The unchecked items are repository-state gates, not claims that should be
+filled with invented data or identifiers.

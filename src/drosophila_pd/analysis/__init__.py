@@ -1,4 +1,6 @@
-"""Evidence-only analysis utilities for frozen simulation reports."""
+"""Read-only analysis utilities for imported rollout and frozen reports."""
+
+from .rollout_analysis import AnalysisResult, LoadedRollout, analyze_rollout, compute_metrics, load_rollout
 
 from .evidence_synthesis import (
     EvidenceSynthesisConfig,
@@ -13,6 +15,11 @@ from .evidence_synthesis import (
 )
 
 __all__ = [
+    "AnalysisResult",
+    "LoadedRollout",
+    "analyze_rollout",
+    "compute_metrics",
+    "load_rollout",
     "EvidenceSynthesisConfig",
     "EvidenceValidationError",
     "build_synthesis",

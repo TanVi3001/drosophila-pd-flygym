@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from drosophila_pd.release_candidate import ReleaseCandidateBuilder, ReleaseCandidateConfig
+from _git_helpers import committed_changes_from_parent
 
 
 ROOT = Path(__file__).parents[1]
@@ -61,10 +62,7 @@ def test_unified_dashboard_keeps_existing_services_and_scope():
 
 
 def test_release_candidate_does_not_change_frozen_paths():
-    import subprocess
-
-    result = subprocess.run(["git", "diff", "--name-only", "HEAD~1"], cwd=ROOT, capture_output=True, text=True, check=False)
-    changed = set(result.stdout.splitlines()) if result.returncode == 0 else set()
+    changed = committed_changes_from_parent(ROOT)
     assert not any(
         path.startswith(("results/", "docs/report/", "dist/"))
         or (path.startswith("notebooks/") and not path.startswith("notebooks/colab/"))

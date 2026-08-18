@@ -76,6 +76,34 @@ def test_build_viewer_bundle_contains_static_entrypoint_and_pose(tmp_path: Path)
     assert "viewer_bundle/web/index.html" in names
 
 
+def test_build_viewer_bundle_does_not_remove_unmarked_output_stage(tmp_path: Path) -> None:
+    pose = tmp_path / "viewer_pose.json"
+    pose.write_text(json.dumps(_pose_document()), encoding="utf-8")
+    stage = tmp_path / "existing"
+    stage.mkdir()
+    sentinel = stage / "keep.txt"
+    sentinel.write_text("keep", encoding="utf-8")
+    archive = tmp_path / "existing.zip"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/build_viewer_bundle.py",
+            "--pose",
+            str(pose),
+            "--output",
+            str(archive),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert sentinel.read_text(encoding="utf-8") == "keep"
+
+
 def test_run_viewer_serves_pose_without_copying_it_into_web(tmp_path: Path) -> None:
     pose = tmp_path / "viewer_pose.json"
     pose.write_text(json.dumps(_pose_document()), encoding="utf-8")

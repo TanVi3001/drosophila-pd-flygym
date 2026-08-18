@@ -1,0 +1,15 @@
+experiment_id: healthy
+name: Healthy baseline
+condition: healthy
+dataset: datasets/healthy/Healthy_001
+description: Computational baseline analysis over an imported Healthy rollout when available.
+seed: 0
+parameters: {}
+expected_outputs:
+  - rollout
+  - metrics
+  - report
+  - figures
+metadata:
+  data_policy: imported_rollout_only
+tags: [baseline, computational]

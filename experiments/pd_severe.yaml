@@ -1,0 +1,12 @@
+experiment_id: pd_severe
+name: PD severe computational condition
+condition: pd
+dataset: datasets/pd/PD_Severe_001
+description: Computational condition configuration; requires an approved imported rollout.
+seed: 3
+parameters:
+  condition_label: severe
+expected_outputs: [rollout, metrics, report, figures]
+metadata:
+  data_policy: imported_rollout_only
+tags: [computational, comparison]

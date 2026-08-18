@@ -1,0 +1,12 @@
+experiment_id: pd_mild
+name: PD mild computational condition
+condition: pd
+dataset: datasets/pd/PD_Mild_001
+description: Computational condition configuration; requires an approved imported rollout.
+seed: 1
+parameters:
+  condition_label: mild
+expected_outputs: [rollout, metrics, report, figures]
+metadata:
+  data_policy: imported_rollout_only
+tags: [computational, comparison]

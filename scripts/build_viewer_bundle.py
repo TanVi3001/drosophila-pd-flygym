@@ -186,6 +186,28 @@ def _iter_files(root: Path) -> Iterable[Path]:
     return (path for path in sorted(root.rglob("*")) if path.is_file())
 
 
+def _remove_existing_stage(stage: Path) -> None:
+    """Remove only a directory previously created as a viewer bundle."""
+
+    if not stage.exists():
+        return
+    if not stage.is_dir():
+        raise ViewerBundleError(f"Refusing to replace non-directory bundle stage: {stage}")
+    marker = stage / "manifest.json"
+    try:
+        manifest = json.loads(marker.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ViewerBundleError(f"Refusing to remove unmarked bundle stage: {stage}") from exc
+    if (
+        not isinstance(manifest, dict)
+        or manifest.get("schema_version") != "viewer-bundle-1"
+        or manifest.get("entrypoint") != "index.html"
+        or manifest.get("viewer_pose") != "viewer_pose.json"
+    ):
+        raise ViewerBundleError(f"Refusing to remove unmarked bundle stage: {stage}")
+    shutil.rmtree(stage)
+
+
 def _write_manifest(stage: Path, pose_path: Path, web_root: Path) -> dict[str, Any]:
     files = []
     for path in _iter_files(stage):
@@ -237,8 +259,7 @@ def build_bundle(
     stage = output_path.parent / output_path.stem
     if stage.resolve() == web.resolve() or stage.resolve() == pose.parent.resolve():
         raise ViewerBundleError("Bundle output must not overwrite the source web or dataset directory.")
-    if stage.exists():
-        shutil.rmtree(stage)
+    _remove_existing_stage(stage)
     stage.mkdir(parents=True)
 
     _copy_web_runtime(web, stage)

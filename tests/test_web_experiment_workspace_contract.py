@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from _git_helpers import committed_changes_from_parent
+
 
 ROOT = Path(__file__).parents[1]
 WEB = ROOT / "web"
@@ -49,15 +51,7 @@ def test_parkinson_analytics_engine_contract_is_additive_and_scoped():
 
 
 def test_frozen_scientific_paths_are_not_part_of_milestone_changes():
-    import subprocess
-
-    result = subprocess.run(
-        ["git", "diff", "--name-only", "HEAD~1"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    changed = set(result.stdout.splitlines()) if result.returncode == 0 else set()
+    changed = committed_changes_from_parent(ROOT)
     assert not any(
         path.startswith(("results/", "docs/report/"))
         or (path.startswith("notebooks/") and not path.startswith("notebooks/colab/"))

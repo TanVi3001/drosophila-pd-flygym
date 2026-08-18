@@ -1,0 +1,12 @@
+experiment_id: pd_moderate
+name: PD moderate computational condition
+condition: pd
+dataset: datasets/pd/PD_Moderate_001
+description: Computational condition configuration; requires an approved imported rollout.
+seed: 2
+parameters:
+  condition_label: moderate
+expected_outputs: [rollout, metrics, report, figures]
+metadata:
+  data_policy: imported_rollout_only
+tags: [computational, comparison]

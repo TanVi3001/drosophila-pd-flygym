@@ -789,3 +789,43 @@ explicit control. Missing datasets return `WAITING_DATASET`; malformed or
 unsupported manifests return `INVALID_DATASET`. Scientific validation is
 reported as unavailable when no reference rollout is declared, rather than
 being inferred or fabricated.
+
+## Publication-Ready Research Platform
+
+The repository is organized as a computational research platform with the
+following workflow:
+
+```text
+FlyGym/MuJoCo
+  -> recorder and rollout export
+  -> viewer pose and static bundle
+  -> imported-rollout analysis
+  -> biomarker summaries and reports
+```
+
+The platform supports simulation, measurement, visualization, analysis,
+provenance, and artifact packaging. It does not diagnose Parkinson's disease,
+replace biological research or experimental fly data, or establish clinical
+biomarker validity. Dataset labels such as `pd` remain computational labels
+unless external biological evidence is supplied.
+
+For a publication audit, start with:
+
+- [Scientific validation](docs/scientific_validation.md)
+- [Reproducibility guide](docs/reproducibility.md)
+- [Publication checklist](docs/publication_checklist.md)
+- [Figure manifest](docs/figure_manifest.md)
+- [Table manifest](docs/table_manifest.md)
+- [Research readiness report](docs/research_readiness.md)
+- [Final repository audit](docs/final_repository_audit.md)
+
+The canonical citation metadata is in [CITATION.cff](CITATION.cff), and the
+license is [MIT](LICENSE). No DOI is declared by this repository. Reproduce a
+software-only installation with:
+
+```bash
+python -m pip install -e ".[test]"
+python scripts/check_runtime.py
+python -m compileall -q src scripts tests
+pytest -q -rs -p no:cacheprovider
+```

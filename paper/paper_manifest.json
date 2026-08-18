@@ -1,0 +1,27 @@
+{
+  "expected_figures": [
+    "Figure_01.png",
+    "Figure_02.png",
+    "Figure_03.png",
+    "Figure_04.png",
+    "Figure_05.png",
+    "Figure_06.png",
+    "Figure_07.png",
+    "Figure_08.png",
+    "Figure_09.png",
+    "Figure_10.png"
+  ],
+  "expected_tables": [
+    "Table_01.csv",
+    "Table_02.csv",
+    "Table_03.csv",
+    "Table_04.csv",
+    "Table_05.csv"
+  ],
+  "figures": [],
+  "generated_at": "2026-08-18T13:34:57.506492+00:00",
+  "schema_version": 1,
+  "scientific_scope": "No paper assets were generated because no real rollout dataset is available.",
+  "status": "WAITING_DATASET",
+  "tables": []
+}
