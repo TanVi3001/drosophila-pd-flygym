@@ -34,6 +34,7 @@ export class Viewer {
         this.shadows = true;
         this.playing = false;
         this.animationFrameId = null;
+        this.dampingFrameId = null;
         this.lastTimestamp = null;
         this.frameAccumulator = 0;
         this.resizeObserver = null;
@@ -60,6 +61,7 @@ export class Viewer {
             this.renderer.toneMappingExposure = 1.05;
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            this.renderer.shadowMap.autoUpdate = true;
             this.renderer.domElement.className = 'three-viewer-canvas';
             this.renderer.domElement.setAttribute('aria-label', '3D Digital Fly viewport');
             this.viewport.append(this.renderer.domElement);
@@ -292,7 +294,14 @@ export class Viewer {
             this.mesh.updateFromSnapshot(snapshot);
             this.skeleton.updateFromSnapshot(snapshot);
         }
+        const controlsChanged = this.cameraController?.update();
         this.renderer.render(this.sceneModel.scene, this.cameraController.getCamera());
+        if (controlsChanged && this.dampingFrameId === null) {
+            this.dampingFrameId = requestAnimationFrame(() => {
+                this.dampingFrameId = null;
+                this.render();
+            });
+        }
         return snapshot;
     }
 
@@ -311,6 +320,8 @@ export class Viewer {
 
     destroy() {
         this.pause();
+        if (this.dampingFrameId !== null) cancelAnimationFrame(this.dampingFrameId);
+        this.dampingFrameId = null;
         this.resizeObserver?.disconnect();
         if (!this.resizeObserver) window.removeEventListener('resize', this.resizeHandler);
         this.cameraController?.dispose();

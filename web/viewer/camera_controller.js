@@ -15,6 +15,8 @@ export class CameraController {
         this.type = 'perspective';
         this.target = new THREE.Vector3(0, 0, 0);
         this.distance = 6;
+        this.orthoSize = 3;
+        this.updating = false;
         this._createCamera();
     }
 
@@ -23,7 +25,7 @@ export class CameraController {
         const height = Math.max(1, this.domElement?.clientHeight ?? 1);
         const aspect = width / height;
         this.camera = this.type === 'orthographic'
-            ? new THREE.OrthographicCamera(-aspect * 3, aspect * 3, 3, -3, 0.01, 1000)
+            ? new THREE.OrthographicCamera(-aspect * this.orthoSize, aspect * this.orthoSize, this.orthoSize, -this.orthoSize, 0.01, 1000)
             : new THREE.PerspectiveCamera(45, aspect, 0.01, 1000);
         this.camera.up.set(0, 0, 1);
         this.camera.position.set(4, -5, 3);
@@ -34,13 +36,29 @@ export class CameraController {
     _createControls() {
         this.controls?.dispose();
         this.controls = new OrbitControls(this.camera, this.domElement);
-        this.controls.enableDamping = false;
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.08;
+        this.controls.minDistance = 0.35;
+        this.controls.maxDistance = 250;
+        this.controls.rotateSpeed = 0.72;
+        this.controls.zoomSpeed = 0.85;
+        this.controls.panSpeed = 0.8;
         this.controls.screenSpacePanning = true;
         this.controls.target.copy(this.target);
-        this.controls.addEventListener('change', () => this.onChange?.());
+        this.controls.addEventListener('change', () => {
+            if (!this.updating) this.onChange?.();
+        });
     }
 
     getCamera() { return this.camera; }
+
+    update() {
+        if (!this.controls) return false;
+        this.updating = true;
+        const changed = this.controls.update();
+        this.updating = false;
+        return changed;
+    }
 
     setType(type) {
         if (!['perspective', 'orthographic'].includes(type) || type === this.type) return this.type;
@@ -94,8 +112,8 @@ export class CameraController {
 
     fitToPoints(points = [], { preset = 'demo', padding = 1.65 } = {}) {
         const vectors = points
-            .map((point) => (point?.isVector3 ? point : new THREE.Vector3(...point)))
-            .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y) && Number.isFinite(point.z));
+            .map(toVector3)
+            .filter((point) => point && Number.isFinite(point.x) && Number.isFinite(point.y) && Number.isFinite(point.z));
         if (!vectors.length) return this.reset();
         const box = new THREE.Box3().setFromPoints(vectors);
         const sphere = box.getBoundingSphere(new THREE.Sphere());
@@ -104,6 +122,7 @@ export class CameraController {
         this.distance = Math.max(2.2, (sphere.radius * padding) / Math.sin(fov / 2));
         if (this.camera.isOrthographicCamera) {
             const size = Math.max(2, sphere.radius * padding);
+            this.orthoSize = size;
             const aspect = Math.max(1, (this.domElement?.clientWidth ?? 1)) / Math.max(1, (this.domElement?.clientHeight ?? 1));
             this.camera.left = -size * aspect;
             this.camera.right = size * aspect;
@@ -122,10 +141,10 @@ export class CameraController {
         const aspect = width / height;
         if (this.camera.isPerspectiveCamera) this.camera.aspect = aspect;
         else {
-            this.camera.left = -3 * aspect;
-            this.camera.right = 3 * aspect;
-            this.camera.top = 3;
-            this.camera.bottom = -3;
+            this.camera.left = -this.orthoSize * aspect;
+            this.camera.right = this.orthoSize * aspect;
+            this.camera.top = this.orthoSize;
+            this.camera.bottom = -this.orthoSize;
         }
         this.camera.updateProjectionMatrix();
     }
@@ -134,4 +153,11 @@ export class CameraController {
         this.controls?.dispose();
         this.controls = null;
     }
+}
+
+function toVector3(point) {
+    if (point?.isVector3) return point.clone();
+    if (!Array.isArray(point) || point.length < 3) return null;
+    const vector = new THREE.Vector3(Number(point[0]), Number(point[1]), Number(point[2]));
+    return vector;
 }

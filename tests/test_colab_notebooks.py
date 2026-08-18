@@ -93,3 +93,5 @@ def test_end_to_end_bundle_step_is_cwd_independent() -> None:
     assert "def _bundle_repo_candidates(seed):" in source
     assert "globals().get(\"viewer_pose_path\")" in source
     assert "bundle_repo = None" in source
+    assert "drosophila-pd-flygym-runtime" in source
+    assert "git\", \"clone\"" in source

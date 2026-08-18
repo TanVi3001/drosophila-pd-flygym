@@ -3,13 +3,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { quaternionFromOrientation, vectorFromValue } from './joint_animator.js';
 
 const MATERIAL_COLORS = Object.freeze({
-    thorax: 0xd08a53,
-    abdomen: 0x7c5039,
-    head: 0xc98c5f,
-    eye: 0x21130f,
-    wing: 0xbfe6f5,
-    leg: 0x3d2c24,
-    antenna: 0x4a2f25,
+    thorax: 0xb56f43,
+    abdomen: 0x59372f,
+    head: 0xc07b4c,
+    eye: 0x080b10,
+    wing: 0xadd8e8,
+    leg: 0x352521,
+    antenna: 0x422b25,
 });
 
 /** Display mesh for imported rollout pose data.
@@ -103,13 +103,18 @@ export class DigitalFlyMesh {
 
     _material(name, overrides = {}) {
         const transparent = name === 'wing' || overrides.opacity !== undefined;
+        const isEye = name === 'eye';
+        const isWing = name === 'wing';
         return new THREE.MeshStandardMaterial({
             color: MATERIAL_COLORS[name] ?? 0xffffff,
-            roughness: name === 'wing' ? 0.35 : 0.82,
-            metalness: 0.02,
+            roughness: isEye ? 0.14 : isWing ? 0.28 : name === 'thorax' || name === 'head' ? 0.68 : 0.84,
+            metalness: isEye ? 0.12 : 0.03,
             transparent,
-            opacity: name === 'wing' ? 0.42 : 0.96,
-            side: name === 'wing' ? THREE.DoubleSide : THREE.FrontSide,
+            opacity: isWing ? 0.3 : 0.96,
+            side: isWing ? THREE.DoubleSide : THREE.FrontSide,
+            depthWrite: !isWing,
+            emissive: isEye ? 0x10202a : 0x000000,
+            emissiveIntensity: isEye ? 0.18 : 0,
             ...overrides,
         });
     }
@@ -145,7 +150,7 @@ export class DigitalFlyMesh {
         mesh.rotation.set(0.16, 0.04, side * 0.48);
         mesh.scale.set(0.92, side, 1);
         mesh.castShadow = false;
-        mesh.receiveShadow = true;
+        mesh.receiveShadow = false;
         mesh.userData.bodyPart = 'wings';
         this.group.add(mesh);
         this.parts.set(mesh.name, mesh);
@@ -154,16 +159,16 @@ export class DigitalFlyMesh {
     _addAntenna(side) {
         const start = [0.88, side * 0.11, 0.25];
         const end = [1.22, side * 0.26, 0.42];
-        this._addCylinderBetween(`antenna_${side > 0 ? 'L' : 'R'}`, start, end, 0.015, 'antenna');
+        this._addCylinderBetween(`antenna_${side > 0 ? 'L' : 'R'}`, start, end, 0.009, 'antenna');
     }
 
     _addLeg(label, side, x, sweep) {
         const hip = [x, side * 0.28, -0.16];
         const knee = [x + sweep, side * 0.72, -0.44];
         const foot = [x + sweep * 1.4, side * 1.08, -0.72];
-        this._addCylinderBetween(`leg_${label}_femur`, hip, knee, 0.035, 'leg', 'legs');
-        this._addCylinderBetween(`leg_${label}_tibia`, knee, foot, 0.025, 'leg', 'legs');
-        const footMesh = this._addEllipsoid(`leg_${label}_foot`, 'leg', foot, [0.07, 0.035, 0.025]);
+        this._addCylinderBetween(`leg_${label}_femur`, hip, knee, 0.026, 'leg', 'legs');
+        this._addCylinderBetween(`leg_${label}_tibia`, knee, foot, 0.018, 'leg', 'legs');
+        const footMesh = this._addEllipsoid(`leg_${label}_foot`, 'leg', foot, [0.055, 0.026, 0.018]);
         footMesh.userData.bodyPart = 'legs';
     }
 

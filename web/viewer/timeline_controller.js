@@ -48,22 +48,28 @@ export class TimelineController {
         root.className = 'three-viewer-timeline';
         root.innerHTML = `
             <div class="three-viewer-controls" role="group" aria-label="Viewer playback controls">
-                <button type="button" data-action="play">Play</button>
-                <button type="button" data-action="pause">Pause</button>
-                <button type="button" data-action="stop">Stop</button>
-                <label>Speed <select data-role="speed"><option value="0.25">0.25x</option><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
-                <label><input type="checkbox" data-role="loop"> Loop</label>
-                <span data-role="frame-readout">Frame 0 / 0</span>
-                <span data-role="time-readout">Time 0.000 s</span>
-                <span data-role="fps-readout">FPS 0</span>
-                <label>Camera <select data-role="camera"><option value="demo" selected>Demo</option><option value="isometric">Isometric</option><option value="front">Front</option><option value="left">Left</option><option value="top">Top</option></select></label>
-                <button type="button" data-action="reset">Reset view</button>
-                <label><input type="checkbox" data-role="axes" checked> Axes</label>
-                <label><input type="checkbox" data-role="grid" checked> Grid</label>
-                <label><input type="checkbox" data-role="floor" checked> Floor</label>
-                <label><input type="checkbox" data-role="shadow" checked> Shadow</label>
+                <div class="three-viewer-transport">
+                    <button type="button" class="viewer-transport-button" data-action="play" aria-label="Play" title="Play"><span aria-hidden="true">&#9654;</span><span>Play</span></button>
+                    <button type="button" class="viewer-transport-button" data-action="pause" aria-label="Pause" title="Pause"><span aria-hidden="true">&#10074;&#10074;</span><span>Pause</span></button>
+                    <button type="button" class="viewer-transport-button" data-action="stop" aria-label="Stop" title="Stop"><span aria-hidden="true">&#9632;</span><span>Stop</span></button>
+                </div>
+                <div class="three-viewer-readouts">
+                    <span class="viewer-readout viewer-readout-primary" data-role="frame-readout">Frame 0 / 0</span>
+                    <span class="viewer-readout" data-role="time-readout">Time 0.000 s</span>
+                    <span class="viewer-readout viewer-readout-muted" data-role="fps-readout">FPS 0</span>
+                </div>
+                <div class="three-viewer-options">
+                    <label>Speed <select data-role="speed"><option value="0.25">0.25x</option><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
+                    <label class="viewer-check"><input type="checkbox" data-role="loop"> Loop</label>
+                    <label>Camera <select data-role="camera"><option value="demo" selected>Demo</option><option value="isometric">Isometric</option><option value="front">Front</option><option value="back">Back</option><option value="left">Left</option><option value="right">Right</option><option value="top">Top</option><option value="bottom">Bottom</option></select></label>
+                    <button type="button" class="viewer-secondary-button" data-action="reset">Reset view</button>
+                    <label class="viewer-check"><input type="checkbox" data-role="axes" checked> Axes</label>
+                    <label class="viewer-check"><input type="checkbox" data-role="grid" checked> Grid</label>
+                    <label class="viewer-check"><input type="checkbox" data-role="floor" checked> Floor</label>
+                    <label class="viewer-check"><input type="checkbox" data-role="shadow" checked> Shadow</label>
+                </div>
             </div>
-            <input data-role="frame" type="range" min="0" max="0" value="0" step="1" aria-label="Viewer frame">
+            <div class="three-viewer-scrubber"><input data-role="frame" type="range" min="0" max="0" value="0" step="1" aria-label="Viewer frame"></div>
         `;
         this.frameInput = root.querySelector('[data-role="frame"]');
         this.frameReadout = root.querySelector('[data-role="frame-readout"]');
@@ -87,6 +93,7 @@ export class TimelineController {
         root.querySelector('[data-role="grid"]').addEventListener('change', (event) => this.callbacks.onGrid?.(event.target.checked));
         root.querySelector('[data-role="floor"]').addEventListener('change', (event) => this.callbacks.onFloor?.(event.target.checked));
         root.querySelector('[data-role="shadow"]').addEventListener('change', (event) => this.callbacks.onShadow?.(event.target.checked));
+        this.setPlaying(false);
     }
 
     setRange(totalFrames) {
@@ -111,6 +118,9 @@ export class TimelineController {
     }
 
     setPlaying(playing) {
+        this.root?.classList.toggle('is-playing', Boolean(playing));
+        this.playButton?.classList.toggle('is-active', Boolean(playing));
+        this.pauseButton?.classList.toggle('is-active', !playing);
         this.playButton?.toggleAttribute('disabled', Boolean(playing));
         this.pauseButton?.toggleAttribute('disabled', !playing);
     }
