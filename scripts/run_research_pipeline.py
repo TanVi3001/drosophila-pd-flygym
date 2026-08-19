@@ -98,6 +98,27 @@ def _default_experiment_suite(root: Path) -> Mapping[str, Any]:
     )
 
 
+def _default_dataset_validation(root: Path, datasets: list[Path]) -> Mapping[str, Any]:
+    """Validate discovered datasets before the experiment suite is started."""
+
+    script = root / "scripts" / "validate_research_workflow.py"
+    if not script.is_file():
+        # Test and embedding callers may provide a temporary artifact root;
+        # validation logic still comes from this repository's existing script.
+        script = REPOSITORY_ROOT / "scripts" / "validate_research_workflow.py"
+    module = _load_script(script)
+    output = root / "results" / "dataset_validation"
+    reports = []
+    for dataset in datasets:
+        report = module.validate_dataset(dataset, output=output / dataset.name)
+        reports.append({"dataset_id": dataset.name, "validation": report})
+    return {
+        "datasets": reports,
+        "count": len(reports),
+        "failed": [item["dataset_id"] for item in reports if not item["validation"].get("overall_pass", False)],
+    }
+
+
 def _default_biomarkers(root: Path) -> Mapping[str, Any]:
     source = root / "src"
     if source.is_dir() and str(source) not in sys.path:
@@ -152,6 +173,90 @@ def _stage_statuses_for_gate(status: str) -> dict[str, dict[str, Any]]:
     if status == "WAITING_RUNTIME":
         result["dataset"] = _status_payload("WAITING_RUNTIME", details={"blocked_by": "runtime"})
     return result
+
+
+def _blocked_statuses(prior: Mapping[str, Mapping[str, Any]], blocked_by: str) -> dict[str, dict[str, Any]]:
+    """Keep completed stages and mark every downstream stage as skipped."""
+
+    statuses = {
+        name: _status_payload("SKIPPED", details={"blocked_by": blocked_by})
+        for name in STAGE_NAMES
+    }
+    statuses.update({name: dict(value) for name, value in prior.items()})
+    return statuses
+
+
+def _count(summary: Mapping[str, Any], status: str) -> int:
+    counts = summary.get("counts")
+    if not isinstance(counts, Mapping):
+        return 0
+    try:
+        return int(counts.get(status, 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _analysis_gate(summary: Mapping[str, Any]) -> tuple[bool, dict[str, Any]]:
+    """Confirm that completed experiments produced analysis artifacts."""
+
+    records = summary.get("experiments")
+    if not isinstance(records, list):
+        # Preserve compatibility with injected stage hooks that only expose
+        # aggregate counts; the real ExperimentManager always emits records.
+        return _count(summary, "COMPLETED") > 0, {"delegated_to": "experiment_manager", "records_verified": False}
+
+    missing: list[str] = []
+    for record in records:
+        if not isinstance(record, Mapping) or record.get("status") != "COMPLETED":
+            continue
+        artifacts = record.get("artifacts")
+        artifact_names = tuple(artifacts) if isinstance(artifacts, Mapping) else ()
+        if not any(str(name).startswith("metrics/") for name in artifact_names):
+            missing.append(f"{record.get('experiment_id', 'unknown')}:metrics")
+        if not any(str(name).startswith("report/") for name in artifact_names):
+            missing.append(f"{record.get('experiment_id', 'unknown')}:report")
+        if not any(str(name).startswith("figures/") for name in artifact_names):
+            missing.append(f"{record.get('experiment_id', 'unknown')}:figures")
+    return not missing and _count(summary, "COMPLETED") > 0, {"missing": missing, "records_verified": True}
+
+
+def _validation_gate(summary: Mapping[str, Any]) -> tuple[bool, dict[str, Any]]:
+    reports = summary.get("datasets")
+    if not isinstance(reports, list):
+        return bool(summary.get("count", 0)), {"reports_verified": False}
+    failed = []
+    for report in reports:
+        if not isinstance(report, Mapping):
+            failed.append("unknown")
+            continue
+        validation = report.get("validation")
+        integrity = report.get("integrity")
+        if not isinstance(validation, Mapping) or not validation.get("overall_pass", False):
+            failed.append(str(report.get("dataset_id", "unknown")))
+            continue
+        if integrity is not None and (not isinstance(integrity, Mapping) or not integrity.get("overall_pass", False)):
+            failed.append(str(report.get("dataset_id", "unknown")))
+    return not failed and bool(reports), {"failed": failed, "reports_verified": True}
+
+
+def _stop_pipeline(
+    root: Path,
+    prior: Mapping[str, Mapping[str, Any]],
+    stage: str,
+    status: str,
+    details: Mapping[str, Any],
+    blocker: str,
+    next_action: str,
+) -> dict[str, Any]:
+    """Persist a terminal gate result without invoking downstream stages."""
+
+    statuses = _blocked_statuses(prior, stage)
+    stage_details = dict(details)
+    stage_details.setdefault("reason_code", status)
+    statuses[stage] = _status_payload(status, details=stage_details)
+    payload = _finish_payload(root, statuses, [blocker], next_action)
+    _write_reports(root, payload)
+    return payload
 
 
 def _write_reports(root: Path, payload: Mapping[str, Any]) -> None:
@@ -234,6 +339,17 @@ def run_research_pipeline(
 
     generated = _invoke("dataset", dataset_generator, root)
     datasets = _real_datasets(root)
+    if generated.get("status") == "FAILED" or generated.get("error"):
+        prior = {"runtime": _status_payload("PASS", details=runtime)}
+        return _stop_pipeline(
+            root,
+            prior,
+            "dataset",
+            "FAILED",
+            generated,
+            "Dataset generation failed.",
+            "Inspect the dataset-generation error before rerunning.",
+        )
     if not datasets:
         statuses = _stage_statuses_for_gate("WAITING_DATASET")
         statuses["runtime"] = _status_payload("PASS", details=runtime)
@@ -241,66 +357,117 @@ def run_research_pipeline(
         payload = _finish_payload(root, statuses, ["Dataset generation completed without a usable real rollout."], "Provide or successfully generate a validated rollout, then rerun this command.")
         _write_reports(root, payload)
         return payload
-    if generated.get("status") == "FAILED" or generated.get("error"):
-        statuses = _stage_statuses_for_gate("FAILED")
-        statuses["runtime"] = _status_payload("PASS", details=runtime)
-        statuses["dataset"] = _status_payload("FAILED", details=generated)
-        payload = _finish_payload(root, statuses, ["Dataset generation failed."], "Inspect the dataset-generation error before rerunning.")
-        _write_reports(root, payload)
-        return payload
+
+    dataset_validation = _invoke(
+        "dataset_validation",
+        lambda _root: _default_dataset_validation(_root, datasets),
+        root,
+    )
+    dataset_valid = isinstance(dataset_validation.get("datasets"), list) and bool(dataset_validation.get("datasets")) and not dataset_validation.get("failed")
+    dataset_details = {"count": len(datasets), "generation": generated, "validation": dataset_validation}
+    prior = {
+        "runtime": _status_payload("PASS", details=runtime),
+        "dataset": _status_payload("PASS", details=dataset_details),
+    }
+    if not dataset_valid:
+        return _stop_pipeline(
+            root,
+            {"runtime": prior["runtime"]},
+            "dataset",
+            "WAITING_DATASET",
+            dataset_details,
+            "Dataset validation did not pass; downstream stages were not started.",
+            "Repair or provide a complete validated real rollout, then rerun this command.",
+        )
 
     suite = _invoke("experiment", experiment_runner, root)
-    experiment_failed = suite.get("status") == "FAILED" or int(suite.get("counts", {}).get("FAILED", 0)) > 0
+    experiment_failed = suite.get("status") == "FAILED" or _count(suite, "FAILED") > 0
+    prior["experiment"] = _status_payload("PASS", details=suite)
     if experiment_failed:
-        statuses = _stage_statuses_for_gate("FAILED")
-        statuses["runtime"] = _status_payload("PASS", details=runtime)
-        statuses["dataset"] = _status_payload("PASS", details={"count": len(datasets), "generation": generated})
-        statuses["experiment"] = _status_payload("FAILED", details=suite)
-        payload = _finish_payload(root, statuses, ["Experiment suite failed."], "Inspect experiment artifacts and rerun after correcting the failed stage.")
-        _write_reports(root, payload)
-        return payload
-    completed_experiments = int(suite.get("counts", {}).get("COMPLETED", 0))
-    if "counts" in suite and completed_experiments == 0:
-        statuses = _stage_statuses_for_gate("WAITING_DATASET")
-        statuses["runtime"] = _status_payload("PASS", details=runtime)
-        statuses["dataset"] = _status_payload("PASS", details={"count": len(datasets), "generation": generated})
-        statuses["experiment"] = _status_payload("WAITING_DATASET", details=suite)
-        payload = _finish_payload(root, statuses, ["No experiment completed over the discovered rollout artifacts."], "Inspect dataset and experiment records, then rerun this command.")
-        _write_reports(root, payload)
-        return payload
+        return _stop_pipeline(
+            root,
+            {"runtime": prior["runtime"], "dataset": prior["dataset"]},
+            "experiment",
+            "FAILED",
+            suite,
+            "Experiment suite failed; downstream stages were not started.",
+            "Inspect experiment artifacts and rerun after correcting the failed stage.",
+        )
+    completed_experiments = _count(suite, "COMPLETED")
+    if "counts" in suite and (_count(suite, "WAITING_DATASET") > 0 or completed_experiments == 0):
+        return _stop_pipeline(
+            root,
+            {"runtime": prior["runtime"], "dataset": prior["dataset"]},
+            "experiment",
+            "WAITING_DATASET",
+            suite,
+            "Experiment suite has no usable completed experiment; downstream stages were not started.",
+            "Inspect experiment records and provide the missing usable dataset artifacts.",
+        )
+
+    analysis_pass, analysis_details = _analysis_gate(suite)
+    prior["experiment"] = _status_payload("PASS", details=suite)
+    prior["analysis"] = _status_payload("PASS", details=analysis_details)
+    if not analysis_pass:
+        return _stop_pipeline(
+            root,
+            {"runtime": prior["runtime"], "dataset": prior["dataset"], "experiment": prior["experiment"]},
+            "analysis",
+            "FAILED",
+            analysis_details,
+            "Analysis artifacts are incomplete; downstream stages were not started.",
+            "Inspect the experiment analysis outputs and rerun the suite.",
+        )
 
     biomarker = _invoke("biomarkers", biomarker_runner, root)
-    validation = _invoke("validation", validation_runner, root)
-    release = _invoke("release", release_runner, root)
-    publication = _invoke("publication", publication_runner, root)
     biomarker_pass = bool(biomarker.get("count", 0)) and not biomarker.get("failed")
-    validation_reports = validation.get("datasets", [])
-    validation_pass = bool(validation_reports) and all(
-        report.get("validation", {}).get("overall_pass", False)
-        and report.get("integrity", {}).get("overall_pass", False)
-        for report in validation_reports
-    )
-    validation_pass = validation_pass or ("datasets" not in validation and bool(validation.get("count", 0)))
+    prior["biomarkers"] = _status_payload("PASS", details=biomarker)
+    if not biomarker_pass:
+        return _stop_pipeline(
+            root,
+            {**prior, "biomarkers": {}},
+            "biomarkers",
+            "FAILED",
+            biomarker,
+            "One or more biomarker reports failed; downstream stages were not started.",
+            "Inspect biomarker reports and rerun after correcting the failed stage.",
+        )
+
+    validation = _invoke("validation", validation_runner, root)
+    validation_pass, validation_details = _validation_gate(validation)
+    prior["validation"] = _status_payload("PASS", details={**validation, **validation_details})
+    if not validation_pass:
+        return _stop_pipeline(
+            root,
+            {**prior, "validation": {}},
+            "validation",
+            "FAILED",
+            {**validation, **validation_details},
+            "Research validation failed; release and publication were not started.",
+            "Inspect validation and integrity reports before preparing publication assets.",
+        )
+
+    release = _invoke("release", release_runner, root)
+    release_pass = release.get("readiness") in {"READY", "READY_FOR_REVIEW"}
+    prior["release"] = _status_payload("PASS", details=release)
+    if not release_pass:
+        return _stop_pipeline(
+            root,
+            {**prior, "release": {}},
+            "release",
+            "FAILED",
+            release,
+            "Release audit is not ready; publication was not started.",
+            "Resolve release-audit blockers before preparing the paper package.",
+        )
+
+    publication = _invoke("publication", publication_runner, root)
+    publication_status = "FAILED" if publication.get("status") == "FAILED" else ("PASS" if publication.get("status") == "READY" else "WAITING_DATASET")
     statuses = {
-        "runtime": _status_payload("PASS", details=runtime),
-        "dataset": _status_payload("PASS", details={"count": len(datasets), "generation": generated}),
-        "experiment": _status_payload("PASS", details=suite),
-        "analysis": _status_payload("PASS", details={"delegated_to": "experiment_manager"}),
-        "biomarkers": _status_payload("PASS" if biomarker_pass else "FAILED", details=biomarker),
-        "validation": _status_payload("PASS" if validation_pass else "FAILED", details=validation),
-        "release": _status_payload("PASS" if release.get("readiness") in {"READY", "READY_FOR_REVIEW"} else "FAILED", details=release),
-        "publication": _status_payload(
-            "FAILED" if publication.get("status") == "FAILED" else ("PASS" if publication.get("status") == "READY" else "WAITING_DATASET"),
-            details=publication,
-        ),
+        **prior,
+        "publication": _status_payload(publication_status, details=publication),
     }
-    blockers = []
-    if statuses["biomarkers"]["status"] == "FAILED":
-        blockers.append("One or more biomarker reports failed.")
-    if statuses["release"]["status"] == "FAILED":
-        blockers.append("Release audit is not ready.")
-    if statuses["publication"]["status"] != "PASS":
-        blockers.append("Publication package is not ready.")
+    blockers = [] if publication_status == "PASS" else ["Publication package is not ready."]
     payload = _finish_payload(root, statuses, blockers, "Review the generated status and validation reports before publication.")
     _write_reports(root, payload)
     return payload
