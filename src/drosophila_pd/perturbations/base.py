@@ -316,6 +316,23 @@ def perturbation_from_mapping(data: dict[str, Any]) -> Perturbation:
             name=name,
             config_id=config_id,
         )
+    if perturbation_type == "disease_layer":
+        # Import lazily to keep the low-level perturbation protocol independent
+        # from the higher-level computational phenotype package.
+        from drosophila_pd.parkinson.disease_layer import DiseaseLayer
+
+        layer_values = dict(values)
+        parameters = layer_values.pop("parameters", None)
+        if parameters is not None:
+            if not isinstance(parameters, dict):
+                raise ValueError("disease_layer.parameters must be a mapping.")
+            for key, value in parameters.items():
+                layer_values.setdefault(key, value)
+        layer_values.setdefault("name", name)
+        if config_id is not None:
+            layer_values.setdefault("config_id", config_id)
+        layer_values.pop("type", None)
+        return DiseaseLayer.from_mapping(layer_values)
     if perturbation_type == "composite":
         raw_components = values.get("components")
         if not isinstance(raw_components, list) or not raw_components:

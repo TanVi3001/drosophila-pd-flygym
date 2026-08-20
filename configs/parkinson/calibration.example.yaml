@@ -1,0 +1,26 @@
+schema_version: "1.0"
+calibration_id: "condition_a_literature_constrained_grid"
+targets: "configs/parkinson/phenotype_database.template.json"
+method: "deterministic_grid_search"
+random_seed: 0
+parameter_grid:
+  motor_vigor:
+    - 1.0
+    - 0.9
+    - 0.8
+  coordination:
+    - 1.0
+    - 0.9
+    - 0.75
+  initiation_delay_steps:
+    - 0
+    - 10
+  motor_noise_std:
+    - 0.0
+  fatigue_rate:
+    - 0.0
+  asymmetry:
+    - 0.0
+notes:
+  - "This is a computational candidate grid, not a disease staging configuration."
+  - "Calibration remains unavailable until numeric, unit-matched literature targets are supplied."

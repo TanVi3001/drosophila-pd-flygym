@@ -1,0 +1,48 @@
+schema_version: "1.0"
+study_id: "computational_condition_response_v1"
+scientific_scope: "Generic computational conditions for calibration; not disease stages."
+conditions:
+  - id: "condition_a_vigor_090"
+    description: "Action-level motor vigor proxy at 0.90."
+    disease_layer:
+      name: "condition_a_vigor_090"
+      motor_vigor: 0.90
+      coordination: 1.0
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "condition_a_vigor_080"
+    description: "Action-level motor vigor proxy at 0.80."
+    disease_layer:
+      name: "condition_a_vigor_080"
+      motor_vigor: 0.80
+      coordination: 1.0
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "condition_b_coordination_075"
+    description: "CPG coupling coordination proxy at 0.75."
+    disease_layer:
+      name: "condition_b_coordination_075"
+      motor_vigor: 1.0
+      coordination: 0.75
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "condition_c_delay_010"
+    description: "Explicit ten-step initiation delay proxy."
+    disease_layer:
+      name: "condition_c_delay_010"
+      motor_vigor: 1.0
+      coordination: 1.0
+      initiation_delay_steps: 10
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0

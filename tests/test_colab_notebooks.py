@@ -21,6 +21,10 @@ NOTEBOOK_NAMES = [
     "09_Validation.ipynb",
     "10_End_to_End.ipynb",
 ]
+RESEARCH_NOTEBOOK_NAMES = [
+    "20_Run_Research.ipynb",
+    "21_Verify_Research_Output.ipynb",
+]
 REQUIRED_MARKDOWN = (
     "Objective",
     "Prerequisites",
@@ -40,7 +44,30 @@ def _load_notebook(name: str) -> dict:
 
 
 def test_colab_workspace_contains_expected_notebooks() -> None:
-    assert sorted(path.name for path in COLAB_DIR.glob("*.ipynb")) == sorted(NOTEBOOK_NAMES)
+    actual = {path.name for path in COLAB_DIR.glob("*.ipynb")}
+    assert set(NOTEBOOK_NAMES).issubset(actual)
+    assert set(RESEARCH_NOTEBOOK_NAMES).issubset(actual)
+
+
+def test_research_notebooks_have_valid_structure_and_sections() -> None:
+    required_sections = (
+        "Section 1",
+        "Section 2",
+        "Section 3",
+        "Section 4",
+    )
+    for name in RESEARCH_NOTEBOOK_NAMES:
+        notebook = _load_notebook(name)
+        assert notebook["nbformat"] == 4
+        assert notebook["metadata"]["kernelspec"]["name"] == "python3"
+        assert notebook["metadata"]["colab"]["name"] == name
+        markdown = "\n".join(
+            "".join(cell["source"])
+            for cell in notebook["cells"]
+            if cell["cell_type"] == "markdown"
+        )
+        for section in required_sections:
+            assert section in markdown, f"{name} lacks {section}"
 
 
 def test_colab_notebooks_have_valid_structure_and_metadata() -> None:

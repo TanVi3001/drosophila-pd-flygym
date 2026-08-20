@@ -190,7 +190,11 @@ def build_paired_checks(
             ).get("observed"),
         ),
     }
-    if perturbation_metadata["type"] in {"identity", "global_action_scale"}:
+    if perturbation_metadata["type"] in {
+        "identity",
+        "global_action_scale",
+        "disease_layer",
+    }:
         checks["adhesion_commands_preserved"] = _check(
             True, perturbed_transform.get("adhesion_commands_preserved")
         )

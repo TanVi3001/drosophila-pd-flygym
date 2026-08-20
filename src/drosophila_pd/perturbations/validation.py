@@ -33,6 +33,10 @@ def summarize_action_transformation(
     metadata_type = (
         perturbation_metadata.get("type") if perturbation_metadata is not None else None
     )
+    custom_validation = bool(
+        perturbation_metadata
+        and perturbation_metadata.get("action_validation") == "structural_only"
+    )
     expected_actions = controller_actions
     expected_transform = "identity"
     scale = _effective_component_scale(
@@ -46,16 +50,22 @@ def summarize_action_transformation(
             if metadata_type == "global_action_scale"
             else "composite_global_action_scale"
         )
+    elif custom_validation:
+        expected_transform = "custom_action_transform"
 
     transform_error = (
         _max_abs_difference(expected_actions, applied_actions)
-        if action_dimensions_valid
+        if action_dimensions_valid and not custom_validation
         else None
     )
     transform_pass = (
-        transform_error is not None
-        and transform_error <= 1e-12
-        and action_dimensions_valid
+        action_dimensions_valid
+        and np.isfinite(controller_actions).all()
+        and np.isfinite(applied_actions).all()
+        and (
+            custom_validation
+            or (transform_error is not None and transform_error <= 1e-12)
+        )
     )
     return {
         "perturbation_type": metadata_type,
@@ -109,6 +119,10 @@ def summarize_controller_transformation(
         perturbation_metadata,
         component_type="cpg_coupling_scale",
     )
+    if scale is None and metadata_type == "disease_layer":
+        parameters = perturbation_metadata.get("parameters", {})
+        if "coordination" in parameters:
+            scale = float(parameters["coordination"])
     expected_transform = "identity"
     expected_weights = pre_weights
     if scale is not None:
@@ -116,7 +130,11 @@ def summarize_controller_transformation(
         expected_transform = (
             "cpg_coupling_scale"
             if metadata_type == "cpg_coupling_scale"
-            else "composite_cpg_coupling_scale"
+            else (
+                "disease_layer_cpg_coupling_scale"
+                if metadata_type == "disease_layer"
+                else "composite_cpg_coupling_scale"
+            )
         )
 
     transform_error = (
@@ -195,6 +213,9 @@ def _component_transform_summaries(
         elif stage == "controller" and metadata_type == "cpg_coupling_scale":
             expected_transform = "cpg_coupling_scale"
             scale = parameters.get("scale")
+        elif stage == "controller" and metadata_type == "disease_layer":
+            expected_transform = "cpg_coupling_scale"
+            scale = parameters.get("coordination")
         else:
             expected_transform = "identity"
             scale = None

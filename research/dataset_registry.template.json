@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "status": "TEMPLATE",
+  "dataset_root": "datasets",
+  "datasets": [],
+  "scientific_scope": "Inventory and provenance metadata for approved imported artifacts only; no biological conclusion."
+}

@@ -43,6 +43,7 @@ build/
 # Logs
 logs/*
 !logs/.gitkeep
+!logs/README.md
 *.log
 
 # Large or raw experiment artifacts

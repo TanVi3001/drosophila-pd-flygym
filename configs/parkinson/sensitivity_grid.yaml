@@ -1,0 +1,114 @@
+schema_version: "1.0"
+study_id: "computational_condition_response_grid_v1"
+scientific_scope: "Sensitivity analysis of generic computational control conditions; not a disease-stage series."
+conditions:
+  - id: "vigor_0_60"
+    description: "Motor vigor proxy at 0.60."
+    disease_layer:
+      name: "vigor_0_60"
+      motor_vigor: 0.60
+      coordination: 1.0
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "vigor_0_70"
+    description: "Motor vigor proxy at 0.70."
+    disease_layer:
+      name: "vigor_0_70"
+      motor_vigor: 0.70
+      coordination: 1.0
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "vigor_0_80"
+    description: "Motor vigor proxy at 0.80."
+    disease_layer:
+      name: "vigor_0_80"
+      motor_vigor: 0.80
+      coordination: 1.0
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "vigor_0_90"
+    description: "Motor vigor proxy at 0.90."
+    disease_layer:
+      name: "vigor_0_90"
+      motor_vigor: 0.90
+      coordination: 1.0
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "coordination_0_60"
+    description: "CPG coupling coordination proxy at 0.60."
+    disease_layer:
+      name: "coordination_0_60"
+      motor_vigor: 1.0
+      coordination: 0.60
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "coordination_0_75"
+    description: "CPG coupling coordination proxy at 0.75."
+    disease_layer:
+      name: "coordination_0_75"
+      motor_vigor: 1.0
+      coordination: 0.75
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "coordination_0_90"
+    description: "CPG coupling coordination proxy at 0.90."
+    disease_layer:
+      name: "coordination_0_90"
+      motor_vigor: 1.0
+      coordination: 0.90
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "delay_00"
+    description: "No initiation delay control condition."
+    disease_layer:
+      name: "delay_00"
+      motor_vigor: 1.0
+      coordination: 1.0
+      initiation_delay_steps: 0
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "delay_05"
+    description: "Initiation delay proxy of five steps."
+    disease_layer:
+      name: "delay_05"
+      motor_vigor: 1.0
+      coordination: 1.0
+      initiation_delay_steps: 5
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0
+  - id: "delay_10"
+    description: "Initiation delay proxy of ten steps."
+    disease_layer:
+      name: "delay_10"
+      motor_vigor: 1.0
+      coordination: 1.0
+      initiation_delay_steps: 10
+      motor_noise_std: 0.0
+      fatigue_rate: 0.0
+      asymmetry: 0.0
+      random_seed: 0

@@ -25,9 +25,42 @@ from .validation import (
 )
 from .comparison import compare_computational_reports
 from .report import generate_computational_pd_report, render_markdown_report
+from .disease_layer import COMPUTATIONAL_SCOPE as DISEASE_LAYER_SCOPE, DiseaseLayer
+from .calibration import (
+    CalibrationCandidate,
+    CalibrationError,
+    CalibrationResult,
+    TargetContribution,
+    calibrate_candidates,
+    calibrate_grid,
+    evaluate_targets,
+    write_calibration_report,
+)
+from .phenotype_database import (
+    PhenotypeDatabase,
+    PhenotypeTarget,
+    load_phenotype_database,
+    phenotype_database_from_mapping,
+    validate_phenotype_document,
+)
 
 __all__ = [
     "COMPUTATIONAL_SCOPE",
+    "DISEASE_LAYER_SCOPE",
+    "DiseaseLayer",
+    "CalibrationCandidate",
+    "CalibrationError",
+    "CalibrationResult",
+    "TargetContribution",
+    "calibrate_candidates",
+    "calibrate_grid",
+    "evaluate_targets",
+    "write_calibration_report",
+    "PhenotypeDatabase",
+    "PhenotypeTarget",
+    "load_phenotype_database",
+    "phenotype_database_from_mapping",
+    "validate_phenotype_document",
     "MOTOR_FEATURE_NAMES",
     "ComputationalPDIndex",
     "ParkinsonMotorConfig",

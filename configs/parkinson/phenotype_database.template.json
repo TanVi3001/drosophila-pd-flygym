@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "name": "literature_observation_template",
+    "purpose": "Record provenance-bearing observations before computational calibration.",
+    "numeric_calibration_status": "WAITING_NUMERIC_TARGETS",
+    "scientific_scope": "These records are literature observations, not biological ground truth or clinical thresholds."
+  },
+  "targets": [
+    {
+      "target_id": "example_locomotor_speed_observation",
+      "metric": "mean_planar_speed_mm_s",
+      "source_id": "S2211124713006165",
+      "citation": "A Single Dopamine Pathway Underlies Progressive Locomotor Deficits in a Drosophila Model of Parkinson Disease, Cell Reports (2013), https://doi.org/10.1016/j.celrep.2013.10.011",
+      "model_context": "The specific genetic Drosophila model and assay context reported by the cited study; not interchangeable with every FlyGym condition.",
+      "assay": "locomotor performance",
+      "direction": "lower",
+      "notes": "Populate target_value or target_range only from an extracted, unit-matched result from the cited source."
+    },
+    {
+      "target_id": "example_walking_reactivity_observation",
+      "metric": "mean_planar_speed_mm_s",
+      "source_id": "elife90905",
+      "citation": "Altered reactivity to threatening stimuli in Drosophila models of Parkinson's disease, eLife (2025), https://doi.org/10.7554/eLife.90905",
+      "model_context": "The genetic model, threat assay, and walking response context reported by the cited study; assay conditions must be matched before use.",
+      "assay": "walking response to threat",
+      "direction": "lower",
+      "notes": "This qualitative observation is retained for provenance and is not numerically calibratable as written."
+    }
+  ]
+}

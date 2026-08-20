@@ -51,10 +51,16 @@ from .parameter_sweep import (
     load_parameter_sweep_config,
     run_parameter_sweep,
 )
+from .calibration_runner import (
+    CalibrationCondition,
+    load_calibration_conditions,
+    run_calibration_conditions,
+)
 
 __all__ = [
     "DEFAULT_HEALTHY_BASELINE_CONFIG",
     "CandidateRobustnessConfig",
+    "CalibrationCondition",
     "ComputationalRescueConditionSpec",
     "ComputationalRescueConfig",
     "CombinedPhenotypeConditionSpec",
@@ -79,11 +85,13 @@ __all__ = [
     "build_perturbation_unavailable_report",
     "load_healthy_baseline_config",
     "load_candidate_robustness_config",
+    "load_calibration_conditions",
     "load_combined_phenotype_sweep_config",
     "load_computational_rescue_config",
     "load_e4_evidence_matrix",
     "load_parameter_sweep_config",
     "run_candidate_robustness_validation",
+    "run_calibration_conditions",
     "run_combined_phenotype_sweep",
     "run_computational_rescue_validation",
     "run_healthy_baseline",

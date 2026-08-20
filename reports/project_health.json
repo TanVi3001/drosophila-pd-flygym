@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "generated_on": "2026-08-19",
+  "scope": "Developer-experience and maintainability snapshot. No simulation was run and no scientific data was generated.",
+  "inventory": {
+    "python_modules_under_src": {
+      "count": 256,
+      "definition": "All .py files below src/, including package initializers."
+    },
+    "top_level_python_scripts": {
+      "count": 42,
+      "definition": "All .py files directly below scripts/."
+    },
+    "python_test_files": {
+      "count": 144,
+      "definition": "All files matching tests/**/test_*.py."
+    },
+    "python_files_under_tests": 147,
+    "markdown_files_under_docs": 603,
+    "configuration_files_under_configs": 29
+  },
+  "tests": {
+    "status": "PASS",
+    "command": "pytest -q -rs -p no:cacheprovider",
+    "passed": 437,
+    "skipped": 13,
+    "failed": 0,
+    "skip_reasons": [
+      "Browser E2E tests require the explicit --run-e2e flag.",
+      "FlyGym/MuJoCo integration tests require the simulation environment."
+    ]
+  },
+  "coverage": {
+    "status": "NOT_REPORTED",
+    "percentage": null,
+    "source": null,
+    "note": "A coverage percentage was not generated or independently verified in this audit; no estimate is provided."
+  },
+  "documentation": {
+    "status": "PASS_WITH_NOTES",
+    "markdown_files": 603,
+    "architecture_book": "PRESENT",
+    "developer_handbook": "PRESENT",
+    "maintenance_guide": "PRESENT",
+    "security_review": "PRESENT",
+    "known_note": "Runtime-dependent instructions remain conditional on the pinned environment and real datasets."
+  },
+  "release": {
+    "status": "PASS",
+    "version": "1.0.0",
+    "changelog": "PRESENT",
+    "release_notes": "PRESENT",
+    "release_checklist": "PRESENT",
+    "license": "PRESENT",
+    "citation": "PRESENT",
+    "contributing": "PRESENT"
+  },
+  "runtime": {
+    "status": "WAITING_RUNTIME",
+    "source": "python scripts/bootstrap.py --json",
+    "python": "3.13.5",
+    "required_python": "3.12.x",
+    "flygym": "MISSING",
+    "mujoco": "MISSING",
+    "flygym_demo": "MISSING",
+    "pip": "PRESENT",
+    "core_repository_directories": "PRESENT"
+  },
+  "research": {
+    "status": "WAITING_RUNTIME",
+    "dataset_status": "WAITING_DATASET",
+    "real_rollout_files_present": false,
+    "note": "Only dataset layout documentation/templates are present in the checkout; no real rollout is claimed."
+  },
+  "protected_scope": {
+    "scientific_pipeline_modified": false,
+    "simulation_modified": false,
+    "viewer_modified": false,
+    "notebooks_modified": false,
+    "public_api_modified": false
+  },
+  "blockers": [
+    "Use the pinned Python 3.12.x runtime.",
+    "Install and verify FlyGym 2.1.0, MuJoCo 3.9.0, and flygym_demo in that runtime.",
+    "Provide approved real rollout datasets before research execution."
+  ]
+}
