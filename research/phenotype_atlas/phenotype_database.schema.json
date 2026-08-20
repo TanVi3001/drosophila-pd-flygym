@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TanVi3001/drosophila-pd-flygym/schema/digital-phenotype-atlas.json",
+  "title": "Digital Phenotype Atlas",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "records"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "metadata": {"type": "object"},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paper_id", "doi", "pmid", "title", "journal", "year", "authors",
+          "species", "strain", "genotype", "gene", "mutation", "expression_system",
+          "sex", "age_days", "temperature", "assay", "arena", "lighting", "camera_fps",
+          "walking_speed_mean", "walking_speed_sd", "walking_speed_unit", "stride_length_mean",
+          "pause_fraction", "turning_rate", "heading_variance", "climbing_score",
+          "step_frequency", "sample_size", "confidence_interval", "p_value", "effect_size",
+          "figure_reference", "table_reference", "supplementary_reference", "notes",
+          "quality_score", "evidence_level", "manual_review", "provenance"
+        ],
+        "properties": {
+          "paper_id": {"type": "string"},
+          "doi": {"type": ["string", "null"]},
+          "pmid": {"type": ["string", "null"]},
+          "title": {"type": "string"},
+          "journal": {"type": "string"},
+          "year": {"type": ["integer", "null"]},
+          "authors": {"type": "string"},
+          "species": {"type": "string"},
+          "strain": {"type": "string"},
+          "genotype": {"type": "string"},
+          "gene": {"type": "string"},
+          "mutation": {"type": "string"},
+          "expression_system": {"type": "string"},
+          "sex": {"type": "string"},
+          "age_days": {"type": ["number", "null"]},
+          "temperature": {"type": ["number", "null"]},
+          "assay": {"type": "string"},
+          "arena": {"type": "string"},
+          "lighting": {"type": "string"},
+          "camera_fps": {"type": ["number", "null"]},
+          "walking_speed_mean": {"type": ["number", "null"]},
+          "walking_speed_sd": {"type": ["number", "null"]},
+          "walking_speed_unit": {"type": "string"},
+          "stride_length_mean": {"type": ["number", "null"]},
+          "pause_fraction": {"type": ["number", "null"]},
+          "turning_rate": {"type": ["number", "null"]},
+          "heading_variance": {"type": ["number", "null"]},
+          "climbing_score": {"type": ["number", "null"]},
+          "step_frequency": {"type": ["number", "null"]},
+          "sample_size": {"type": ["integer", "null"]},
+          "confidence_interval": {"type": ["string", "null"]},
+          "p_value": {"type": ["number", "null"]},
+          "effect_size": {"type": ["number", "null"]},
+          "figure_reference": {"type": ["string", "null"]},
+          "table_reference": {"type": ["string", "null"]},
+          "supplementary_reference": {"type": ["string", "null"]},
+          "notes": {"type": ["string", "null"]},
+          "quality_score": {"type": ["number", "null"]},
+          "evidence_level": {"type": ["string", "null"]},
+          "manual_review": {"type": ["boolean", "string", "null"]},
+          "provenance": {
+            "type": ["object", "string", "null"],
+            "properties": {
+              "paper": {"type": ["string", "null"]},
+              "figure": {"type": ["string", "null"]},
+              "table": {"type": ["string", "null"]},
+              "supplement": {"type": ["string", "null"]},
+              "page": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    }
+  }
+}

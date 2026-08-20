@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Literature campaign paper registry row",
+  "description": "Schema for curator-supplied paper registry rows. This template contains no papers.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "paper_id": { "type": "string", "minLength": 1 },
+    "doi": { "type": "string" },
+    "pmid": { "type": "string" },
+    "title": { "type": "string" },
+    "journal": { "type": "string" },
+    "year": { "type": "string" },
+    "gene": { "type": "string" },
+    "genotype": { "type": "string" },
+    "assay": { "type": "string" },
+    "status": { "type": "string" },
+    "reviewer": { "type": "string" },
+    "priority": { "type": "string" },
+    "notes": { "type": "string" }
+  },
+  "required": [
+    "paper_id",
+    "doi",
+    "pmid",
+    "title",
+    "journal",
+    "year",
+    "gene",
+    "genotype",
+    "assay",
+    "status",
+    "reviewer",
+    "priority",
+    "notes"
+  ]
+}

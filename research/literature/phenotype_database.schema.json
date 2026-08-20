@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/TanVi3001/drosophila-pd-flygym/schema/literature-phenotype-record.json",
+  "title": "Literature phenotype database CSV row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "paper_id", "citation", "species", "genotype", "gene", "assay",
+    "age_days", "temperature", "sex", "walking_speed", "walking_speed_unit",
+    "stride_length", "stride_unit", "pause_fraction", "turning_rate",
+    "heading_variance", "climbing_score", "sample_size", "mean", "std",
+    "sem", "ci95", "notes", "quality_score", "evidence_level"
+  ],
+  "properties": {
+    "paper_id": {"type": "string"},
+    "citation": {"type": "string"},
+    "species": {"type": "string"},
+    "genotype": {"type": "string"},
+    "gene": {"type": "string"},
+    "assay": {"type": "string"},
+    "age_days": {"type": ["number", "null"]},
+    "temperature": {"type": ["number", "null"]},
+    "sex": {"type": "string"},
+    "walking_speed": {"type": ["number", "null"]},
+    "walking_speed_unit": {"type": "string"},
+    "stride_length": {"type": ["number", "null"]},
+    "stride_unit": {"type": "string"},
+    "pause_fraction": {"type": ["number", "null"]},
+    "turning_rate": {"type": ["number", "null"]},
+    "heading_variance": {"type": ["number", "null"]},
+    "climbing_score": {"type": ["number", "null"]},
+    "sample_size": {"type": ["integer", "null"]},
+    "mean": {"type": ["number", "null"]},
+    "std": {"type": ["number", "null"]},
+    "sem": {"type": ["number", "null"]},
+    "ci95": {"type": "string"},
+    "notes": {"type": "string"},
+    "quality_score": {"type": ["number", "null"]},
+    "evidence_level": {"type": "string"}
+  }
+}
