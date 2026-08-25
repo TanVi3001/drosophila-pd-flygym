@@ -1,0 +1,138 @@
+{
+  "fly_name": "healthy_baseline",
+  "timestep_s": 0.0001,
+  "camera": {},
+  "simulation": {
+    "dataset_id": "Healthy_001",
+    "timestep_s": 0.0001,
+    "source": "scripts/run_demo.py",
+    "configuration": {
+      "fly": {
+        "name": "healthy_baseline",
+        "factory": "canonical_locomotion",
+        "model_kwargs": {},
+        "locomotion_kwargs": {
+          "joint_stiffness": 0.05,
+          "joint_damping": 0.06,
+          "passive_tarsus_stiffness": 7.5,
+          "passive_tarsus_damping": 0.01,
+          "actuator_gain": 45.0,
+          "actuator_forcerange": [
+            -65.0,
+            65.0
+          ],
+          "add_adhesion": true,
+          "adhesion_gain": 40.0,
+          "colorize": false
+        }
+      },
+      "world": {
+        "kind": "flat",
+        "kwargs": {},
+        "spawn_position": [
+          0.0,
+          0.0,
+          0.5
+        ],
+        "spawn_orientation": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "add_ground_contact_sensors": false
+      },
+      "simulation": {
+        "timestep": 0.0001
+      },
+      "renderer": {
+        "cameras": [
+          "track"
+        ],
+        "camera_res": [
+          240,
+          320
+        ],
+        "playback_speed": 0.2,
+        "output_fps": 25,
+        "buffer_frames": true,
+        "kwargs": {}
+      },
+      "metadata": {
+        "condition": "healthy computational baseline"
+      }
+    }
+  },
+  "quaternion_order": "wxyz",
+  "body_segment_names": [
+    "c_thorax",
+    "c_head",
+    "c_rostrum",
+    "c_haustellum",
+    "l_eye",
+    "r_eye",
+    "l_pedicel",
+    "l_funiculus",
+    "l_arista",
+    "r_pedicel",
+    "r_funiculus",
+    "r_arista",
+    "c_abdomen12",
+    "c_abdomen3",
+    "c_abdomen4",
+    "c_abdomen5",
+    "c_abdomen6",
+    "l_wing",
+    "r_wing",
+    "l_haltere",
+    "r_haltere",
+    "lf_coxa",
+    "lf_trochanterfemur",
+    "lf_tibia",
+    "lf_tarsus1",
+    "lf_tarsus2",
+    "lf_tarsus3",
+    "lf_tarsus4",
+    "lf_tarsus5",
+    "lm_coxa",
+    "lm_trochanterfemur",
+    "lm_tibia",
+    "lm_tarsus1",
+    "lm_tarsus2",
+    "lm_tarsus3",
+    "lm_tarsus4",
+    "lm_tarsus5",
+    "lh_coxa",
+    "lh_trochanterfemur",
+    "lh_tibia",
+    "lh_tarsus1",
+    "lh_tarsus2",
+    "lh_tarsus3",
+    "lh_tarsus4",
+    "lh_tarsus5",
+    "rf_coxa",
+    "rf_trochanterfemur",
+    "rf_tibia",
+    "rf_tarsus1",
+    "rf_tarsus2",
+    "rf_tarsus3",
+    "rf_tarsus4",
+    "rf_tarsus5",
+    "rm_coxa",
+    "rm_trochanterfemur",
+    "rm_tibia",
+    "rm_tarsus1",
+    "rm_tarsus2",
+    "rm_tarsus3",
+    "rm_tarsus4",
+    "rm_tarsus5",
+    "rh_coxa",
+    "rh_trochanterfemur",
+    "rh_tibia",
+    "rh_tarsus1",
+    "rh_tarsus2",
+    "rh_tarsus3",
+    "rh_tarsus4",
+    "rh_tarsus5"
+  ]
+}

@@ -1,0 +1,10 @@
+parameter,proxy,lower_bound,upper_bound,unit,healthy_default,range_status,source_basis,reason
+motor_vigor,motor_vigor,,,dimensionless,existing healthy controller default,NOT_PROPOSED,"15 papers; qualitative-only coverage","No verified quantitative phenotype value"
+coordination,coordination,,,dimensionless,existing healthy controller default,NOT_PROPOSED,"5 papers; low/medium confidence","No standardized coordination metric"
+delay,delay,,,s,existing healthy controller default,NOT_PROPOSED,"0 papers","No delay evidence"
+noise,noise,,,dimensionless,existing healthy controller default,NOT_PROPOSED,"1 treatment-context paper","No baseline variance target"
+fatigue,fatigue,,,dimensionless,existing healthy controller default,NOT_PROPOSED,"0 papers","No within-session fatigue assay"
+latency,latency,,,s,existing healthy controller default,NOT_PROPOSED,"1 weak qualitative mapping","Completion time does not isolate latency"
+asymmetry,asymmetry,,,dimensionless,existing healthy controller default,NOT_PROPOSED,"0 papers","No left-right evidence"
+freezing,freezing,,,dimensionless,existing healthy controller default,NOT_PROPOSED,"1 weak qualitative mapping","Idling is not an operational freezing measure"
+postural_instability,postural_instability,,,dimensionless,existing healthy controller default,NOT_PROPOSED,"6 qualitative papers","No numeric posture frequency or angle distribution"

@@ -1,0 +1,19 @@
+schema_version: "1.0"
+experiment_id: "sprint5_calibration_experiment"
+scientific_frame:
+  scope: "Generic computational parameter-response experiment; not a disease-stage configuration."
+  target_policy: "Only approved numeric literature targets may be used for calibration."
+  no_fabricated_data: true
+families:
+  - family: "motor_vigor"
+    perturbation_type: "global_action_scale"
+    parameter_name: "scale"
+    values: [0.60, 0.70, 0.80, 0.90, 1.00]
+    baseline_equivalent_value: 1.00
+    description: "Computational motor-output response sweep. Values are experiment candidates, not biological ranges."
+  - family: "coordination"
+    perturbation_type: "cpg_coupling_scale"
+    parameter_name: "scale"
+    values: [0.60, 0.75, 0.90, 1.00]
+    baseline_equivalent_value: 1.00
+    description: "Computational CPG-coupling response sweep. Values are experiment candidates, not biological ranges."

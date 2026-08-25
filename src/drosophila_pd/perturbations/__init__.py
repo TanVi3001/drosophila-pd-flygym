@@ -9,6 +9,7 @@ from .base import (
     IdentityPerturbation,
     NoOpPerturbation,
     Perturbation,
+    _copy_action,
     load_perturbation_config,
     perturbation_from_mapping,
     perturbation_metadata_complete,

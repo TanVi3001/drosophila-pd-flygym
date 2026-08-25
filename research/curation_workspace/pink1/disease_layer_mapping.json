@@ -1,0 +1,187 @@
+{
+  "gene_group": "Pink1",
+  "mapping_status": "candidate_pending_manual_review",
+  "source_metadata": "paper_information.json",
+  "scientific_boundary": [
+    "Disease Layer proxy không phải neuron thật.",
+    "Mapping chỉ diễn tả khả năng liên quan giữa endpoint vận động và một proxy tính toán.",
+    "Không paper nào trong file này chứng minh một mô hình Parkinson sinh học hoàn chỉnh.",
+    "Không dùng mapping để suy ra chẩn đoán, hiệu quả thuốc hoặc giá trị lâm sàng.",
+    "Không có giá trị số mới được tạo; giá trị chưa xác minh được để null hoặc pending_manual_extraction."
+  ],
+  "proxy_definitions": {
+    "motor_vigor": "Mức output vận động tổng thể; proxy gần nhất với speed/climbing/flight giảm.",
+    "coordination": "Mức phối hợp giữa các bộ phận khi tạo chuyển động; chỉ confidence cao khi assay tách được coordination.",
+    "delay": "Độ trễ bắt đầu hoặc chuyển trạng thái; không suy ra chỉ từ một climbing time tổng hợp.",
+    "noise": "Biến thiên hoặc bất thường của motor output; cần trajectory/time-series để đánh giá.",
+    "fatigue": "Suy giảm theo thời gian trong cùng một phiên hoặc sau hoạt động; tuổi cao không tự động là fatigue.",
+    "asymmetry": "Khác biệt trái-phải; chưa có bằng chứng trực tiếp trong nhóm Pink1 này.",
+    "freezing": "Các khoảng dừng được định nghĩa rõ; idling chưa đủ để gọi freezing.",
+    "latency": "Thời gian chờ trước action hoặc response; climbing completion time không tách được latency.",
+    "postural_instability": "Proxy cho bất thường tư thế/cấu trúc; không đồng nhất với orientation variance."
+  },
+  "papers": [
+    {
+      "paper": {"paper_id": "PINK1-001", "title": "Mitochondrial dysfunction in Drosophila PINK1 mutants is complemented by parkin", "year": 2006, "journal": "Nature", "doi": "10.1038/nature04788", "pmid": "16672980", "source_record": "paper_information.json#PINK1-001"},
+      "phenotypes": [{"name": "Locomotive defect", "metric": "locomotion", "quantitative_data": false}],
+      "disease_signature": ["locomotive defect"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Locomotion tổng thể phù hợp với giảm motor output, nhưng metric chưa được tách.", "alternatives": [{"proxy": "coordination", "confidence": "LOW", "reason": "Có thể liên quan nhưng chưa có gait/inter-leg assay."}]}],
+      "calibration": {"candidate": "conditional", "metrics": ["locomotion"], "reason": "Cần exact assay, unit và numeric value trước khi fit."},
+      "validation": {"candidate": true, "reason": "Có thể dùng để kiểm tra hướng phenotype nếu full text xác nhận assay."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-002", "title": "Drosophila pink1 is required for mitochondrial function and interacts genetically with parkin", "year": 2006, "journal": "Nature", "doi": "10.1038/nature04779", "pmid": "16672981", "source_record": "paper_information.json#PINK1-002"},
+      "phenotypes": [{"name": "Flight-muscle degeneration", "metric": "flight muscle", "quantitative_data": false}],
+      "disease_signature": ["flight-muscle degeneration"],
+      "disease_layer_mapping": [{"proxy": "UNMAPPED", "confidence": "NONE", "reason": "Chưa có endpoint locomotion đủ rõ trong lượt curation."}],
+      "calibration": {"candidate": false, "metrics": [], "reason": "Không đủ bằng chứng cho numeric motor target."},
+      "validation": {"candidate": false, "reason": "Chỉ dùng supporting/reference cho tới khi xác nhận assay."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-003", "title": "Mitochondrial pathology and muscle and dopaminergic neuron degeneration caused by inactivation of Drosophila Pink1 is rescued by Parkin", "year": 2006, "journal": "PNAS", "doi": "10.1073/pnas.0602493103", "pmid": "16818890", "source_record": "paper_information.json#PINK1-003"},
+      "phenotypes": [{"name": "Locomotor defect", "metric": "locomotion", "quantitative_data": false}, {"name": "Muscle degeneration", "metric": "flight muscle", "quantitative_data": false}],
+      "disease_signature": ["locomotor defect", "muscle degeneration"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Locomotor defect được nêu trong paper."}, {"proxy": "postural_instability", "confidence": "LOW", "reason": "Muscle degeneration có thể ảnh hưởng tư thế nhưng chưa đo trực tiếp."}],
+      "calibration": {"candidate": "conditional", "metrics": ["locomotion"], "reason": "Cần lấy số và protocol từ full text."},
+      "validation": {"candidate": true, "reason": "Có thể kiểm tra hướng rescue trong mô hình tính toán."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-004", "title": "Pink1 regulates mitochondrial dynamics through interaction with the fission/fusion machinery", "year": 2008, "journal": "PNAS", "doi": "10.1073/pnas.0711845105", "pmid": "18443288", "source_record": "paper_information.json#PINK1-004"},
+      "phenotypes": [{"name": "Behavioral phenotype", "metric": "behavior", "quantitative_data": false}],
+      "disease_signature": [],
+      "disease_layer_mapping": [{"proxy": "UNMAPPED", "confidence": "NONE", "reason": "Chưa xác nhận metric locomotion cụ thể."}],
+      "calibration": {"candidate": false, "metrics": [], "reason": "Không được suy ra calibration target từ mechanism-only evidence."},
+      "validation": {"candidate": false, "reason": "Cần full-text screening thêm."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-005", "title": "Pink1 suppresses alpha-synuclein-induced phenotypes in a Drosophila model of Parkinson's disease", "year": 2008, "journal": "Genome", "doi": "10.1139/G08-085", "pmid": "19088817", "source_record": "paper_information.json#PINK1-005"},
+      "phenotypes": [{"name": "Premature loss of climbing ability", "metric": "climbing", "quantitative_data": false}],
+      "disease_signature": ["climbing reduction"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Climbing giảm là endpoint motor output."}, {"proxy": "coordination", "confidence": "LOW", "reason": "Climbing cần phối hợp chân nhưng paper không tách biến này."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing success"], "reason": "Cần exact value và assay metadata."},
+      "validation": {"candidate": true, "reason": "Có thể dùng để kiểm tra phenotype tương tác PINK1-alpha-synuclein."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-006", "title": "Drosophila HtrA2 is dispensable for apoptosis but acts downstream of PINK1 independently from Parkin", "year": 2009, "journal": null, "doi": null, "pmid": "19282869", "source_record": "paper_information.json#PINK1-006"},
+      "phenotypes": [{"name": "Climbing defect", "metric": "climbing", "quantitative_data": false}, {"name": "Flight phenotype", "metric": "flight", "quantitative_data": false}],
+      "disease_signature": ["climbing defect", "flight phenotype"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Climbing reduction phù hợp với motor output."}, {"proxy": "coordination", "confidence": "MEDIUM", "reason": "Flight cần phối hợp, nhưng không có decomposition."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing", "flight"], "reason": "Cần tách HtrA2 effect khỏi Pink1 effect."},
+      "validation": {"candidate": true, "reason": "Phù hợp kiểm tra pathway-associated phenotype nếu metadata đầy đủ."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-007", "title": "TRAP1 rescues PINK1 loss-of-function phenotypes", "year": 2013, "journal": "Cell Death and Disease", "doi": null, "pmid": null, "source_record": "paper_information.json#PINK1-007"},
+      "phenotypes": [{"name": "Reduced climbing", "metric": "climbing", "quantitative_data": false}, {"name": "Reduced flight", "metric": "flight", "quantitative_data": false}, {"name": "Abnormal wing posture/thorax indentation", "metric": "morphology", "quantitative_data": false}],
+      "disease_signature": ["climbing reduction", "flight reduction", "abnormal posture"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Negative geotaxis/climbing giảm trong Pink1[B9]."}, {"proxy": "coordination", "confidence": "MEDIUM", "reason": "Flight cần phối hợp cánh-thân."}, {"proxy": "postural_instability", "confidence": "HIGH", "reason": "Wing posture và thorax indentation là phenotype tư thế quan sát trực tiếp."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing success", "flight ability", "posture frequency"], "reason": "Assay metadata tốt; số trên figure còn pending."},
+      "validation": {"candidate": true, "reason": "Có điều kiện rescue rõ, hữu ích để kiểm tra hướng thay đổi output."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-008", "title": "Drosophila ref(2)P is required for the parkin-mediated suppression of mitochondrial dysfunction in pink1 mutants", "year": 2013, "journal": "Cell Death and Disease", "doi": "10.1038/cddis.2013.394", "pmid": "24157867", "source_record": "paper_information.json#PINK1-008"},
+      "phenotypes": [{"name": "Climbing defect", "metric": "climbing", "quantitative_data": false}, {"name": "Climbing rescue", "metric": "climbing", "quantitative_data": false}],
+      "disease_signature": ["climbing defect", "genetic rescue response"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Climbing là endpoint motor trực tiếp."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing success"], "reason": "n >= 60/genotype đã thấy; exact values pending."},
+      "validation": {"candidate": true, "reason": "Phù hợp kiểm tra rescue response."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-009", "title": "PINK1-mediated phosphorylation of Parkin boosts Parkin activity in Drosophila", "year": 2014, "journal": "Open Biology", "doi": null, "pmid": "24901221", "source_record": "paper_information.json#PINK1-009"},
+      "phenotypes": [{"name": "Abnormal/slower climbing", "metric": "climbing", "quantitative_data": false}, {"name": "Wing posture", "metric": "posture", "quantitative_data": false}],
+      "disease_signature": ["slower climbing", "abnormal wing posture"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Climbing giảm trong PINK1-null background."}, {"proxy": "postural_instability", "confidence": "HIGH", "reason": "Wing posture là phenotype tư thế trực tiếp."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing", "posture"], "reason": "Cần genotype-by-variant values."},
+      "validation": {"candidate": true, "reason": "Có thể kiểm tra sự khác biệt giữa Parkin variants."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-010", "title": "PINK1-mediated phosphorylation of Miro inhibits synaptic growth and protects dopaminergic neurons in Drosophila", "year": 2014, "journal": "Scientific Reports", "doi": "10.1038/srep06962", "pmid": null, "source_record": "paper_information.json#PINK1-010"},
+      "phenotypes": [{"name": "Reduced larval crawling", "metric": "crawling", "quantitative_data": false}, {"name": "Larval idling", "metric": "idling", "quantitative_data": false}, {"name": "Adult climbing/jumping/flying defects", "metric": "climbing; jumping; flight", "quantitative_data": false}],
+      "disease_signature": ["reduced crawling", "idling", "adult locomotor defect"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Crawling và adult locomotor output giảm."}, {"proxy": "coordination", "confidence": "MEDIUM", "reason": "Crawling/jumping/flight cần phối hợp nhiều bộ phận."}, {"proxy": "freezing", "confidence": "LOW", "reason": "Idling có thể gợi ý dừng nhưng chưa đủ để gọi freezing."}],
+      "calibration": {"candidate": "conditional", "metrics": ["crawling", "idling", "climbing", "flight"], "reason": "Cần tách larval và adult data."},
+      "validation": {"candidate": true, "reason": "Có nhiều stage/assay để kiểm tra robustness."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-011", "title": "Basal mitophagy is widespread in Drosophila but minimally affected by loss of Pink1 or parkin", "year": 2018, "journal": "Journal of Cell Biology", "doi": "10.1083/jcb.201801044", "pmid": null, "source_record": "paper_information.json#PINK1-011"},
+      "phenotypes": [{"name": "Climbing/flight validation phenotype", "metric": "climbing; flight", "quantitative_data": false}],
+      "disease_signature": ["behavioral validation phenotype"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Climbing và flight là endpoint motor trực tiếp."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing", "flight"], "reason": "Paper tập trung mitophagy; locomotion là endpoint phụ."},
+      "validation": {"candidate": true, "reason": "Phù hợp kiểm tra model không chỉ khớp một assay."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-012", "title": "Deficiency of parkin and PINK1 impairs age-dependent mitophagy in Drosophila", "year": 2018, "journal": "eLife", "doi": "10.7554/eLife.35878", "pmid": "29809156", "source_record": "paper_information.json#PINK1-012"},
+      "phenotypes": [{"name": "Locomotion endpoint not confirmed", "metric": null, "quantitative_data": false}],
+      "disease_signature": [],
+      "disease_layer_mapping": [{"proxy": "UNMAPPED", "confidence": "NONE", "reason": "Chưa xác nhận named locomotion assay phù hợp."}],
+      "calibration": {"candidate": false, "metrics": [], "reason": "Không đủ bằng chứng."},
+      "validation": {"candidate": false, "reason": "Giữ ở screening stage."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-013", "title": "Superoxide dismutating molecules rescue the toxic effects of PINK1 and parkin loss", "year": 2018, "journal": "Cell Death and Disease", "doi": null, "pmid": null, "source_record": "paper_information.json#PINK1-013"},
+      "phenotypes": [{"name": "Negative geotaxis climbing defect", "metric": "climbing", "quantitative_data": false}, {"name": "Climbing response to Sod2/M40403", "metric": "climbing", "quantitative_data": false}],
+      "disease_signature": ["negative geotaxis deficit", "rescue response"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Assay đo số ruồi vượt vạch trong 10 giây."}, {"proxy": "postural_instability", "confidence": "LOW", "reason": "Có thể ảnh hưởng climbing nhưng không được tách trực tiếp."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing success"], "reason": "Method metadata mạnh; source-data values pending."},
+      "validation": {"candidate": true, "reason": "Có baseline và intervention comparison."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-014", "title": "The STING pathway does not contribute to behavioural or mitochondrial phenotypes in Drosophila Pink1/parkin or mtDNA mutator models", "year": 2020, "journal": "Scientific Reports", "doi": "10.1038/s41598-020-59647-3", "pmid": null, "source_record": "paper_information.json#PINK1-014"},
+      "phenotypes": [{"name": "Pink1 climbing defect", "metric": "climbing", "quantitative_data": false}, {"name": "No rescue/enhanced defect under Relish manipulation", "metric": "climbing", "quantitative_data": false}],
+      "disease_signature": ["climbing defect", "negative genetic interaction"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Pink1 climbing defect là endpoint motor."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing"], "reason": "Chỉ dùng nếu genotype/n/value được transcribe đầy đủ."},
+      "validation": {"candidate": true, "reason": "Negative result hữu ích để tránh thêm một proxy không có bằng chứng."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-015", "title": "Discovery of levodopa-induced dyskinesia-associated genes using genomic studies in patients and Drosophila behavioral analyses", "year": 2022, "journal": "Communications Biology", "doi": "10.1038/s42003-022-03830-x", "pmid": null, "source_record": "paper_information.json#PINK1-015"},
+      "phenotypes": [{"name": "Retarded movement and speed in untreated PINK1B9", "metric": "speed; trajectory", "quantitative_data": false}, {"name": "Abrupt acceleration and directional change after prolonged L-DOPA", "metric": "AIM score; angular change", "quantitative_data": false}],
+      "disease_signature": ["slow movement", "trajectory change", "abrupt irregular acceleration in treatment context"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Baseline PINK1B9 được mô tả chậm hơn revertant."}, {"proxy": "noise", "confidence": "MEDIUM", "reason": "AIM dùng deviation của instantaneous speed và đổi hướng, nhưng đây là treatment context."}, {"proxy": "coordination", "confidence": "LOW", "reason": "Directional change có thể liên quan phối hợp nhưng không có inter-leg measure."}],
+      "calibration": {"candidate": "conditional", "metrics": ["mean speed", "trajectory", "AIM score", "angular change"], "reason": "Tách day 0 baseline khỏi L-DOPA và AIM trước khi dùng."},
+      "validation": {"candidate": true, "reason": "Có time-series/trajectory phù hợp kiểm tra động lực chuyển động."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-016", "title": "PINK1 and Parkin regulate IP3R-mediated ER calcium release", "year": 2023, "journal": "Nature Communications", "doi": "10.1038/s41467-023-40929-z", "pmid": null, "source_record": "paper_information.json#PINK1-016"},
+      "phenotypes": [{"name": "Climbing time", "metric": "time to finish", "quantitative_data": false}],
+      "disease_signature": ["climbing performance"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Thời gian tới vạch là output vận động tổng hợp."}, {"proxy": "latency", "confidence": "LOW", "reason": "Completion time có thể chứa latency nhưng assay không tách thành phần."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing time"], "reason": "Có method rõ; exact genotype values pending."},
+      "validation": {"candidate": true, "reason": "Có thể kiểm tra cùng phenotype bằng assay khác."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-017", "title": "Cdk8/CDK19 promotes mitochondrial fission through Drp1 phosphorylation and can phenotypically suppress pink1 deficiency in Drosophila", "year": 2024, "journal": null, "doi": null, "pmid": "38637532", "source_record": "paper_information.json#PINK1-017"},
+      "phenotypes": [{"name": "Climbing defect", "metric": "climbing", "quantitative_data": false}, {"name": "Thorax indentation", "metric": "morphology", "quantitative_data": false}],
+      "disease_signature": ["climbing defect", "thorax indentation"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "Fig. 8B-C có climbing endpoint."}, {"proxy": "postural_instability", "confidence": "HIGH", "reason": "Thorax indentation là phenotype cấu trúc/tư thế trực tiếp."}],
+      "calibration": {"candidate": "conditional", "metrics": ["climbing", "thorax indentation frequency"], "reason": "Sample size rõ; exact plotted values pending."},
+      "validation": {"candidate": true, "reason": "Có rescue bằng hPink1/Cdk8/CDK19 để kiểm tra hướng phenotype."},
+      "manual_review_required": true
+    },
+    {
+      "paper": {"paper_id": "PINK1-018", "title": "Synaptic deregulation of cholinergic projection neurons causes olfactory dysfunction across five fly Parkinsonism models", "year": 2024, "journal": "eLife", "doi": "10.7554/eLife.98348", "pmid": "40178224", "source_record": "paper_information.json#PINK1-018"},
+      "phenotypes": [{"name": "Startle-induced negative geotaxis", "metric": "geotaxis", "quantitative_data": false}, {"name": "Age-dependent geotaxis decline", "metric": "geotaxis; age", "quantitative_data": false}],
+      "disease_signature": ["age-dependent geotaxis performance"],
+      "disease_layer_mapping": [{"proxy": "motor_vigor", "confidence": "HIGH", "reason": "SING đo khả năng leo sau kích thích."}, {"proxy": "fatigue", "confidence": "LOW", "reason": "Suy giảm theo tuổi không đủ để kết luận fatigue trong một phiên vận động."}],
+      "calibration": {"candidate": "conditional", "metrics": ["SING performance"], "reason": "Có thể làm age-stratified validation target, không phải walking target."},
+      "validation": {"candidate": true, "reason": "Có nhóm tuổi và normalized control để kiểm tra xu hướng."},
+      "manual_review_required": true
+    }
+  ]
+}

@@ -292,6 +292,7 @@ def run_locomotion(
         else None
     )
     cpg_phases = np.full((step_count + 1, 6), np.nan, dtype=float)
+    controller_action_history: list[Any] = []
 
     _collect_thorax_state(
         sim,
@@ -313,7 +314,9 @@ def run_locomotion(
             timestep_s=float(sim.timestep),
             random_seed=config.random_seed,
             expected_joint_angle_count=len(dof_order),
+            action_history=tuple(controller_action_history),
         )
+        controller_action_history.append(controller_action)
         apply_locomotion_action(sim, fly.name, action)
         sim.step()
 
@@ -534,6 +537,7 @@ def _apply_action_perturbation(
     timestep_s: float,
     random_seed: int,
     expected_joint_angle_count: int,
+    action_history: tuple[Any, ...] = (),
 ) -> Any:
     if perturbation is None:
         return action
@@ -546,6 +550,7 @@ def _apply_action_perturbation(
             timestep_s=timestep_s,
             random_seed=random_seed,
             expected_joint_angle_count=expected_joint_angle_count,
+            action_history=action_history,
         ),
     )
 

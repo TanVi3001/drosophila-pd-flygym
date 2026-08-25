@@ -1,0 +1,22 @@
+criteria:
+  locomotion_assay: 18
+  quantitative_metric: 18
+  sample_size: 12
+  protocol: 12
+  genotype: 10
+  control: 10
+  provenance: 10
+  doi_pmid: 5
+  supplementary: 5
+expected_proxies:
+  - motor_vigor
+  - coordination
+  - delay
+  - noise
+  - fatigue
+  - latency
+  - asymmetry
+  - freezing
+  - postural_instability
+high_threshold: 75
+medium_threshold: 50

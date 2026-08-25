@@ -30,6 +30,7 @@ class ActionPerturbationContext:
     timestep_s: float
     random_seed: int
     expected_joint_angle_count: int
+    action_history: tuple[Any, ...] = ()
 
 
 class Perturbation(Protocol):

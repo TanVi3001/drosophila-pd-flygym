@@ -17,6 +17,7 @@ from drosophila_pd.perturbations import (
     ActionPerturbationContext,
     ControllerPerturbationContext,
     CPGCouplingScalePerturbation,
+    _copy_action,
 )
 
 
@@ -49,6 +50,13 @@ class DiseaseLayer:
     random_seed: int = 0
     name: str = "computational_disease_layer"
     config_id: str | None = None
+    action_latency_steps: int = 0
+    freezing_probability: float = 0.0
+    freezing_duration_steps: int = 0
+    left_joint_gains: tuple[float, ...] = ()
+    right_joint_gains: tuple[float, ...] = ()
+    left_joint_offsets: tuple[float, ...] = ()
+    right_joint_offsets: tuple[float, ...] = ()
 
     def __post_init__(self) -> None:
         numeric_fields = {
@@ -73,6 +81,12 @@ class DiseaseLayer:
             raise ValueError("asymmetry must be between -1 and 1.")
         if int(self.initiation_delay_steps) < 0:
             raise ValueError("initiation_delay_steps must be non-negative.")
+        if int(self.action_latency_steps) < 0:
+            raise ValueError("action_latency_steps must be non-negative.")
+        if not 0.0 <= float(self.freezing_probability) <= 1.0:
+            raise ValueError("freezing_probability must be between 0 and 1.")
+        if int(self.freezing_duration_steps) < 0:
+            raise ValueError("freezing_duration_steps must be non-negative.")
         if not str(self.name).strip():
             raise ValueError("name must be a non-empty string.")
 
@@ -84,6 +98,32 @@ class DiseaseLayer:
             raise ValueError(
                 "non-zero asymmetry requires equally sized left/right joint index maps."
             )
+        if set(left) & set(right):
+            raise ValueError("left_joint_indices and right_joint_indices must be disjoint.")
+        vector_values = {
+            "left_joint_gains": self.left_joint_gains,
+            "right_joint_gains": self.right_joint_gains,
+            "left_joint_offsets": self.left_joint_offsets,
+            "right_joint_offsets": self.right_joint_offsets,
+        }
+        vectors: dict[str, tuple[float, ...]] = {}
+        for field_name, values in vector_values.items():
+            vector = tuple(float(value) for value in values)
+            if any(not np.isfinite(value) for value in vector):
+                raise ValueError(f"{field_name} must contain only finite values.")
+            if vector and (not left or len(vector) != len(left)):
+                raise ValueError(
+                    f"{field_name} must match the left/right joint index map length."
+                )
+            vectors[field_name] = vector
+        if vectors["left_joint_gains"] and not vectors["right_joint_gains"]:
+            raise ValueError("left_joint_gains requires right_joint_gains.")
+        if vectors["right_joint_gains"] and not vectors["left_joint_gains"]:
+            raise ValueError("right_joint_gains requires left_joint_gains.")
+        if vectors["left_joint_offsets"] and not vectors["right_joint_offsets"]:
+            raise ValueError("left_joint_offsets requires right_joint_offsets.")
+        if vectors["right_joint_offsets"] and not vectors["left_joint_offsets"]:
+            raise ValueError("right_joint_offsets requires left_joint_offsets.")
         object.__setattr__(self, "motor_vigor", float(self.motor_vigor))
         object.__setattr__(self, "coordination", float(self.coordination))
         object.__setattr__(self, "initiation_delay_steps", int(self.initiation_delay_steps))
@@ -94,6 +134,11 @@ class DiseaseLayer:
         object.__setattr__(self, "right_joint_indices", right)
         object.__setattr__(self, "random_seed", int(self.random_seed))
         object.__setattr__(self, "config_id", None if self.config_id is None else str(self.config_id))
+        object.__setattr__(self, "action_latency_steps", int(self.action_latency_steps))
+        object.__setattr__(self, "freezing_probability", float(self.freezing_probability))
+        object.__setattr__(self, "freezing_duration_steps", int(self.freezing_duration_steps))
+        for field_name, values in vectors.items():
+            object.__setattr__(self, field_name, values)
 
     @property
     def perturbation_type(self) -> str:
@@ -132,20 +177,44 @@ class DiseaseLayer:
         if not np.isfinite(joint_angles).all():
             raise ValueError("Locomotion joint-angle commands must be finite.")
 
-        transformed = joint_angles.copy()
+        source_adhesion = getattr(action, "adhesion_onoff", None)
+        if self.action_latency_steps:
+            history = tuple(context.action_history)
+            if len(history) >= self.action_latency_steps:
+                delayed_action = history[-self.action_latency_steps]
+                transformed = np.asarray(delayed_action.joint_angles, dtype=float).copy()
+                source_adhesion = getattr(delayed_action, "adhesion_onoff", source_adhesion)
+                if transformed.shape != joint_angles.shape or not np.isfinite(transformed).all():
+                    raise ValueError("Delayed action does not match the current action shape.")
+            else:
+                transformed = np.zeros_like(joint_angles)
+        else:
+            transformed = joint_angles.copy()
         fatigue_factor = max(0.0, 1.0 - self.fatigue_rate * float(context.time_s))
         transformed *= self.motor_vigor * fatigue_factor
         if context.step_index < self.initiation_delay_steps:
             transformed.fill(0.0)
 
-        if self.asymmetry != 0.0:
-            for left_index, right_index in zip(
-                self.left_joint_indices, self.right_joint_indices
+        if self.asymmetry != 0.0 or self.left_joint_gains or self.left_joint_offsets:
+            for pair_index, (left_index, right_index) in enumerate(
+                zip(self.left_joint_indices, self.right_joint_indices)
             ):
                 if left_index >= transformed.size or right_index >= transformed.size:
                     raise ValueError("Asymmetry joint index exceeds action dimensions.")
-                transformed[left_index] *= 1.0 + self.asymmetry
-                transformed[right_index] *= 1.0 - self.asymmetry
+                left_gain = (
+                    self.left_joint_gains[pair_index]
+                    if self.left_joint_gains
+                    else 1.0 + self.asymmetry
+                )
+                right_gain = (
+                    self.right_joint_gains[pair_index]
+                    if self.right_joint_gains
+                    else 1.0 - self.asymmetry
+                )
+                left_offset = self.left_joint_offsets[pair_index] if self.left_joint_offsets else 0.0
+                right_offset = self.right_joint_offsets[pair_index] if self.right_joint_offsets else 0.0
+                transformed[left_index] = transformed[left_index] * left_gain + left_offset
+                transformed[right_index] = transformed[right_index] * right_gain + right_offset
 
         if self.motor_noise_std != 0.0:
             rng = np.random.default_rng(
@@ -155,9 +224,31 @@ class DiseaseLayer:
             )
             transformed += rng.normal(0.0, self.motor_noise_std, size=transformed.shape)
 
-        adhesion = getattr(action, "adhesion_onoff", None)
-        copied_adhesion = None if adhesion is None else np.asarray(adhesion, dtype=bool).copy()
-        return type(action)(joint_angles=transformed, adhesion_onoff=copied_adhesion)
+        if self._freezing_active(context):
+            transformed.fill(0.0)
+
+        return _copy_action(action, joint_angles=transformed, adhesion_onoff=source_adhesion)
+
+    def _freezing_active(self, context: ActionPerturbationContext) -> bool:
+        """Reconstruct a seed-controlled freeze state without mutable runtime state."""
+
+        if self.freezing_probability <= 0.0 or self.freezing_duration_steps <= 0:
+            return False
+        remaining = 0
+        active = False
+        for step_index in range(int(context.step_index) + 1):
+            if remaining > 0:
+                active = True
+                remaining -= 1
+                continue
+            rng = np.random.default_rng(
+                np.random.SeedSequence(
+                    [self.random_seed, int(context.random_seed), step_index, 193]
+                )
+            )
+            active = bool(rng.random() < self.freezing_probability)
+            remaining = self.freezing_duration_steps - 1 if active else 0
+        return active
 
     def metadata(self) -> dict[str, Any]:
         """Return auditable, JSON-serializable layer metadata."""
@@ -173,8 +264,15 @@ class DiseaseLayer:
                 "motor_noise_std": self.motor_noise_std,
                 "fatigue_rate": self.fatigue_rate,
                 "asymmetry": self.asymmetry,
+                "action_latency_steps": self.action_latency_steps,
+                "freezing_probability": self.freezing_probability,
+                "freezing_duration_steps": self.freezing_duration_steps,
                 "left_joint_indices": list(self.left_joint_indices),
                 "right_joint_indices": list(self.right_joint_indices),
+                "left_joint_gains": list(self.left_joint_gains),
+                "right_joint_gains": list(self.right_joint_gains),
+                "left_joint_offsets": list(self.left_joint_offsets),
+                "right_joint_offsets": list(self.right_joint_offsets),
                 "random_seed": self.random_seed,
             },
             "intervention_target": "controller_and_joint_angle_action",
@@ -182,6 +280,15 @@ class DiseaseLayer:
             "deterministic": True,
             "action_validation": "structural_only_for_custom_transforms",
             "scientific_scope": COMPUTATIONAL_SCOPE,
+            "unsupported_proxies": {
+                "postural_instability": {
+                    "status": "UNSUPPORTED",
+                    "reason": (
+                        "LocomotionAction exposes joint_angles and adhesion_onoff, "
+                        "but no orientation or body-stabilization command."
+                    ),
+                }
+            },
             "description": (
                 "Generic computational Disease Layer. Parameters are control-level "
                 "proxies and require external literature targets before calibration."
@@ -199,13 +306,32 @@ class DiseaseLayer:
                 if key in values and key not in nested:
                     nested[key] = values[key]
             values = nested
-        if "experiment_id" in values and "config_id" not in values:
-            values["config_id"] = values.pop("experiment_id")
+        if "experiment_id" in values:
+            # ``experiment_id`` is the historical config alias.  Preserve an
+            # explicit ``config_id`` when both are present, but never pass the
+            # alias through to the dataclass constructor as an unknown field.
+            experiment_id = values.pop("experiment_id")
+            values.setdefault("config_id", experiment_id)
+        if "latency_steps" in values:
+            # Keep the short historical alias accepted, while preferring the
+            # explicit field when a mapping contains both spellings.
+            latency_steps = values.pop("latency_steps")
+            values.setdefault("action_latency_steps", latency_steps)
         for key in ("left_joint_indices", "right_joint_indices"):
             if key in values:
                 if not isinstance(values[key], (list, tuple)):
                     raise ValueError(f"{key} must be a list of integer indices.")
                 values[key] = tuple(int(index) for index in values[key])
+        for key in (
+            "left_joint_gains",
+            "right_joint_gains",
+            "left_joint_offsets",
+            "right_joint_offsets",
+        ):
+            if key in values:
+                if not isinstance(values[key], (list, tuple)):
+                    raise ValueError(f"{key} must be a list of numeric values.")
+                values[key] = tuple(float(value) for value in values[key])
         allowed = {
             "motor_vigor",
             "coordination",
@@ -215,6 +341,13 @@ class DiseaseLayer:
             "asymmetry",
             "left_joint_indices",
             "right_joint_indices",
+            "action_latency_steps",
+            "freezing_probability",
+            "freezing_duration_steps",
+            "left_joint_gains",
+            "right_joint_gains",
+            "left_joint_offsets",
+            "right_joint_offsets",
             "random_seed",
             "name",
             "config_id",

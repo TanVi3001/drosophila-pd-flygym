@@ -1,0 +1,57 @@
+# Campaign v1: sweep computational proxies tren runtime FlyGym that.
+# Cac gia tri la diem khao sat ky thuat, khong phai khoang sinh hoc da xac nhan.
+
+campaign_name: disease_layer_experimental_campaign_v1
+random_seeds: [0, 1]
+steps: 5000
+duration_s: 0.5
+output_directory: results/experimental_campaign
+scientific_scope: >-
+  Day la computational locomotion experiment; khong phai biological validation,
+  clinical prediction hoac drug response.
+
+proxies:
+  motor_vigor:
+    enabled: true
+    parameter: motor_vigor
+    values: [0.8, 0.9, 1.0]
+    reason: Sweep control-level motor output scale.
+  coordination:
+    enabled: true
+    parameter: coordination
+    values: [0.75, 0.9, 1.0]
+    reason: Sweep control-level CPG coupling scale.
+  noise:
+    enabled: false
+    parameter: motor_noise_std
+    values: [0.0, 0.01, 0.05]
+    reason: Co the bat khi can khao sat noise cua action.
+  delay:
+    enabled: false
+    parameter: initiation_delay_steps
+    values: [0, 5, 10]
+    reason: Co the bat khi can khao sat delay cua action.
+  fatigue:
+    enabled: false
+    parameter: fatigue_rate
+    values: [0.0, 0.01, 0.05]
+    reason: Co the bat khi can khao sat action decay theo thoi gian.
+  latency:
+    enabled: false
+    values: []
+    reason: DiseaseLayer hien tai khong co truong latency.
+  freezing:
+    enabled: false
+    values: []
+    reason: DiseaseLayer hien tai khong co state freezing.
+  asymmetry:
+    enabled: false
+    parameter: asymmetry
+    values: [0.0, 0.1]
+    left_joint_indices: []
+    right_joint_indices: []
+    reason: Chi bat sau khi xac minh mapping khop trai/phai.
+  postural_instability:
+    enabled: false
+    values: []
+    reason: DiseaseLayer hien tai khong co truong postural/orientation.

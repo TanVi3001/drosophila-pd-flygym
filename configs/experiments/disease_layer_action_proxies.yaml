@@ -1,0 +1,24 @@
+# Action-level Disease Layer example.
+# Values are computational configuration examples, not biological ranges.
+# postural_instability is intentionally absent: LocomotionAction has no
+# orientation/body-stabilization command to perturb without changing FlyGym.
+
+experiment_id: disease_layer_action_proxy_example
+random_seed: 17
+type: disease_layer
+parameters:
+  motor_vigor: 0.8
+  coordination: 0.75
+  initiation_delay_steps: 0
+  action_latency_steps: 3
+  motor_noise_std: 0.01
+  fatigue_rate: 0.0
+  freezing_probability: 0.05
+  freezing_duration_steps: 20
+  asymmetry: 0.0
+  left_joint_indices: [0, 2]
+  right_joint_indices: [1, 3]
+  left_joint_gains: [1.05, 1.05]
+  right_joint_gains: [0.95, 0.95]
+  left_joint_offsets: [0.0, 0.0]
+  right_joint_offsets: [0.0, 0.0]

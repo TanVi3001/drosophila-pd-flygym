@@ -1,0 +1,10 @@
+proxy,simulation_metric,literature_metric,expected_direction,calibration_ready,validation_ready,status,notes
+motor_vigor,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.
+coordination,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.
+noise,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.
+delay,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.
+fatigue,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.
+latency,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.
+freezing,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.
+asymmetry,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.
+postural_instability,,,,WAITING_EVIDENCE,WAITING_EVIDENCE,WAITING_EVIDENCE,Approved quantitative literature target is required before assignment.

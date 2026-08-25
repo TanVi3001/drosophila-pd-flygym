@@ -1,0 +1,12 @@
+Artifact,Producer,Input,Output,Version,Random Seed,Deterministic,Checksum,Manifest,Reproducible,Current Status
+Runtime environment,scripts/check_runtime.py,Python and installed distributions,runtime report,checker contract,N/A,conditional,N/A,N/A,conditional,WAITING_RUNTIME on uncertified host
+Simulation rollout,FlyGym adapter and RolloutRecorder,validated runtime plus experiment config,rollout.json; rollout.npz,FlyGym 2.1.0 / MuJoCo 3.9.0,required,conditional,required,required,conditional,WAITING_DATASET until a real rollout exists
+Dataset package,export pipeline,rollout and metadata,manifest.json; metadata.json; checksums,export schema, inherited,conditional,required,required,conditional,WAITING_DATASET until a real dataset exists
+Viewer pose,viewer export pipeline,validated rollout artifacts,viewer_pose.json,viewer export schema,inherited,conditional,required,required,conditional,WAITING_DATASET until source rollout exists
+Analysis metrics,analysis pipeline,rollout.json or rollout.npz,metrics.json; metrics.csv; report,analysis version,inherited,conditional,required,conditional,conditional,WAITING_DATASET until source rollout exists
+Biomarker report,biomarker pipeline,approved metrics and rollout,biomarkers.json; biomarkers.csv; report,biomarker version,inherited,conditional,required,conditional,conditional,WAITING_DATASET until source metrics exist
+Calibration experiment,Calibration Engine,approved targets plus experiment config and rollout metrics,calibration report and parameter artifacts,calibration contract,required,conditional,required,required,conditional,WAITING_TARGET_DATA
+Validation/concordance,Validation and Concordance Framework,approved literature targets plus simulation artifacts,validation/concordance reports,framework version,inherited,conditional,required,required,conditional,WAITING_DATASET and target data
+Figures,analysis/viewer/report producers,validated metrics or pose plus plotting config,figures and figure manifest,producer version,inherited,conditional,required,required,conditional,WAITING_DATASET
+Paper package,publication workflow,reviewed reports figures tables and citations,paper sources and publication manifest,release configuration,N/A,manual,required,required,conditional,INPUT_REQUIRED
+Release package,release engineering,source commit and approved artifacts,release manifest and archive,release version,N/A,conditional,required,required,conditional,INPUT_REQUIRED

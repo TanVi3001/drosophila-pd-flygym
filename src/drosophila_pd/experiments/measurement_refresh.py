@@ -564,6 +564,7 @@ def _collect_rollout_arrays(
         else None
     )
     cpg_phases = np.full((step_count + 1, 6), np.nan, dtype=float)
+    controller_action_history: list[Any] = []
 
     _collect_thorax_state(
         sim,
@@ -585,7 +586,9 @@ def _collect_rollout_arrays(
             timestep_s=float(sim.timestep),
             random_seed=config.random_seed,
             expected_joint_angle_count=len(dof_order),
+            action_history=tuple(controller_action_history),
         )
+        controller_action_history.append(controller_action)
         apply_locomotion_action(sim, fly.name, action)
         sim.step()
         controller_joint_angle_actions[step_index] = controller_action.joint_angles
