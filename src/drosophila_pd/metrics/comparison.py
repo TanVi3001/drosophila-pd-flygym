@@ -115,7 +115,7 @@ def evaluate_identity_equivalence(
             abs_tol=abs_tol,
             rel_tol=rel_tol,
         ),
-        "heading_yaw_change_rad": _scalar_close_check(
+        "heading_yaw_change_rad": _optional_scalar_close_check(
             baseline["heading_yaw_change_rad"],
             perturbed["heading_yaw_change_rad"],
             abs_tol=abs_tol,
@@ -264,6 +264,34 @@ def _scalar_close_check(
             rel_tol=rel_tol,
         ),
     }
+
+
+def _optional_scalar_close_check(
+    baseline: Any, perturbed: Any, *, abs_tol: float, rel_tol: float
+) -> dict[str, Any]:
+    """Compare a metric that may be unavailable for a short rollout.
+
+    Two matching ``None`` values mean that the metric is unavailable on both
+    sides, not that the identity comparison failed.  A one-sided missing
+    value remains a failure, as does any non-finite value.
+    """
+
+    if baseline is None and perturbed is None:
+        return {
+            "baseline": None,
+            "perturbed": None,
+            "absolute_difference": None,
+            "available": False,
+            "pass": True,
+        }
+    result = _scalar_close_check(
+        baseline,
+        perturbed,
+        abs_tol=abs_tol,
+        rel_tol=rel_tol,
+    )
+    result["available"] = result["absolute_difference"] is not None
+    return result
 
 
 def _sequence_close_check(

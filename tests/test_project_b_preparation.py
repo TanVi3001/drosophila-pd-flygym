@@ -102,8 +102,17 @@ def test_project_b_local_markdown_links_resolve() -> None:
 
 
 def test_existing_dataset_cli_reports_waiting_dataset(tmp_path: Path) -> None:
+    empty_root = tmp_path / "empty_repository"
     result = subprocess.run(
-        [sys.executable, "scripts/dataset_cli.py", "status", "--output", str(tmp_path / "status")],
+        [
+            sys.executable,
+            "scripts/dataset_cli.py",
+            "status",
+            "--root",
+            str(empty_root),
+            "--output",
+            str(tmp_path / "status"),
+        ],
         cwd=ROOT,
         check=True,
         capture_output=True,

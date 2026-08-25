@@ -146,7 +146,9 @@ def test_real_generation_pipeline_when_flygym_is_available(tmp_path: Path) -> No
         run_suite=True,
     )
 
-    assert summary["counts"]["COMPLETED"] == 1
+    # ``count`` is the number requested per configured group.  The current
+    # generator covers Healthy plus the three PD groups.
+    assert summary["counts"]["COMPLETED"] == 4
     dataset = tmp_path / "datasets" / "healthy" / "Healthy_001"
     assert (dataset / "rollout.json").is_file()
     assert (dataset / "rollout.npz").is_file()

@@ -73,8 +73,17 @@ def test_kernel_waits_without_dataset_and_persists_operational_outputs(tmp_path:
 def test_kernel_cli_status_and_shutdown(tmp_path: Path) -> None:
     script = Path(__file__).resolve().parents[1] / "scripts" / "kernel.py"
     output = tmp_path / "kernel"
+    empty_root = tmp_path / "empty_repository"
     boot = subprocess.run(
-        [sys.executable, str(script), "boot", "--output", str(output)],
+        [
+            sys.executable,
+            str(script),
+            "boot",
+            "--root",
+            str(empty_root),
+            "--output",
+            str(output),
+        ],
         check=True,
         capture_output=True,
         text=True,
@@ -82,7 +91,15 @@ def test_kernel_cli_status_and_shutdown(tmp_path: Path) -> None:
     assert json.loads(boot.stdout)["state"] == KernelState.WAITING_DATASET.value
 
     status = subprocess.run(
-        [sys.executable, str(script), "status", "--output", str(output)],
+        [
+            sys.executable,
+            str(script),
+            "status",
+            "--root",
+            str(empty_root),
+            "--output",
+            str(output),
+        ],
         check=True,
         capture_output=True,
         text=True,
@@ -90,7 +107,15 @@ def test_kernel_cli_status_and_shutdown(tmp_path: Path) -> None:
     assert json.loads(status.stdout)["state"] == KernelState.WAITING_DATASET.value
 
     shutdown = subprocess.run(
-        [sys.executable, str(script), "shutdown", "--output", str(output)],
+        [
+            sys.executable,
+            str(script),
+            "shutdown",
+            "--root",
+            str(empty_root),
+            "--output",
+            str(output),
+        ],
         check=True,
         capture_output=True,
         text=True,

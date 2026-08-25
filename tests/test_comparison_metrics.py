@@ -66,6 +66,19 @@ def test_identity_equivalence_fails_for_metric_difference():
     assert result["checks"]["planar_displacement_mm"]["pass"] is False
 
 
+def test_identity_equivalence_accepts_matching_unavailable_heading_metric():
+    baseline = _condition_report()
+    perturbed = deepcopy(baseline)
+    baseline["derived_locomotion_metrics"]["heading_yaw_change_rad"] = None
+    perturbed["derived_locomotion_metrics"]["heading_yaw_change_rad"] = None
+
+    result = evaluate_identity_equivalence(baseline, perturbed)
+
+    assert result["pass"] is True
+    assert result["checks"]["heading_yaw_change_rad"]["available"] is False
+    assert result["checks"]["heading_yaw_change_rad"]["pass"] is True
+
+
 def _condition_report(
     *, displacement: float = 6.0, speed: float = 10.0, yaw: float = 0.2
 ) -> dict:

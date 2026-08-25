@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -107,8 +108,11 @@ def test_builders_are_fluent_and_do_not_import_flygym_until_build() -> None:
     assert fly_builder.spawn_position == (1.0, 2.0, 0.5)
     assert WorldBuilder().blocks(rand_seed=3)._config.kind == "blocks"
 
-    with pytest.raises(FlyGymUnavailableError):
-        fly_builder.build()
+    if importlib.util.find_spec("flygym") is None:
+        with pytest.raises(FlyGymUnavailableError):
+            fly_builder.build()
+    else:
+        assert fly_builder.build() is not None
 
 
 def test_adapter_facade_delegates_renderer_creation() -> None:
