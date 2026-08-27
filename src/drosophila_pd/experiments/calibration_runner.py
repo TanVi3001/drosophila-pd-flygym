@@ -103,6 +103,7 @@ def run_calibration_conditions(
     repo_root: str | Path | None = None,
     targets_path: str | Path | None = None,
     condition_runner: ConditionRunner | None = None,
+    export_artifacts: bool = False,
 ) -> dict[str, Any]:
     """Run baseline and computational conditions, then optionally calibrate.
 
@@ -115,7 +116,10 @@ def run_calibration_conditions(
         raise ValueError("At least one calibration condition is required.")
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
-    runner = condition_runner or _default_condition_runner(repo_root)
+    runner = condition_runner or _default_condition_runner(
+        repo_root,
+        artifacts_root=(output / "artifacts") if export_artifacts else None,
+    )
 
     baseline_report = runner(baseline_config, None, "healthy_baseline")
     baseline_path = output / "healthy_baseline.json"
@@ -193,6 +197,13 @@ def run_calibration_conditions(
             "passed": sum(item["status"] == "PASS" for item in reports),
             "failed": sum(item["status"] == "FAILED" for item in reports),
         },
+        "artifact_export": {
+            "enabled": bool(export_artifacts),
+            "root": (output / "artifacts").as_posix() if export_artifacts else None,
+            "viewer_export": "run_calibration_conditions.py --export-viewer"
+            if export_artifacts
+            else None,
+        },
         "overall_pass": bool(baseline_report.get("overall_pass") is True)
         and all(item["status"] == "PASS" for item in reports),
         "scientific_scope": SCIENTIFIC_SCOPE,
@@ -201,18 +212,26 @@ def run_calibration_conditions(
     return summary
 
 
-def _default_condition_runner(repo_root: str | Path | None) -> ConditionRunner:
+def _default_condition_runner(
+    repo_root: str | Path | None,
+    *,
+    artifacts_root: Path | None = None,
+) -> ConditionRunner:
     def runner(
         config: HealthyBaselineConfig,
         layer: DiseaseLayer | None,
         condition_id: str,
     ) -> dict[str, Any]:
+        rollout_output_dir = None
+        if artifacts_root is not None:
+            rollout_output_dir = artifacts_root / _safe_filename(condition_id)
         return run_locomotion(
             config,
             repo_root=repo_root,
             perturbation=layer,
             condition_id=condition_id,
             include_condition_metadata=True,
+            rollout_output_dir=rollout_output_dir,
         )
 
     return runner

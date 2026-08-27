@@ -87,6 +87,35 @@ def _copy_local_mesh_asset(
     asset = mesh.get("asset") if isinstance(mesh, dict) else None
     if not isinstance(asset, dict):
         return
+
+    if asset.get("type") == "stl_segments":
+        items = asset.get("segments")
+        if not isinstance(items, list):
+            raise ViewerBundleError("STL mesh asset must declare a segments list")
+        copied: set[Path] = set()
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            uri = item.get("uri")
+            if not isinstance(uri, str) or not uri or "://" in uri:
+                raise ViewerBundleError("STL mesh segment URI must be a local relative path")
+            relative_uri = _safe_asset_uri(uri)
+            sources = (
+                pose_path.parent / relative_uri,
+                web_root / relative_uri,
+                REPOSITORY_ROOT / relative_uri,
+            )
+            source = next((candidate for candidate in sources if candidate.is_file()), None)
+            if source is None:
+                raise ViewerBundleError(f"Mesh asset declared by viewer_pose.json was not found: {uri}")
+            destination = stage / relative_uri
+            if destination in copied:
+                continue
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+            copied.add(destination)
+        return
+
     uri = asset.get("uri")
     if not isinstance(uri, str) or not uri or "://" in uri:
         return

@@ -57,12 +57,12 @@ SUPPORTED_PARAMETER_FIELDS = {
     "noise": "motor_noise_std",
     "delay": "initiation_delay_steps",
     "fatigue": "fatigue_rate",
+    "latency": "action_latency_steps",
+    "freezing": "freezing_probability",
     "asymmetry": "asymmetry",
 }
 
 UNSUPPORTED_PROXY_REASONS = {
-    "latency": "DiseaseLayer hiện tại không có trường latency riêng.",
-    "freezing": "DiseaseLayer hiện tại không có state hoặc parameter freezing.",
     "postural_instability": "DiseaseLayer hiện tại không có parameter posture/orientation.",
 }
 
@@ -91,6 +91,7 @@ class ProxySweep:
     values: tuple[float, ...]
     left_joint_indices: tuple[int, ...] = ()
     right_joint_indices: tuple[int, ...] = ()
+    freezing_duration_steps: int = 0
     reason: str | None = None
 
     def validate(self) -> None:
@@ -109,6 +110,10 @@ class ProxySweep:
             raise ValueError(f"Proxy {self.proxy} cần ít nhất một parameter value.")
         if any(not math.isfinite(value) for value in self.values):
             raise ValueError(f"Proxy {self.proxy} chứa parameter value không finite.")
+        if self.proxy == "freezing" and self.freezing_duration_steps <= 0:
+            raise ValueError(
+                "Freezing sweep cần freezing_duration_steps dương để tạo các pause episode."
+            )
         if self.proxy == "asymmetry" and any(value != 0 for value in self.values):
             if not self.left_joint_indices or not self.right_joint_indices:
                 raise ValueError(
@@ -126,6 +131,8 @@ class ProxySweep:
         if self.proxy == "asymmetry":
             parameters["left_joint_indices"] = self.left_joint_indices
             parameters["right_joint_indices"] = self.right_joint_indices
+        if self.proxy == "freezing":
+            parameters["freezing_duration_steps"] = self.freezing_duration_steps
         return DiseaseLayer.from_mapping(parameters)
 
 
@@ -178,6 +185,7 @@ class CampaignConfig:
                 values=values,
                 left_joint_indices=tuple(int(value) for value in raw.get("left_joint_indices", [])),
                 right_joint_indices=tuple(int(value) for value in raw.get("right_joint_indices", [])),
+                freezing_duration_steps=int(raw.get("freezing_duration_steps", 0)),
                 reason=None if raw.get("reason") is None else str(raw["reason"]),
             )
             sweep.validate()
@@ -220,6 +228,7 @@ class CampaignConfig:
                     "values": list(item.values),
                     "left_joint_indices": list(item.left_joint_indices),
                     "right_joint_indices": list(item.right_joint_indices),
+                    "freezing_duration_steps": item.freezing_duration_steps,
                     "reason": item.reason,
                 }
                 for item in self.proxies

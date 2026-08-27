@@ -203,8 +203,14 @@ def run_locomotion(
     condition_id: str = "unperturbed",
     include_condition_metadata: bool = False,
     apply_config_perturbation: bool = True,
+    rollout_output_dir: str | Path | None = None,
 ) -> dict[str, Any]:
-    """Execute the FlyGym locomotion pipeline and return a compact report."""
+    """Execute the FlyGym locomotion pipeline and return a compact report.
+
+    ``rollout_output_dir`` is an opt-in export path for demonstrations and
+    downstream viewer inspection.  The default remains the compact metrics
+    workflow used by the existing calibration tests and reports.
+    """
 
     if perturbation is not None and apply_config_perturbation:
         config = perturbation.apply_to_config(config)
@@ -244,6 +250,33 @@ def run_locomotion(
     sim = Simulation(world, timestep=config.timestep_s)
     sim.reset()
 
+    rollout_recorder = None
+    if rollout_output_dir is not None:
+        # Keep raw observation capture behind an explicit opt-in so ordinary
+        # calibration runs do not pay the serialization cost.
+        from drosophila_pd.flygym_adapter import RolloutRecorder  # noqa: PLC0415
+
+        rollout_recorder = RolloutRecorder(
+            sim,
+            fly.name,
+            fly=fly,
+            timestep=float(sim.timestep),
+            simulation_metadata={
+                "dataset_id": condition_id,
+                "condition_id": condition_id,
+                "source": "drosophila_pd.experiments.healthy_baseline.run_locomotion",
+                "experiment_id": config.experiment_id,
+                "configuration": config.to_report(),
+                "perturbation": (
+                    perturbation.metadata() if perturbation is not None else None
+                ),
+                "scientific_scope": (
+                    "Computational locomotion rollout for control-level condition "
+                    "comparison; not biological validation."
+                ),
+            },
+        )
+
     controller, preprogrammed_steps = build_official_cpg_controller(
         timestep=sim.timestep,
         random_seed=config.random_seed,
@@ -272,6 +305,9 @@ def run_locomotion(
     apply_locomotion_action(sim, fly.name, initial_action)
     if config.warmup_duration_s > 0:
         sim.warmup(duration_s=config.warmup_duration_s)
+
+    if rollout_recorder is not None:
+        rollout_recorder.record()
 
     thorax_index = _body_segment_index(fly, "c_thorax")
     step_count = config.expected_step_count()
@@ -334,6 +370,8 @@ def run_locomotion(
             thorax_quaternions,
             step_index + 1,
         )
+        if rollout_recorder is not None:
+            rollout_recorder.record()
         cpg_phases[step_index + 1] = controller.cpg_network.curr_phases % (
             2 * np.pi
         )
@@ -423,6 +461,15 @@ def run_locomotion(
         "overall_pass": all(check["pass"] for check in checks.values()),
         "scientific_scope": _locomotion_scientific_scope(perturbation),
     }
+    if rollout_recorder is not None:
+        from drosophila_pd.flygym_adapter import export_rollout  # noqa: PLC0415
+
+        exported = export_rollout(rollout_recorder.rollout, rollout_output_dir)
+        report["rollout_artifacts"] = {
+            "output_dir": exported.output_dir,
+            "files": exported.files,
+            "frame_count": rollout_recorder.rollout.frame_count,
+        }
     if include_condition_metadata:
         report.update(
             {

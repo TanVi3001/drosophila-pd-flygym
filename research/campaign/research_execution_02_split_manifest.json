@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "study_id": "research_execution_02",
+  "status": "PROPOSED_PENDING_HUMAN_APPROVAL",
+  "split_unit": "paper_id",
+  "calibration": {
+    "paper_ids": [
+      "riemensperger_2011_dopamine_deficiency"
+    ],
+    "target_ids": [
+      "riemensperger_2011_da_deficient_walking_speed_calibration"
+    ]
+  },
+  "holdout": {
+    "paper_ids": [
+      "pokrzywa_2017_alpha_syn_flytracker"
+    ],
+    "target_ids": [
+      "pokrzywa_2017_alpha_syn_velocity_holdout"
+    ]
+  },
+  "checks": {
+    "paper_overlap": false,
+    "target_overlap": false,
+    "metric_overlap_allowed": true,
+    "unit_match_for_selected_metric": true,
+    "assay_equivalence": false,
+    "direct_biological_equivalence": false
+  },
+  "interpretation": "This is an independent paper-level computational holdout with explicit assay and duration mismatch. It must not be presented as biological validation."
+}

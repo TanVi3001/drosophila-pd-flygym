@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 import { quaternionFromOrientation, vectorFromValue } from './joint_animator.js';
 
 const MATERIAL_COLORS = Object.freeze({
@@ -26,6 +27,7 @@ export class DigitalFlyMesh {
         this.parts = new Map();
         this.metadata = null;
         this.usingFallback = true;
+        this.assetType = null;
         this._buildFallback();
     }
 
@@ -43,7 +45,9 @@ export class DigitalFlyMesh {
     }
 
     async _loadAsset(asset) {
-        if (!asset || typeof asset.uri !== 'string' || !asset.uri) return false;
+        if (!asset || typeof asset !== 'object') return false;
+        if (asset.type === 'stl_segments') return this._loadStlSegments(asset);
+        if (typeof asset.uri !== 'string' || !asset.uri) return false;
         try {
             const loader = new GLTFLoader();
             const gltf = await loader.loadAsync(asset.uri);
@@ -59,6 +63,7 @@ export class DigitalFlyMesh {
             });
             this.group.add(root);
             this.usingFallback = false;
+            this.assetType = 'gltf';
             return true;
         } catch (error) {
             console.warn('Unable to load declared fly mesh asset; using presentation fallback.', error);
@@ -66,9 +71,53 @@ export class DigitalFlyMesh {
         }
     }
 
+    async _loadStlSegments(asset) {
+        const segments = Array.isArray(asset.segments) ? asset.segments : [];
+        if (!segments.length) return false;
+
+        const loader = new STLLoader();
+        const geometries = new Map();
+        try {
+            for (const item of segments) {
+                if (!item || typeof item.uri !== 'string') continue;
+                if (!geometries.has(item.uri)) {
+                    geometries.set(item.uri, await loader.loadAsync(item.uri));
+                }
+            }
+            if (!geometries.size) return false;
+            this.clear();
+            for (const item of segments) {
+                const geometry = geometries.get(item.uri);
+                if (!geometry) continue;
+                geometry.computeVertexNormals();
+                const mesh = new THREE.Mesh(
+                    geometry.clone(),
+                    this._material(item.material || 'thorax'),
+                );
+                mesh.name = item.segment || item.id || `body:${this.parts.size}`;
+                mesh.scale.set(...(Array.isArray(item.scale) ? item.scale : [1000, 1000, 1000]));
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                mesh.userData.bodyPart = bodyPartForSegment(mesh.name);
+                mesh.userData.bodySegment = mesh.name;
+                this.group.add(mesh);
+                this.parts.set(mesh.name, mesh);
+            }
+            if (!this.parts.size) return false;
+            this.usingFallback = false;
+            this.assetType = 'stl_segments';
+            return true;
+        } catch (error) {
+            console.warn('Unable to load FlyGym STL mesh assets; using presentation fallback.', error);
+            this.clear();
+            return false;
+        }
+    }
+
     _buildFallback() {
         this.clear();
         this.usingFallback = true;
+        this.assetType = 'fallback';
         this._addEllipsoid('thorax', 'thorax', [0, 0, 0.03], [0.55, 0.36, 0.42]);
         this._addEllipsoid('abdomen', 'abdomen', [-0.72, 0, -0.02], [0.78, 0.39, 0.34], [0, 0.05, 0]);
         this._addEllipsoid('head', 'head', [0.62, 0, 0.1], [0.38, 0.32, 0.3]);
@@ -194,10 +243,32 @@ export class DigitalFlyMesh {
     }
 
     updateFromFrame(frame) {
+        if (this.assetType === 'stl_segments') {
+            this._updateStlSegments(frame);
+            return;
+        }
         const thorax = vectorFromValue(frame?.thorax);
         if (thorax) this.group.position.set(...thorax);
         const orientation = quaternionFromOrientation(frame?.orientation);
         if (orientation) this.group.quaternion.copy(orientation);
+    }
+
+    _updateStlSegments(frame) {
+        this.group.position.set(0, 0, 0);
+        this.group.quaternion.identity();
+        const bones = new Map((frame?.skeleton?.bones ?? []).map((bone) => [bone.id, bone]));
+        this.parts.forEach((mesh, id) => {
+            const bone = bones.get(id);
+            const position = vectorFromValue(bone?.position);
+            if (!position) {
+                mesh.visible = false;
+                return;
+            }
+            mesh.visible = true;
+            mesh.position.set(...position);
+            const orientation = quaternionFromOrientation(bone?.orientation);
+            if (orientation) mesh.quaternion.copy(orientation);
+        });
     }
 
     updateFromSnapshot(snapshot) {
@@ -235,4 +306,14 @@ export class DigitalFlyMesh {
         this.clear();
         this.group.removeFromParent();
     }
+}
+
+function bodyPartForSegment(segment) {
+    if (segment.includes('wing')) return 'wings';
+    if (segment.includes('eye')) return 'eyes';
+    if (segment.includes('pedicel') || segment.includes('funiculus') || segment.includes('arista')) return 'antenna';
+    if (segment.includes('coxa') || segment.includes('tibia') || segment.includes('tarsus') || segment.includes('trochanter')) return 'legs';
+    if (segment.includes('abdomen')) return 'abdomen';
+    if (segment.includes('head') || segment.includes('rostrum') || segment.includes('haustellum')) return 'head';
+    return 'thorax';
 }

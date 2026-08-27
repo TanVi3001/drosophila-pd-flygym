@@ -218,6 +218,20 @@ python scripts/run_viewer.py
 
 The static ZIP can be uploaded to GitHub Pages or any static web host.
 
+### Optional brain-body GPU demo
+
+The optional `scripts/run_brain_body_rollout.py` connects a separate,
+caller-supplied brain-body source to the existing FlyGym recording and export
+pipeline. It runs real `BrainEngine` and MuJoCo steps when the source,
+checkpoint, and CUDA runtime are available; it does not reconstruct motion from
+the supplied videos or summary JSON files. The Colab/Jupyter walkthrough is
+`notebooks/colab/30_Brain_Body_GPU_Demo.ipynb`, and the setup/provenance
+requirements are documented in [the brain-body GPU workflow](docs/brain_body_gpu_workflow.md).
+
+The result is a computational locomotion condition, not biological Parkinson
+validation, clinical prediction, or treatment evidence. Keep the external
+brain source and checkpoint provenance with every generated artifact.
+
 ## Parkinson Research Workbench
 
 The V2 Web Platform also provides a research workbench for imported rollouts.

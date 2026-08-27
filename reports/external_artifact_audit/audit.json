@@ -1,0 +1,716 @@
+{
+  "archive": {
+    "name": "drosophila_pd_all_videos.zip",
+    "sha256": "83e6d7dfda9656d29aa612bc6fe11e5b6d04e926af7cf82cd2e35fef43913bd3",
+    "size_bytes": 5949561
+  },
+  "generated_at": "2026-08-26T18:17:21.984967+00:00",
+  "inventory": {
+    "duplicate_names": [],
+    "invalid_json_members": [],
+    "json_count": 7,
+    "member_count": 15,
+    "other_count": 0,
+    "raw_rollout_members": [],
+    "unsafe_members": [],
+    "video_count": 8,
+    "viewer_pose_members": []
+  },
+  "json_reports": [
+    {
+      "document_type": "comparison_report",
+      "experiment_id": "milestone_d_pink1_parkin_OE_age25",
+      "external_source_references": [
+        "bridge_scales.json from fly-brain brain_body_bridge.py",
+        "data/bridge_scales/pink1_parkin_OE_age25_bridge_scales.json"
+      ],
+      "flygym_version": "2.1.0",
+      "git_commit": null,
+      "metrics": {
+        "baseline_sample_count": 5001,
+        "baseline_speed_mm_s": 12.568372100573873,
+        "baseline_step_count": 5000,
+        "baseline_timestep_s": 0.0001,
+        "perturbed_sample_count": 5001,
+        "perturbed_speed_mm_s": 11.981251355628846,
+        "perturbed_step_count": 5000,
+        "perturbed_timestep_s": 0.0001
+      },
+      "model": "pink1_parkin_OE_age25",
+      "mujoco_version": "3.9.0",
+      "name": "pink1_parkin_OE_age25_locomotion.json",
+      "overall_pass": true,
+      "perturbation_parameters": {
+        "coupling_scale": 0.888889,
+        "is_asymmetric": false,
+        "left_motor_scale": 0.956522,
+        "model": "pink1_parkin_OE_age25",
+        "motor_scale": 0.956522,
+        "right_motor_scale": 0.956522,
+        "scales_json_path": "data/bridge_scales/pink1_parkin_OE_age25_bridge_scales.json"
+      },
+      "random_seed": 0,
+      "scientific_scope": [
+        "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+        "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+      ],
+      "sha256": "d1086dbc202d4800b67cd38d9319ec4de61621dcb3ea5947266989052a50c1e5",
+      "status": "PARSED"
+    },
+    {
+      "document_type": "comparison_report",
+      "experiment_id": "milestone_d_pink1",
+      "external_source_references": [
+        "bridge_scales.json from fly-brain brain_body_bridge.py",
+        "data/bridge_scales/pink1_bridge_scales.json"
+      ],
+      "flygym_version": "2.1.0",
+      "git_commit": null,
+      "metrics": {
+        "baseline_sample_count": 5001,
+        "baseline_speed_mm_s": 12.568372100573873,
+        "baseline_step_count": 5000,
+        "baseline_timestep_s": 0.0001,
+        "perturbed_sample_count": 5001,
+        "perturbed_speed_mm_s": 14.410521353596543,
+        "perturbed_step_count": 5000,
+        "perturbed_timestep_s": 0.0001
+      },
+      "model": "pink1",
+      "mujoco_version": "3.9.0",
+      "name": "pink1_locomotion.json",
+      "overall_pass": true,
+      "perturbation_parameters": {
+        "coupling_scale": 1.047619,
+        "is_asymmetric": false,
+        "left_motor_scale": 1.148515,
+        "model": "pink1",
+        "motor_scale": 1.148515,
+        "right_motor_scale": 1.148515,
+        "scales_json_path": "data/bridge_scales/pink1_bridge_scales.json"
+      },
+      "random_seed": 0,
+      "scientific_scope": [
+        "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+        "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+      ],
+      "sha256": "a32a8666b7d1f7257154386d27ccd6b8ab464334c6343f825fb69427aa31d2b2",
+      "status": "PARSED"
+    },
+    {
+      "document_type": "comparison_report",
+      "experiment_id": "milestone_d_complexI",
+      "external_source_references": [
+        "bridge_scales.json from fly-brain brain_body_bridge.py",
+        "data/bridge_scales/complexI_bridge_scales.json"
+      ],
+      "flygym_version": "2.1.0",
+      "git_commit": null,
+      "metrics": {
+        "baseline_sample_count": 5001,
+        "baseline_speed_mm_s": 12.568372100573873,
+        "baseline_step_count": 5000,
+        "baseline_timestep_s": 0.0001,
+        "perturbed_sample_count": 5001,
+        "perturbed_speed_mm_s": 13.979692961939309,
+        "perturbed_step_count": 5000,
+        "perturbed_timestep_s": 0.0001
+      },
+      "model": "complexI",
+      "mujoco_version": "3.9.0",
+      "name": "complexI_locomotion.json",
+      "overall_pass": true,
+      "perturbation_parameters": {
+        "coupling_scale": 0.857143,
+        "is_asymmetric": false,
+        "left_motor_scale": 1.108911,
+        "model": "complexI",
+        "motor_scale": 1.108911,
+        "right_motor_scale": 1.108911,
+        "scales_json_path": "data/bridge_scales/complexI_bridge_scales.json"
+      },
+      "random_seed": 0,
+      "scientific_scope": [
+        "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+        "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+      ],
+      "sha256": "afb04168ff8830c486a1a9999828760fc9028aac29169a0a13fba1439e4f9d21",
+      "status": "PARSED"
+    },
+    {
+      "document_type": "comparison_report",
+      "experiment_id": "milestone_d_parkin",
+      "external_source_references": [
+        "bridge_scales.json from fly-brain brain_body_bridge.py",
+        "data/bridge_scales/parkin_bridge_scales.json"
+      ],
+      "flygym_version": "2.1.0",
+      "git_commit": null,
+      "metrics": {
+        "baseline_sample_count": 5001,
+        "baseline_speed_mm_s": 12.568372100573873,
+        "baseline_step_count": 5000,
+        "baseline_timestep_s": 0.0001,
+        "perturbed_sample_count": 5001,
+        "perturbed_speed_mm_s": 11.98666862250425,
+        "perturbed_step_count": 5000,
+        "perturbed_timestep_s": 0.0001
+      },
+      "model": "parkin",
+      "mujoco_version": "3.9.0",
+      "name": "parkin_locomotion.json",
+      "overall_pass": true,
+      "perturbation_parameters": {
+        "coupling_scale": 0.47619,
+        "is_asymmetric": false,
+        "left_motor_scale": 0.985149,
+        "model": "parkin",
+        "motor_scale": 0.985149,
+        "right_motor_scale": 0.985149,
+        "scales_json_path": "data/bridge_scales/parkin_bridge_scales.json"
+      },
+      "random_seed": 0,
+      "scientific_scope": [
+        "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+        "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+      ],
+      "sha256": "1cad9071db235a2fb6bfdd8e66196dd43a158840fa03406c79ef97b84cbaf448",
+      "status": "PARSED"
+    },
+    {
+      "document_type": "comparison_report",
+      "experiment_id": "milestone_d_lrrk2",
+      "external_source_references": [
+        "bridge_scales.json from fly-brain brain_body_bridge.py",
+        "data/bridge_scales/lrrk2_bridge_scales.json"
+      ],
+      "flygym_version": "2.1.0",
+      "git_commit": null,
+      "metrics": {
+        "baseline_sample_count": 5001,
+        "baseline_speed_mm_s": 12.568372100573873,
+        "baseline_step_count": 5000,
+        "baseline_timestep_s": 0.0001,
+        "perturbed_sample_count": 5001,
+        "perturbed_speed_mm_s": 14.283457719970892,
+        "perturbed_step_count": 5000,
+        "perturbed_timestep_s": 0.0001
+      },
+      "model": "lrrk2",
+      "mujoco_version": "3.9.0",
+      "name": "lrrk2_locomotion.json",
+      "overall_pass": true,
+      "perturbation_parameters": {
+        "coupling_scale": 0.904762,
+        "is_asymmetric": false,
+        "left_motor_scale": 1.143564,
+        "model": "lrrk2",
+        "motor_scale": 1.143564,
+        "right_motor_scale": 1.143564,
+        "scales_json_path": "data/bridge_scales/lrrk2_bridge_scales.json"
+      },
+      "random_seed": 0,
+      "scientific_scope": [
+        "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+        "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+      ],
+      "sha256": "5d71ce364b11317d829d16f8a08192b11688ac68f456164965db7034cb2e07c8",
+      "status": "PARSED"
+    },
+    {
+      "document_type": "comparison_report",
+      "experiment_id": "milestone_d_dj1",
+      "external_source_references": [
+        "bridge_scales.json from fly-brain brain_body_bridge.py",
+        "data/bridge_scales/dj1_bridge_scales.json"
+      ],
+      "flygym_version": "2.1.0",
+      "git_commit": null,
+      "metrics": {
+        "baseline_sample_count": 5001,
+        "baseline_speed_mm_s": 12.568372100573873,
+        "baseline_step_count": 5000,
+        "baseline_timestep_s": 0.0001,
+        "perturbed_sample_count": 5001,
+        "perturbed_speed_mm_s": 11.918868570297617,
+        "perturbed_step_count": 5000,
+        "perturbed_timestep_s": 0.0001
+      },
+      "model": "dj1",
+      "mujoco_version": "3.9.0",
+      "name": "dj1_locomotion.json",
+      "overall_pass": true,
+      "perturbation_parameters": {
+        "coupling_scale": 0.714286,
+        "is_asymmetric": false,
+        "left_motor_scale": 0.960396,
+        "model": "dj1",
+        "motor_scale": 0.960396,
+        "right_motor_scale": 0.960396,
+        "scales_json_path": "data/bridge_scales/dj1_bridge_scales.json"
+      },
+      "random_seed": 0,
+      "scientific_scope": [
+        "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+        "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+      ],
+      "sha256": "93fa3873dff7b6a2db5ffe8b89be6c333b17ebff135a93a6e20d600e8371dbd1",
+      "status": "PARSED"
+    },
+    {
+      "document_type": "comparison_report",
+      "experiment_id": "milestone_d_pink1_age25",
+      "external_source_references": [
+        "bridge_scales.json from fly-brain brain_body_bridge.py",
+        "data/bridge_scales/pink1_age25_bridge_scales.json"
+      ],
+      "flygym_version": "2.1.0",
+      "git_commit": null,
+      "metrics": {
+        "baseline_sample_count": 5001,
+        "baseline_speed_mm_s": 12.568372100573873,
+        "baseline_step_count": 5000,
+        "baseline_timestep_s": 0.0001,
+        "perturbed_sample_count": 5001,
+        "perturbed_speed_mm_s": 10.682772228544117,
+        "perturbed_step_count": 5000,
+        "perturbed_timestep_s": 0.0001
+      },
+      "model": "pink1_age25",
+      "mujoco_version": "3.9.0",
+      "name": "pink1_age25_locomotion.json",
+      "overall_pass": true,
+      "perturbation_parameters": {
+        "coupling_scale": 0.5,
+        "is_asymmetric": false,
+        "left_motor_scale": 0.782609,
+        "model": "pink1_age25",
+        "motor_scale": 0.782609,
+        "right_motor_scale": 0.782609,
+        "scales_json_path": "data/bridge_scales/pink1_age25_bridge_scales.json"
+      },
+      "random_seed": 0,
+      "scientific_scope": [
+        "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+        "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+      ],
+      "sha256": "5ae866cc3592633d87b86f456bd763c75f900fb4bc3fa59020bb7bb8e967e041",
+      "status": "PARSED"
+    }
+  ],
+  "members": [
+    {
+      "duplicate_name": false,
+      "kind": "video",
+      "name": "pink1_perturbed.mp4",
+      "safe_path": true,
+      "sha256": "2fdc1661698b530c31b6ff9855a62e7b7c11c3c481e7c643b5e54f303c199855",
+      "size_bytes": 761861,
+      "status": "PRESENT_NOT_DECODED"
+    },
+    {
+      "duplicate_name": false,
+      "json_details": {
+        "document_type": "comparison_report",
+        "experiment_id": "milestone_d_pink1_parkin_OE_age25",
+        "external_source_references": [
+          "bridge_scales.json from fly-brain brain_body_bridge.py",
+          "data/bridge_scales/pink1_parkin_OE_age25_bridge_scales.json"
+        ],
+        "flygym_version": "2.1.0",
+        "git_commit": null,
+        "metrics": {
+          "baseline_sample_count": 5001,
+          "baseline_speed_mm_s": 12.568372100573873,
+          "baseline_step_count": 5000,
+          "baseline_timestep_s": 0.0001,
+          "perturbed_sample_count": 5001,
+          "perturbed_speed_mm_s": 11.981251355628846,
+          "perturbed_step_count": 5000,
+          "perturbed_timestep_s": 0.0001
+        },
+        "model": "pink1_parkin_OE_age25",
+        "mujoco_version": "3.9.0",
+        "overall_pass": true,
+        "perturbation_parameters": {
+          "coupling_scale": 0.888889,
+          "is_asymmetric": false,
+          "left_motor_scale": 0.956522,
+          "model": "pink1_parkin_OE_age25",
+          "motor_scale": 0.956522,
+          "right_motor_scale": 0.956522,
+          "scales_json_path": "data/bridge_scales/pink1_parkin_OE_age25_bridge_scales.json"
+        },
+        "random_seed": 0,
+        "scientific_scope": [
+          "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+          "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+        ]
+      },
+      "kind": "json",
+      "name": "pink1_parkin_OE_age25_locomotion.json",
+      "safe_path": true,
+      "sha256": "d1086dbc202d4800b67cd38d9319ec4de61621dcb3ea5947266989052a50c1e5",
+      "size_bytes": 30604,
+      "status": "PARSED"
+    },
+    {
+      "duplicate_name": false,
+      "kind": "video",
+      "name": "healthy_baseline.mp4",
+      "safe_path": true,
+      "sha256": "83d679e495653f866247f7e87cbae77732dae2a2c1c8a3628bf358b231a70e22",
+      "size_bytes": 740188,
+      "status": "PRESENT_NOT_DECODED"
+    },
+    {
+      "duplicate_name": false,
+      "json_details": {
+        "document_type": "comparison_report",
+        "experiment_id": "milestone_d_pink1",
+        "external_source_references": [
+          "bridge_scales.json from fly-brain brain_body_bridge.py",
+          "data/bridge_scales/pink1_bridge_scales.json"
+        ],
+        "flygym_version": "2.1.0",
+        "git_commit": null,
+        "metrics": {
+          "baseline_sample_count": 5001,
+          "baseline_speed_mm_s": 12.568372100573873,
+          "baseline_step_count": 5000,
+          "baseline_timestep_s": 0.0001,
+          "perturbed_sample_count": 5001,
+          "perturbed_speed_mm_s": 14.410521353596543,
+          "perturbed_step_count": 5000,
+          "perturbed_timestep_s": 0.0001
+        },
+        "model": "pink1",
+        "mujoco_version": "3.9.0",
+        "overall_pass": true,
+        "perturbation_parameters": {
+          "coupling_scale": 1.047619,
+          "is_asymmetric": false,
+          "left_motor_scale": 1.148515,
+          "model": "pink1",
+          "motor_scale": 1.148515,
+          "right_motor_scale": 1.148515,
+          "scales_json_path": "data/bridge_scales/pink1_bridge_scales.json"
+        },
+        "random_seed": 0,
+        "scientific_scope": [
+          "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+          "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+        ]
+      },
+      "kind": "json",
+      "name": "pink1_locomotion.json",
+      "safe_path": true,
+      "sha256": "a32a8666b7d1f7257154386d27ccd6b8ab464334c6343f825fb69427aa31d2b2",
+      "size_bytes": 29971,
+      "status": "PARSED"
+    },
+    {
+      "duplicate_name": false,
+      "json_details": {
+        "document_type": "comparison_report",
+        "experiment_id": "milestone_d_complexI",
+        "external_source_references": [
+          "bridge_scales.json from fly-brain brain_body_bridge.py",
+          "data/bridge_scales/complexI_bridge_scales.json"
+        ],
+        "flygym_version": "2.1.0",
+        "git_commit": null,
+        "metrics": {
+          "baseline_sample_count": 5001,
+          "baseline_speed_mm_s": 12.568372100573873,
+          "baseline_step_count": 5000,
+          "baseline_timestep_s": 0.0001,
+          "perturbed_sample_count": 5001,
+          "perturbed_speed_mm_s": 13.979692961939309,
+          "perturbed_step_count": 5000,
+          "perturbed_timestep_s": 0.0001
+        },
+        "model": "complexI",
+        "mujoco_version": "3.9.0",
+        "overall_pass": true,
+        "perturbation_parameters": {
+          "coupling_scale": 0.857143,
+          "is_asymmetric": false,
+          "left_motor_scale": 1.108911,
+          "model": "complexI",
+          "motor_scale": 1.108911,
+          "right_motor_scale": 1.108911,
+          "scales_json_path": "data/bridge_scales/complexI_bridge_scales.json"
+        },
+        "random_seed": 0,
+        "scientific_scope": [
+          "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+          "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+        ]
+      },
+      "kind": "json",
+      "name": "complexI_locomotion.json",
+      "safe_path": true,
+      "sha256": "afb04168ff8830c486a1a9999828760fc9028aac29169a0a13fba1439e4f9d21",
+      "size_bytes": 30192,
+      "status": "PARSED"
+    },
+    {
+      "duplicate_name": false,
+      "kind": "video",
+      "name": "parkin_perturbed.mp4",
+      "safe_path": true,
+      "sha256": "79fec2c44b2319b92c12e19c3ea1fec4bb340e3aa8e05de058e8cada10e12f82",
+      "size_bytes": 725889,
+      "status": "PRESENT_NOT_DECODED"
+    },
+    {
+      "duplicate_name": false,
+      "json_details": {
+        "document_type": "comparison_report",
+        "experiment_id": "milestone_d_parkin",
+        "external_source_references": [
+          "bridge_scales.json from fly-brain brain_body_bridge.py",
+          "data/bridge_scales/parkin_bridge_scales.json"
+        ],
+        "flygym_version": "2.1.0",
+        "git_commit": null,
+        "metrics": {
+          "baseline_sample_count": 5001,
+          "baseline_speed_mm_s": 12.568372100573873,
+          "baseline_step_count": 5000,
+          "baseline_timestep_s": 0.0001,
+          "perturbed_sample_count": 5001,
+          "perturbed_speed_mm_s": 11.98666862250425,
+          "perturbed_step_count": 5000,
+          "perturbed_timestep_s": 0.0001
+        },
+        "model": "parkin",
+        "mujoco_version": "3.9.0",
+        "overall_pass": true,
+        "perturbation_parameters": {
+          "coupling_scale": 0.47619,
+          "is_asymmetric": false,
+          "left_motor_scale": 0.985149,
+          "model": "parkin",
+          "motor_scale": 0.985149,
+          "right_motor_scale": 0.985149,
+          "scales_json_path": "data/bridge_scales/parkin_bridge_scales.json"
+        },
+        "random_seed": 0,
+        "scientific_scope": [
+          "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+          "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+        ]
+      },
+      "kind": "json",
+      "name": "parkin_locomotion.json",
+      "safe_path": true,
+      "sha256": "1cad9071db235a2fb6bfdd8e66196dd43a158840fa03406c79ef97b84cbaf448",
+      "size_bytes": 30078,
+      "status": "PARSED"
+    },
+    {
+      "duplicate_name": false,
+      "kind": "video",
+      "name": "complexI_perturbed.mp4",
+      "safe_path": true,
+      "sha256": "050d0b081bb7fcd548f0d0900d666a89f4dd2905e9a35c7893efcae434e288d1",
+      "size_bytes": 755163,
+      "status": "PRESENT_NOT_DECODED"
+    },
+    {
+      "duplicate_name": false,
+      "kind": "video",
+      "name": "pink1_parkin_OE_age25_perturbed.mp4",
+      "safe_path": true,
+      "sha256": "8e1c5ad3dd21abee1144a635f2c472430b65f2397c579bde4a9b69f0fd03d0c2",
+      "size_bytes": 735142,
+      "status": "PRESENT_NOT_DECODED"
+    },
+    {
+      "duplicate_name": false,
+      "json_details": {
+        "document_type": "comparison_report",
+        "experiment_id": "milestone_d_lrrk2",
+        "external_source_references": [
+          "bridge_scales.json from fly-brain brain_body_bridge.py",
+          "data/bridge_scales/lrrk2_bridge_scales.json"
+        ],
+        "flygym_version": "2.1.0",
+        "git_commit": null,
+        "metrics": {
+          "baseline_sample_count": 5001,
+          "baseline_speed_mm_s": 12.568372100573873,
+          "baseline_step_count": 5000,
+          "baseline_timestep_s": 0.0001,
+          "perturbed_sample_count": 5001,
+          "perturbed_speed_mm_s": 14.283457719970892,
+          "perturbed_step_count": 5000,
+          "perturbed_timestep_s": 0.0001
+        },
+        "model": "lrrk2",
+        "mujoco_version": "3.9.0",
+        "overall_pass": true,
+        "perturbation_parameters": {
+          "coupling_scale": 0.904762,
+          "is_asymmetric": false,
+          "left_motor_scale": 1.143564,
+          "model": "lrrk2",
+          "motor_scale": 1.143564,
+          "right_motor_scale": 1.143564,
+          "scales_json_path": "data/bridge_scales/lrrk2_bridge_scales.json"
+        },
+        "random_seed": 0,
+        "scientific_scope": [
+          "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+          "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+        ]
+      },
+      "kind": "json",
+      "name": "lrrk2_locomotion.json",
+      "safe_path": true,
+      "sha256": "5d71ce364b11317d829d16f8a08192b11688ac68f456164965db7034cb2e07c8",
+      "size_bytes": 30042,
+      "status": "PARSED"
+    },
+    {
+      "duplicate_name": false,
+      "kind": "video",
+      "name": "dj1_perturbed.mp4",
+      "safe_path": true,
+      "sha256": "f9d5822079fed4f21ac4f933c1729a2f244586110f82a129651606b43f6f8898",
+      "size_bytes": 729316,
+      "status": "PRESENT_NOT_DECODED"
+    },
+    {
+      "duplicate_name": false,
+      "json_details": {
+        "document_type": "comparison_report",
+        "experiment_id": "milestone_d_dj1",
+        "external_source_references": [
+          "bridge_scales.json from fly-brain brain_body_bridge.py",
+          "data/bridge_scales/dj1_bridge_scales.json"
+        ],
+        "flygym_version": "2.1.0",
+        "git_commit": null,
+        "metrics": {
+          "baseline_sample_count": 5001,
+          "baseline_speed_mm_s": 12.568372100573873,
+          "baseline_step_count": 5000,
+          "baseline_timestep_s": 0.0001,
+          "perturbed_sample_count": 5001,
+          "perturbed_speed_mm_s": 11.918868570297617,
+          "perturbed_step_count": 5000,
+          "perturbed_timestep_s": 0.0001
+        },
+        "model": "dj1",
+        "mujoco_version": "3.9.0",
+        "overall_pass": true,
+        "perturbation_parameters": {
+          "coupling_scale": 0.714286,
+          "is_asymmetric": false,
+          "left_motor_scale": 0.960396,
+          "model": "dj1",
+          "motor_scale": 0.960396,
+          "right_motor_scale": 0.960396,
+          "scales_json_path": "data/bridge_scales/dj1_bridge_scales.json"
+        },
+        "random_seed": 0,
+        "scientific_scope": [
+          "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+          "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+        ]
+      },
+      "kind": "json",
+      "name": "dj1_locomotion.json",
+      "safe_path": true,
+      "sha256": "93fa3873dff7b6a2db5ffe8b89be6c333b17ebff135a93a6e20d600e8371dbd1",
+      "size_bytes": 29998,
+      "status": "PARSED"
+    },
+    {
+      "duplicate_name": false,
+      "kind": "video",
+      "name": "pink1_age25_perturbed.mp4",
+      "safe_path": true,
+      "sha256": "a5519962314b4cf0ae2d45b748ccea274a6a2bf773dd0e22d7d93fc7ef78b9cf",
+      "size_bytes": 705505,
+      "status": "PRESENT_NOT_DECODED"
+    },
+    {
+      "duplicate_name": false,
+      "kind": "video",
+      "name": "lrrk2_perturbed.mp4",
+      "safe_path": true,
+      "sha256": "ac278dc4c2bce2ecb05955b18722cea5a7ea36322ecaaa8b49e6c4c2a7c6b470",
+      "size_bytes": 763043,
+      "status": "PRESENT_NOT_DECODED"
+    },
+    {
+      "duplicate_name": false,
+      "json_details": {
+        "document_type": "comparison_report",
+        "experiment_id": "milestone_d_pink1_age25",
+        "external_source_references": [
+          "bridge_scales.json from fly-brain brain_body_bridge.py",
+          "data/bridge_scales/pink1_age25_bridge_scales.json"
+        ],
+        "flygym_version": "2.1.0",
+        "git_commit": null,
+        "metrics": {
+          "baseline_sample_count": 5001,
+          "baseline_speed_mm_s": 12.568372100573873,
+          "baseline_step_count": 5000,
+          "baseline_timestep_s": 0.0001,
+          "perturbed_sample_count": 5001,
+          "perturbed_speed_mm_s": 10.682772228544117,
+          "perturbed_step_count": 5000,
+          "perturbed_timestep_s": 0.0001
+        },
+        "model": "pink1_age25",
+        "mujoco_version": "3.9.0",
+        "overall_pass": true,
+        "perturbation_parameters": {
+          "coupling_scale": 0.5,
+          "is_asymmetric": false,
+          "left_motor_scale": 0.782609,
+          "model": "pink1_age25",
+          "motor_scale": 0.782609,
+          "right_motor_scale": 0.782609,
+          "scales_json_path": "data/bridge_scales/pink1_age25_bridge_scales.json"
+        },
+        "random_seed": 0,
+        "scientific_scope": [
+          "Milestone C validates an unperturbed deterministic FlyGym locomotion simulation baseline for future software comparisons. It is not a Parkinson's disease model and is not biological validation.",
+          "This condition report records a controlled simulation perturbation condition for software comparison. It is not a Parkinson's disease model and is not biological validation."
+        ]
+      },
+      "kind": "json",
+      "name": "pink1_age25_locomotion.json",
+      "safe_path": true,
+      "sha256": "5ae866cc3592633d87b86f456bd763c75f900fb4bc3fa59020bb7bb8e967e041",
+      "size_bytes": 30272,
+      "status": "PARSED"
+    }
+  ],
+  "provenance": {
+    "interpretation": "Archive is treated as derived computational output until the source repository, raw rollouts, runtime manifest, and video provenance are supplied.",
+    "raw_rollout_present": false,
+    "unresolved_external_references": [
+      "bridge_scales.json from fly-brain brain_body_bridge.py",
+      "data/bridge_scales/complexI_bridge_scales.json",
+      "data/bridge_scales/dj1_bridge_scales.json",
+      "data/bridge_scales/lrrk2_bridge_scales.json",
+      "data/bridge_scales/parkin_bridge_scales.json",
+      "data/bridge_scales/pink1_age25_bridge_scales.json",
+      "data/bridge_scales/pink1_bridge_scales.json",
+      "data/bridge_scales/pink1_parkin_OE_age25_bridge_scales.json"
+    ],
+    "video_decode": "NOT_PERFORMED",
+    "viewer_pose_present": false
+  },
+  "schema_version": 1,
+  "scientific_scope": "This is an artifact and provenance audit only. It does not validate biological Parkinson phenotypes, clinical claims, or video content.",
+  "status": "PARSEABLE_DERIVED_ARTIFACTS"
+}

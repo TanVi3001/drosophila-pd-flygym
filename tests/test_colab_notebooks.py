@@ -24,6 +24,7 @@ NOTEBOOK_NAMES = [
 RESEARCH_NOTEBOOK_NAMES = [
     "20_Run_Research.ipynb",
     "21_Verify_Research_Output.ipynb",
+    "30_Brain_Body_GPU_Demo.ipynb",
 ]
 REQUIRED_MARKDOWN = (
     "Objective",

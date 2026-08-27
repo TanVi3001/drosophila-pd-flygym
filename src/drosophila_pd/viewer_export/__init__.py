@@ -1,6 +1,11 @@
 """Read-only FlyGym rollout to Three.js viewer-pose export package."""
 
-from .mesh_exporter import DEFAULT_VIEWER_BODY_PARTS, build_mesh_metadata, build_visibility
+from .mesh_exporter import (
+    DEFAULT_VIEWER_BODY_PARTS,
+    build_mesh_metadata,
+    build_visibility,
+    materialize_mesh_assets,
+)
 from .pose_exporter import (
     PoseExportResult,
     RolloutInputs,
@@ -31,6 +36,7 @@ __all__ = [
     "find_latest_rollout",
     "find_latest_viewer_pose",
     "load_rollout_inputs",
+    "materialize_mesh_assets",
     "resolve_dataset",
     "schema",
     "trajectory_for_frame",

@@ -13,7 +13,7 @@ import tempfile
 from urllib.parse import unquote, urlsplit
 import webbrowser
 
-from build_viewer_bundle import _copy_web_runtime, _write_entrypoint
+from build_viewer_bundle import _copy_local_mesh_asset, _copy_web_runtime, _load_pose, _write_entrypoint
 from drosophila_pd.viewer_export.discovery import find_latest_viewer_pose
 
 
@@ -79,6 +79,7 @@ def _runtime_root(root: Path, pose: Path):
         runtime = Path(temporary)
         _copy_web_runtime(root, runtime)
         shutil.copy2(pose, runtime / "viewer_pose.json")
+        _copy_local_mesh_asset(_load_pose(pose), pose, runtime, root)
         _write_entrypoint(runtime)
         yield runtime
 

@@ -104,6 +104,10 @@ def test_three_viewer_has_production_visual_controls_and_mesh_fallback_boundary(
     camera = (VIEWER / "camera_controller.js").read_text(encoding="utf-8")
 
     assert "GLTFLoader" in mesh
+    assert "STLLoader" in mesh
+    assert "stl_segments" in mesh
+    assert "_updateStlSegments" in mesh
+    assert "quaternionFromOrientation(bone" in mesh
     assert "presentation fallback" in mesh
     assert "MeshStandardMaterial" in mesh
     assert "castShadow" in mesh
@@ -111,6 +115,7 @@ def test_three_viewer_has_production_visual_controls_and_mesh_fallback_boundary(
     assert "setShadowEnabled" in scene
     assert "fitToPoints" in camera
     assert "demo" in camera
+    assert "meshMode !== 'flygym_stl'" in (VIEWER / "viewer.js").read_text(encoding="utf-8")
     for control in ("FPS", "Time", "Camera", "Axes", "Grid", "Floor", "Shadow"):
         assert control in timeline
 

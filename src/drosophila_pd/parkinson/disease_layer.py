@@ -137,6 +137,10 @@ class DiseaseLayer:
         object.__setattr__(self, "action_latency_steps", int(self.action_latency_steps))
         object.__setattr__(self, "freezing_probability", float(self.freezing_probability))
         object.__setattr__(self, "freezing_duration_steps", int(self.freezing_duration_steps))
+        # Cache the deterministic freeze state as frames are requested.  The
+        # cache changes only execution cost, not the seed-controlled sequence;
+        # without it, each frame would replay the complete history from step 0.
+        object.__setattr__(self, "_freezing_cache", {})
         for field_name, values in vectors.items():
             object.__setattr__(self, field_name, values)
 
@@ -230,25 +234,36 @@ class DiseaseLayer:
         return _copy_action(action, joint_angles=transformed, adhesion_onoff=source_adhesion)
 
     def _freezing_active(self, context: ActionPerturbationContext) -> bool:
-        """Reconstruct a seed-controlled freeze state without mutable runtime state."""
+        """Return the seed-controlled freeze state at one action step."""
 
         if self.freezing_probability <= 0.0 or self.freezing_duration_steps <= 0:
             return False
-        remaining = 0
-        active = False
-        for step_index in range(int(context.step_index) + 1):
+        target = int(context.step_index)
+        if target < 0:
+            return False
+
+        cache_key = int(context.random_seed)
+        cache = self._freezing_cache.setdefault(
+            cache_key,
+            {"states": [], "remaining": 0},
+        )
+        states = cache["states"]
+        remaining = int(cache["remaining"])
+        for step_index in range(len(states), target + 1):
             if remaining > 0:
                 active = True
                 remaining -= 1
-                continue
-            rng = np.random.default_rng(
-                np.random.SeedSequence(
-                    [self.random_seed, int(context.random_seed), step_index, 193]
+            else:
+                rng = np.random.default_rng(
+                    np.random.SeedSequence(
+                        [self.random_seed, cache_key, step_index, 193]
+                    )
                 )
-            )
-            active = bool(rng.random() < self.freezing_probability)
-            remaining = self.freezing_duration_steps - 1 if active else 0
-        return active
+                active = bool(rng.random() < self.freezing_probability)
+                remaining = self.freezing_duration_steps - 1 if active else 0
+            states.append(active)
+        cache["remaining"] = remaining
+        return bool(states[target])
 
     def metadata(self) -> dict[str, Any]:
         """Return auditable, JSON-serializable layer metadata."""

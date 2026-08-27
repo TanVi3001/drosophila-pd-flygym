@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "study_id": "research_execution_02",
+    "status": "PROPOSED_PENDING_HUMAN_APPROVAL",
+    "split_unit": "paper_id",
+    "numeric_target_policy": "Only explicitly reported values with a named assay, unit, source location, and provenance are entered. Assay and duration mismatch prevents direct biological equivalence.",
+    "scientific_scope": "Conditional computational calibration of existing locomotion metrics; not biological validation, diagnosis, clinical prediction, or treatment evidence.",
+    "approval_required": true,
+    "approval_note": "A research lead must review the source locations, units, genotype, age, assay, and transfer assumptions before this target set is used as an official calibration dataset.",
+    "source_urls": [
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC3021077/",
+      "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0184117"
+    ]
+  },
+  "targets": [
+    {
+      "target_id": "riemensperger_2011_da_deficient_walking_speed_calibration",
+      "paper_id": "riemensperger_2011_dopamine_deficiency",
+      "split": "calibration",
+      "metric": "mean_planar_speed_mm_s",
+      "source_id": "PMC3021077-Fig2A",
+      "citation": "Riemensperger et al. (2011), Behavioral consequences of dopamine deficiency in the Drosophila central nervous system, PNAS, DOI: 10.1073/pnas.1010930108, PMID: 21187381",
+      "model_context": "5-day-old adult flies with neural dopamine deficiency, DTHgFS+/-; ple context",
+      "assay": "Spontaneous walking in an open arena; reported median walking speed",
+      "direction": "target",
+      "target_value": 7.8,
+      "unit": "mm/s",
+      "weight": 1.0,
+      "scale": 7.8,
+      "source_location": "Figure 2A and Results section: DA deficiency reduces activity and arousal",
+      "review_status": "PROPOSED_PENDING_HUMAN_APPROVAL",
+      "compatibility": "CONDITIONAL",
+      "notes": "The paper reports 7.8 mm/s for the dopamine-deficient group. FlyGym uses a short flat-ground simulated rollout, so this is a provisional transfer target rather than a directly equivalent experimental endpoint."
+    },
+    {
+      "target_id": "pokrzywa_2017_alpha_syn_velocity_holdout",
+      "paper_id": "pokrzywa_2017_alpha_syn_flytracker",
+      "split": "holdout",
+      "metric": "mean_planar_speed_mm_s",
+      "source_id": "PLOS ONE 10.1371/journal.pone.0184117-Fig2A",
+      "citation": "Pokrzywa et al. (2017), Effects of small-molecule amyloid modulators on a Drosophila model of Parkinson's disease, PLOS ONE, DOI: 10.1371/journal.pone.0184117",
+      "model_context": "Adult female flies expressing human alpha-synuclein under nSyb-GAL4; value described within the first 3 weeks",
+      "assay": "FlyTracker locomotion tracking in vials; 10-second recordings at 30 frames/s, repeated weekly",
+      "direction": "target",
+      "target_value": 2.5,
+      "unit": "mm/s",
+      "weight": 1.0,
+      "scale": 2.5,
+      "source_location": "Figure 2A and Results section: Age-dependent climbing deficits in PD flies",
+      "review_status": "PROPOSED_PENDING_HUMAN_APPROVAL",
+      "compatibility": "CONDITIONAL",
+      "notes": "The paper states that alpha-synuclein flies decline from 5.6 mm/s to 2.5 mm/s within the first 3 weeks. The exact age corresponding to the endpoint is not encoded here; retain this as an independent paper-level holdout with an explicit context limitation."
+    }
+  ]
+}

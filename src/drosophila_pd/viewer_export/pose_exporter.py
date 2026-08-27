@@ -9,7 +9,7 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 
-from .mesh_exporter import build_mesh_metadata, build_visibility
+from .mesh_exporter import build_mesh_metadata, build_visibility, materialize_mesh_assets
 from .trajectory_exporter import build_trajectory_frames
 from .validator import ValidationReport, validate_pose_document
 
@@ -29,6 +29,7 @@ class RolloutInputs:
     timestep_s: float
     com_positions: np.ndarray | None
     body_positions: np.ndarray | None
+    body_orientations: np.ndarray | None
     body_segment_names: list[str]
     joint_positions: dict[str, np.ndarray]
     joint_velocity: dict[str, np.ndarray]
@@ -72,6 +73,7 @@ def export_viewer_pose(
     validation = validate_pose_document(document, expected_frame_count=inputs.frame_count)
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
+    materialize_mesh_assets(document["mesh"], target.parent)
     target.write_text(json.dumps(document, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     return PoseExportResult(target, (inputs.rollout_json, inputs.arrays_npz), document, validation)
 
@@ -130,6 +132,12 @@ def load_rollout_inputs(dataset_dir: str | Path) -> RolloutInputs:
         joint_acceleration = _differentiate(joint_velocity, timestep_s)
     com = _com_values(data, arrays, frames, positions.shape[0])
     body_positions = _body_position_values(data, arrays, frames, positions.shape[0])
+    body_orientations = _body_orientation_values(data, arrays, frames, positions.shape[0])
+    if body_orientations is not None:
+        body_orientations = _sanitize_body_orientations(body_orientations)
+    if body_positions is not None and body_orientations is not None:
+        if body_positions.shape[1] != body_orientations.shape[1]:
+            raise ValueError("body_positions and body_orientations body counts do not match")
     body_segment_names = _body_segment_names(data, metadata, body_positions)
     contacts = _contact_series(data, arrays, frames, positions.shape[0])
     metadata.update({
@@ -152,6 +160,7 @@ def load_rollout_inputs(dataset_dir: str | Path) -> RolloutInputs:
         timestep_s=timestep_s,
         com_positions=com,
         body_positions=body_positions,
+        body_orientations=body_orientations,
         body_segment_names=body_segment_names,
         joint_positions=joint_positions,
         joint_velocity=joint_velocity,
@@ -392,6 +401,46 @@ def _body_position_values(
     return array
 
 
+def _body_orientation_values(
+    data: Mapping[str, Any],
+    arrays: Mapping[str, np.ndarray],
+    frames: Sequence[Any],
+    count: int,
+) -> np.ndarray | None:
+    value = _first_array(arrays, ("body_orientations", "body_rotations"))
+    if value is None:
+        value = _first_value(data, ("body_orientations", "body_rotations"))
+    if value is None and frames:
+        values = [frame.get("body_orientations", frame.get("body_rotations")) if isinstance(frame, Mapping) else None for frame in frames]
+        if any(item is not None for item in values):
+            value = values
+    if value is None:
+        return None
+    array = np.asarray(value, dtype=float)
+    if array.ndim != 3 or array.shape[0] != count or array.shape[2] != 4:
+        raise ValueError("body_orientations must have shape (n_samples, n_bodies, 4)")
+    return array
+
+
+def _sanitize_body_orientations(value: np.ndarray) -> np.ndarray:
+    """Normalize body quaternions without changing the source rollout."""
+
+    source = np.asarray(value, dtype=float)
+    result = np.empty_like(source, dtype=float)
+    previous = np.zeros((source.shape[1], 4), dtype=float)
+    previous[:, 0] = 1.0
+    for frame_index in range(source.shape[0]):
+        for body_index in range(source.shape[1]):
+            candidate = source[frame_index, body_index]
+            norm = float(np.linalg.norm(candidate))
+            if not np.isfinite(candidate).all() or not np.isfinite(norm) or norm <= 0.0:
+                result[frame_index, body_index] = previous[body_index]
+            else:
+                result[frame_index, body_index] = candidate / norm
+                previous[body_index] = result[frame_index, body_index]
+    return result
+
+
 def _body_segment_names(
     data: Mapping[str, Any],
     metadata: Mapping[str, Any],
@@ -508,13 +557,19 @@ def _frame_skeleton_values(inputs: RolloutInputs, index: int) -> dict[str, Any] 
     bones = []
     for body_index, position in enumerate(inputs.body_positions[index]):
         name = names[body_index] if body_index < len(names) else f"body_{body_index}"
-        bones.append({
+        bone = {
             "id": str(name),
             "position": _json_safe(position),
             "source_index": body_index,
-        })
+        }
+        if inputs.body_orientations is not None and body_index < inputs.body_orientations.shape[1]:
+            quaternion = inputs.body_orientations[index, body_index]
+            bone["orientation"] = _json_safe(quaternion[[1, 2, 3, 0]])
+            bone["quaternion_order"] = "xyzw"
+        bones.append(bone)
     return {
         "source": "rollout.body_positions",
+        "orientation_source": "rollout.body_orientations",
         "bones": bones,
     }
 

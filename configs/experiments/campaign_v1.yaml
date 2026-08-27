@@ -38,12 +38,15 @@ proxies:
     reason: Co the bat khi can khao sat action decay theo thoi gian.
   latency:
     enabled: false
+    parameter: action_latency_steps
     values: []
-    reason: DiseaseLayer hien tai khong co truong latency.
+    reason: Action latency is implemented but disabled until a campaign explicitly enables it.
   freezing:
     enabled: false
+    parameter: freezing_probability
     values: []
-    reason: DiseaseLayer hien tai khong co state freezing.
+    freezing_duration_steps: 0
+    reason: Freezing is implemented but disabled until duration and probability are specified.
   asymmetry:
     enabled: false
     parameter: asymmetry

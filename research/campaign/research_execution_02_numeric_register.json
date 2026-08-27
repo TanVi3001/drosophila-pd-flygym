@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "status": "REFERENCE_REGISTER_NOT_CALIBRATION_INPUT",
+  "scientific_scope": "Provenance-bearing numeric observations collected for review. Values are not automatically treated as directly comparable simulation targets.",
+  "observations": [
+    {
+      "paper_id": "riemensperger_2011_dopamine_deficiency",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3021077/",
+      "source_location": "Figure 2A",
+      "metric": "walking speed",
+      "unit": "mm/s",
+      "values": {
+        "dopamine_deficient_median": 7.8,
+        "rescued_control_median": 10.8,
+        "wild_type_median": 15.0
+      },
+      "status": "CALIBRATION_VALUE_SELECTED_CONDITIONALLY",
+      "notes": "Only the dopamine-deficient value is placed in the conditional calibration split; group labels and assay context must be reviewed."
+    },
+    {
+      "paper_id": "riemensperger_2011_dopamine_deficiency",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3021077/",
+      "source_location": "Figure 2A",
+      "metric": "covered distance",
+      "unit": "cm per 15 min",
+      "values": {
+        "dopamine_deficient_median": 193.0,
+        "rescued_control_median": 425.0,
+        "wild_type_median": 474.0
+      },
+      "status": "REFERENCE_ONLY",
+      "notes": "The current simulation duration and path-length definition are not equivalent to this 15-minute open-arena endpoint."
+    },
+    {
+      "paper_id": "pokrzywa_2017_alpha_syn_flytracker",
+      "source": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0184117/",
+      "source_location": "Figure 2A and Results section",
+      "metric": "mean velocity",
+      "unit": "mm/s",
+      "values": {
+        "alpha_syn_early": 5.6,
+        "alpha_syn_late_within_first_3_weeks": 2.5,
+        "control_early": 6.0,
+        "control_late_within_first_3_weeks": 5.0
+      },
+      "status": "HOLDOUT_VALUE_SELECTED_CONDITIONALLY",
+      "notes": "The source describes a time-course range rather than a single precisely age-indexed endpoint."
+    },
+    {
+      "paper_id": "kajtor_2025_trial_based_behavior",
+      "source": "https://elifesciences.org/articles/90905",
+      "source_location": "Results and Figure 3",
+      "metric": "relative mean speed reduction",
+      "unit": "percent",
+      "values": {
+        "parkin_R275W_reduction": 24.96,
+        "parkin_stop_proportion": 37.72,
+        "control_stop_proportion": 43.48,
+        "alpha_syn_stop_duration_increase": 116.98
+      },
+      "status": "REFERENCE_ONLY",
+      "notes": "The current simulation does not expose the same trial-based threat-response metrics, so these values are not passed to the calibration engine."
+    }
+  ]
+}

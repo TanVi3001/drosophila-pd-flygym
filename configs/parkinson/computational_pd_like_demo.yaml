@@ -1,0 +1,34 @@
+# Demonstration condition for the existing control-level Disease Layer.
+#
+# This is a configurable computational locomotion condition, not a biological
+# Parkinson model and not a mapping from any parameter to neuron loss,
+# dopamine concentration, disease stage, diagnosis, or treatment response.
+
+schema_version: "1.0"
+study_id: "computational_locomotion_condition_demo"
+scientific_scope: >-
+  A control-level computational locomotion condition combining existing Disease
+  Layer proxies. It is intended for visual and metric comparison only; it is not
+  biological validation, clinical prediction, or drug response.
+
+conditions:
+  - condition_id: computational_pd_like_demo
+    description: >-
+      Combined candidate condition: reduced motor command amplitude, reduced CPG
+      coupling, delayed initiation and action latency, gradual fatigue, bounded
+      action noise, and seed-controlled pause episodes. These are computational
+      perturbations selected for an explicit demonstration, not disease-stage
+      labels or fitted biological values.
+    disease_layer:
+      name: computational_pd_like_demo
+      config_id: computational_pd_like_demo
+      motor_vigor: 0.80
+      coordination: 0.75
+      initiation_delay_steps: 300
+      action_latency_steps: 100
+      motor_noise_std: 0.002
+      fatigue_rate: 0.15
+      freezing_probability: 0.0006
+      freezing_duration_steps: 250
+      asymmetry: 0.0
+      random_seed: 0

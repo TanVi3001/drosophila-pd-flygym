@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "study_id": "research_execution_02",
+  "authorization_status": "AUTHORIZED_FOR_CONDITIONAL_COMPUTATIONAL_USE",
+  "authorized_by": "project_owner_instruction",
+  "authorized_at": "2026-08-27",
+  "formal_scientific_approval": false,
+  "scope": {
+    "allowed": [
+      "Run the existing calibration engine on the explicitly recorded target.",
+      "Evaluate the independent paper-level holdout without an acceptance claim.",
+      "Report transfer assumptions, assay mismatch, and numerical error."
+    ],
+    "not_allowed": [
+      "Treat a computational match as biological validation.",
+      "Call the selected condition a Parkinson disease stage or mechanism.",
+      "Use the result for diagnosis, clinical prediction, treatment evidence, or drug response.",
+      "Promote reference-only literature values to calibration targets without review."
+    ]
+  },
+  "authorized_target_ids": [
+    "riemensperger_2011_da_deficient_walking_speed_calibration",
+    "pokrzywa_2017_alpha_syn_velocity_holdout"
+  ],
+  "calibration_target": {
+    "paper_id": "riemensperger_2011_dopamine_deficiency",
+    "metric": "mean_planar_speed_mm_s",
+    "value": 7.8,
+    "unit": "mm/s",
+    "source": "PMC3021077-Fig2A",
+    "use": "conditional_calibration"
+  },
+  "holdout_target": {
+    "paper_id": "pokrzywa_2017_alpha_syn_flytracker",
+    "metric": "mean_planar_speed_mm_s",
+    "value": 2.5,
+    "unit": "mm/s",
+    "source": "PLOS ONE 10.1371/journal.pone.0184117-Fig2A",
+    "use": "independent_paper_level_holdout"
+  },
+  "required_follow_up": [
+    "Research lead verifies both source locations, statistics, units, genotype, age, sex, and assay context.",
+    "Research lead decides whether the transfer assumptions are acceptable for the stated computational question.",
+    "Add independently reviewed targets for metrics other than mean_planar_speed_mm_s before multi-metric calibration.",
+    "Keep holdout interpretation descriptive until a pre-registered acceptance rule exists."
+  ],
+  "source_records": [
+    "research/campaign/research_execution_02_numeric_targets.json",
+    "research/campaign/research_execution_02_numeric_targets.csv",
+    "research/campaign/research_execution_02_split_manifest.json",
+    "research/campaign/research_execution_02_target_review.md"
+  ]
+}

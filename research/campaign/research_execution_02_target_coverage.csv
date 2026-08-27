@@ -1,0 +1,10 @@
+metric,calibration_target_count,holdout_target_count,target_status,evidence_scope,notes
+mean_planar_speed_mm_s,1,1,CONDITIONAL,"Riemensperger 2011 calibration; Pokrzywa 2017 holdout","Only metric currently entered as numeric calibration/holdout data; assay and duration differ."
+planar_path_length_mm,0,0,REFERENCE_ONLY,"Reference values recorded in numeric register","No directly compatible reviewed target; do not convert covered distance into FlyGym path length."
+heading_yaw_change_rad,0,0,UNAVAILABLE_TARGET,"No reviewed numeric target","Simulation metric is available in archived reports, but no compatible literature target is entered."
+trajectory_efficiency,0,0,UNAVAILABLE_TARGET,"No reviewed numeric target","Absence of a target is not evidence of absence of a phenotype."
+pause_fraction,0,0,UNAVAILABLE_TARGET,"No reviewed numeric target","No approved quantitative target is present in the current split."
+joint_velocity,0,0,UNAVAILABLE_TARGET,"No reviewed numeric target","No approved quantitative target is present in the current split."
+symmetry_index,0,0,UNAVAILABLE_TARGET,"No reviewed numeric target","No approved quantitative target is present in the current split."
+orientation_stability,0,0,UNAVAILABLE_TARGET,"No reviewed numeric target","No approved quantitative target is present in the current split."
+com_displacement,0,0,UNAVAILABLE_TARGET,"No reviewed numeric target","No approved quantitative target is present in the current split."

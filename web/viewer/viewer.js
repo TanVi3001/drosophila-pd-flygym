@@ -112,6 +112,10 @@ export class Viewer {
         this.fps = documentData.fps;
         this.frameCount = documentData.frame_count;
         await this.mesh.loadMetadata(documentData.mesh);
+        const meshMode = documentData.mesh?.render_mode;
+        this.skeleton.setVisible(
+            meshMode !== 'flygym_stl' && documentData.mesh?.visibility?.skeleton !== false,
+        );
         this.trajectory.updateFromPose(documentData);
         this.timeline.setRange(this.frameCount);
         this.show();
