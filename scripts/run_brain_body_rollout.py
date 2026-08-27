@@ -75,9 +75,13 @@ def _maybe_reexec(args: argparse.Namespace, argv: Sequence[str]) -> None:
     if os.environ.get("DPD_BRAIN_BODY_REEXEC") == "1":
         return
     root = _brain_root(args)
+    # Missing source must return the normal validation status below. Do not
+    # attempt an environment handoff for a path that cannot run anything.
+    if not root.is_dir():
+        return
     runtime_python = _brain_python(root, args.brain_python)
     current_python = _resolve(sys.executable)
-    if runtime_python == current_python:
+    if runtime_python.resolve() == current_python:
         return
     needs_brain_runtime = not _torch_available() or (
         args.device != "cpu" and not _torch_cuda_available()

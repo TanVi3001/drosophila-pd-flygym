@@ -211,7 +211,7 @@ def audit_archive(
                 "duplicate_name": name_counts[name] > 1,
             }
             if not safe:
-                unsafe_members.append(name)
+                unsafe_members.append(_normalized_member_name(name))
                 row["status"] = "UNSAFE_PATH"
                 members.append(row)
                 continue
