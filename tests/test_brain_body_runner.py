@@ -91,4 +91,6 @@ def test_real_brain_body_rollout_to_viewer_pose(tmp_path: Path) -> None:
     assert summary["brain_device"] == "cuda"
     assert summary["frame_count"] == 11
     assert len(pose["frames"]) == 11
+    first_bones = pose["frames"][0]["skeleton"]["bones"]
+    assert any(any(abs(float(value)) > 0.0 for value in bone["position"]) for bone in first_bones)
     assert (output / "viewer_bundle.zip").is_file()

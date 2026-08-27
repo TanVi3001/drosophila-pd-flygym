@@ -243,6 +243,13 @@ def _run_simulation(
     started = time.perf_counter()
     try:
         simulation.reset()
+        # FlyGym resets qpos/qvel but does not always refresh derived MuJoCo
+        # fields (xpos, xquat, subtree_com) until the first physics step.
+        # Forward kinematics here gives the recorder a valid t=0 pose without
+        # advancing time or changing the rollout's physical dynamics.
+        import mujoco
+
+        mujoco.mj_forward(simulation.mj_model, simulation.mj_data)
         dof_order = fly.get_actuated_jointdofs_order(ActuatorType.POSITION)
         controller = HybridTurningController(
             timestep=simulation.timestep,
